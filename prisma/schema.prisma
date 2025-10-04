@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  password_hash   String
+  display_name    String?
+  persona_default String   @default("spouse")
+  settings        Json     @default("{}")
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  email_verified_at DateTime?
+  facts           Fact[]
+  tokens          RefreshToken[]
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  userId     String
+  token_hash String
+  created_at DateTime @default(now())
+  expires_at DateTime
+  revoked_at DateTime?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([expires_at])
+}
+
+model Fact {
+  id               String   @id @default(uuid())
+  userId           String
+  type             String   // "trait" | "preference" | "bio" | "goal" | "note"
+  key              String?  // e.g., favorite_cuisine
+  value            String?  // e.g., Thai
+  text             String   // full text
+  qdrant_point_id  String?  // mirror id in Qdrant
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
