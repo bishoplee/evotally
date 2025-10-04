@@ -1,3 +1,4 @@
+// keep your existing blocks ↑ unchanged
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,17 +9,21 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  password_hash   String
-  display_name    String?
-  persona_default String   @default("spouse")
-  settings        Json     @default("{}")
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id                String        @id @default(uuid())
+  email             String        @unique
+  password_hash     String
+  display_name      String?
+  persona_default   String        @default("spouse")
+  settings          Json          @default("{}")
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
   email_verified_at DateTime?
-  facts           Fact[]
-  tokens          RefreshToken[]
+
+  facts             Fact[]
+  tokens            RefreshToken[]
+
+  // NEW: relations
+  sessions          Session[]
 }
 
 model RefreshToken {
@@ -29,21 +34,83 @@ model RefreshToken {
   expires_at DateTime
   revoked_at DateTime?
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([expires_at])
 }
 
 model Fact {
-  id               String   @id @default(uuid())
-  userId           String
-  type             String   // "trait" | "preference" | "bio" | "goal" | "note"
-  key              String?  // e.g., favorite_cuisine
-  value            String?  // e.g., Thai
-  text             String   // full text
-  qdrant_point_id  String?  // mirror id in Qdrant
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String   @id @default(uuid())
+  userId          String
+  type            String   // "trait" | "preference" | "bio" | "goal" | "note"
+  key             String?  // e.g., favorite_cuisine
+  value           String?  // e.g., Thai
+  text            String   // full text
+  qdrant_point_id String?  // mirror id in Qdrant
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
+// ---------- NEW MODELS BELOW ----------
+
+model Session {
+  id           String    @id @default(uuid())      // can be used as conversation_id
+  userId       String?
+  tenant_id    String?                            // optional if you have multitenancy
+  persona_tag  String?                            // "companion_friend" | "spouse_partner" | ...
+  title        String?
+  started_at   DateTime  @default(now())
+  ended_at     DateTime?
+  meta         Json?
+
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  turns        Turn[]
+
+  @@index([userId, started_at])
+  @@index([tenant_id, started_at])
+}
+
+enum Role {
+  user
+  assistant
+  tool
+}
+
+model Turn {
+  id              String   @id @default(uuid())  // use this as Qdrant point id
+  sessionId       String
+  conversation_id String   // mirror of session.id or external conv id
+  turn_no         Int
+  role            Role
+  text            String
+  ts              DateTime @default(now())
+  meta            Json?
+
+  // lightweight mirrors for retrieval joins (optional)
+  tenant_id       String?
+  qdrant_point_id String?  @unique
+
+  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, turn_no])          // enforce order uniqueness per conversation
+  @@index([sessionId, turn_no])
+  @@index([conversation_id, ts])
+  @@index([ts])
+}
+
+// Optional: structured tool calls (instead of stuffing everything in Turn.meta)
+model ToolCall {
+  id        String   @id @default(uuid())
+  turnId    String   @unique
+  name      String
+  args      Json
+  result    Json?
+  created_at DateTime @default(now())
+
+  turn      Turn     @relation(fields: [turnId], references: [id], onDelete: Cascade)
+
+  @@index([name])
+}
