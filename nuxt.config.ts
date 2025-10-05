@@ -1,7 +1,13 @@
+// nuxt.config.ts
 export default defineNuxtConfig({
   srcDir: 'app',
-  modules: ['@pinia/nuxt'],
-  serverDir: 'app/server', 
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
+  serverDir: 'app/server',
+  css: ['~/assets/css/tailwind.css'],        // <-- load Tailwind CSS
+  tailwindcss: {
+    viewer: false,                            // optional
+    exposeConfig: false
+  },
   runtimeConfig: {
     authJwtSecret: process.env.AUTH_JWT_SECRET || 'changeme',
     accessTtl: process.env.ACCESS_TTL_SECONDS || '900',
@@ -17,6 +23,11 @@ export default defineNuxtConfig({
     externals: { inline: [] },
     moduleSideEffects: ['@prisma/client']
   },
-  vite: { ssr: { noExternal: ['@prisma/client', 'prisma'] } }
+  vite: { ssr: { noExternal: ['@prisma/client', 'prisma'] } },
+  postcss: {                                   // <-- ensure PostCSS runs Tailwind
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {}
+    }
+  }
 })
-
