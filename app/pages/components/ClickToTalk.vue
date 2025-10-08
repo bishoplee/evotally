@@ -33,7 +33,7 @@
  * - Gets JWT from our Pinia auth store (in-memory access token)
  * - Captures mic and sends the track to the gateway peer connection
  * - Plays remote TTS/audio via a hidden <audio> element
- * - Local VAD just drives the UI (server handles barge-in)
+ * - Local VAD drives UI AND sends events to server via data channel
  */
 import { ref, onBeforeUnmount } from 'vue'
 import { useAuth } from '~/stores/auth'
@@ -54,7 +54,7 @@ const gatewayURL = (runtime.public?.gatewayUrl as string) || (import.meta as any
 const auth = useAuth()
 
 const isOpen   = ref(false)
-const status   = ref('Click “Talk” to start the mic.')
+const status   = ref('Click "Talk" to start the mic.')
 const vadState = ref<'idle' | 'listening' | 'speaking'>('idle')
 
 let mediaStream: MediaStream | null = null
@@ -68,8 +68,82 @@ let silenceSince = 0
 let idleTimer: number | null = null
 
 let pc: RTCPeerConnection | null = null
+let dataChannel: RTCDataChannel | null = null
 const remoteAudio = ref<HTMLAudioElement | null>(null)
 const playbackActive = ref(false)
+
+// Track the last state to avoid sending duplicate messages
+let lastVadState: 'listening' | 'speaking' = 'listening'
+
+/* Data Channel Management */
+function setupDataChannel() {
+  if (!pc) return
+
+  // Create reliable data channel for control messages
+  dataChannel = pc.createDataChannel('vad-control', {
+    ordered: true,
+    maxRetransmits: 3
+  })
+
+  dataChannel.onopen = () => {
+    console.log('Data channel opened - bidirectional communication ready')
+    // Send initial state
+    sendVadState('listening')
+  }
+
+  dataChannel.onclose = () => {
+    console.log('Data channel closed')
+  }
+
+  dataChannel.onerror = (error) => {
+    console.error('Data channel error:', error)
+  }
+
+  // Handle incoming messages from server
+  dataChannel.onmessage = (event) => {
+    try {
+      const message = JSON.parse(event.data)
+      handleServerMessage(message)
+    } catch (e) {
+      console.error('Failed to parse server message:', e)
+    }
+  }
+}
+
+function sendVadState(state: 'listening' | 'speaking' | 'finished_talking') {
+  if (dataChannel && dataChannel.readyState === 'open') {
+    const message = {
+      type: 'vad_state',
+      state: state,
+      timestamp: Date.now()
+    }
+    dataChannel.send(JSON.stringify(message))
+    console.log('Sent VAD state:', state)
+  }
+}
+
+function handleServerMessage(message: any) {
+  console.log('Received from server:', message)
+
+  switch (message.type) {
+    case 'tts_status':
+      // Server can notify about TTS playback status
+      if (message.playing !== undefined) {
+        playbackActive.value = message.playing
+      }
+      break
+    case 'processing_state':
+      // Server can notify about its current processing state
+      status.value = message.message || `Server: ${message.state}`
+      break
+    case 'error':
+      console.error('Server error:', message.error)
+      status.value = `Server error: ${message.error}`
+      break
+    default:
+      console.log('Unknown message type:', message.type)
+  }
+}
 
 /* Helpers */
 function resetIdleTimer() {
@@ -99,7 +173,7 @@ function computeRms(buf: Float32Array) {
   return Math.sqrt(s / buf.length)
 }
 
-/* Local VAD loop (UI only; server handles true barge-in) */
+/* Local VAD loop (UI + sends events to server) */
 async function startAnalysis() {
   if (!audioCtx || !analyser) return
 
@@ -109,6 +183,7 @@ async function startAnalysis() {
   vadState.value = 'listening'
   speakingSince = 0
   silenceSince = 0
+  lastVadState = 'listening'
 
   if (analysisTimer) clearInterval(analysisTimer)
   analysisTimer = window.setInterval(() => {
@@ -125,6 +200,12 @@ async function startAnalysis() {
           status.value = '…capturing (server is listening)'
           silenceSince = 0
           resetIdleTimer()
+
+          // Notify server that user started speaking
+          if (lastVadState !== 'speaking') {
+            sendVadState('speaking')
+            lastVadState = 'speaking'
+          }
         }
       } else {
         speakingSince = 0
@@ -136,6 +217,10 @@ async function startAnalysis() {
           vadState.value = 'listening'
           status.value = 'Listening…'
           speakingSince = 0
+
+          // Notify server that user finished talking
+          sendVadState('finished_talking')
+          lastVadState = 'listening'
         }
       } else {
         silenceSince = 0
@@ -175,6 +260,9 @@ async function openSession() {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     })
 
+    // Set up data channel BEFORE creating offer
+    setupDataChannel()
+
     // Send mic → gateway
     mediaStream.getTracks().forEach(t => pc!.addTrack(t, mediaStream!))
 
@@ -189,7 +277,20 @@ async function openSession() {
       ev.track.onended = () => { playbackActive.value = false }
     }
 
-    // --- START: Added robustness for ICE and Connection State ---
+    // Handle incoming data channels (if server creates them)
+    pc.ondatachannel = (event) => {
+      const incomingChannel = event.channel
+      incomingChannel.onmessage = (msgEvent) => {
+        try {
+          const message = JSON.parse(msgEvent.data)
+          handleServerMessage(message)
+        } catch (e) {
+          console.error('Failed to parse incoming channel message:', e)
+        }
+      }
+    }
+
+    // ICE and connection state handling
     pc.oniceconnectionstatechange = () => {
       const s = pc?.iceConnectionState
       if (s === 'failed' || s === 'closed') {
@@ -201,12 +302,10 @@ async function openSession() {
     pc.onconnectionstatechange = () => {
       const s = pc?.connectionState
       if (s === 'failed' || s === 'disconnected' || s === 'closed') {
-        // If ice state didn't catch it, the overall connection state should.
         if (s !== 'failed') status.value = `Connection closed: ${s}`
         closeSession()
       }
     }
-    // --- END: Added robustness for ICE and Connection State ---
 
     // SDP offer → gateway
     const offer = await pc.createOffer()
@@ -241,6 +340,14 @@ async function closeSession() {
 
   if (idleTimer) { clearTimeout(idleTimer); idleTimer = null }
 
+  // Close data channel
+  if (dataChannel) {
+    try {
+      dataChannel.close()
+    } catch {}
+    dataChannel = null
+  }
+
   try { mediaStream?.getTracks().forEach(t => t.stop()) } catch {}
   mediaStream = null
 
@@ -269,6 +376,7 @@ async function closeSession() {
   isOpen.value = false
   vadState.value = 'idle'
   status.value = 'Stopped.'
+  lastVadState = 'listening'
 }
 
 async function toggle() {
