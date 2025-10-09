@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const email = ref(''); const password = ref(''); const display_name = ref(''); const ok = ref('')
 async function submit() {
-	console.log('this is the new thing')
   ok.value = ''
   await $fetch('/api/auth/register', { method: 'POST', body: { email: email.value, password: password.value, display_name: display_name.value || undefined } })
   ok.value = 'Registered! You can now login.'; setTimeout(()=>navigateTo('/login'), 600)
