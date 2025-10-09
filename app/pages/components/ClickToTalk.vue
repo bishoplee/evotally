@@ -28,24 +28,17 @@
 </template>
 
 <script setup lang="ts">
-/**
- * This component opens a WebRTC session to the voice-gateway:
- * - Gets JWT from our Pinia auth store (in-memory access token)
- * - Captures mic and sends the track to the gateway peer connection
- * - Plays remote TTS/audio via a hidden <audio> element
- * - Local VAD drives UI AND sends events to server via data channel
- */
 import { ref, onBeforeUnmount } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 /* ==== knobs you can tweak ==== */
 const frameMs        = 50      // analysis frame
-const startMs        = 200      // min voiced ms to mark "speaking" (UI only)
-const endMs          = 600      // min silence ms to return to "listening" (UI only)
-const silenceMs      = endMs    // exposed in UI
-const idleNudgeSec   = 25       // if no speech for N seconds, UI nudge
-const vadRmsStart    = 0.015    // RMS threshold to mark speaking
-const vadRmsEnd      = 0.008    // RMS to mark end speaking (hysteresis)
+const startMs        = 200     // min voiced ms to mark "speaking"
+const endMs          = 400     // reduced from 600ms for faster finished_talking
+const silenceMs      = endMs
+const idleNudgeSec   = 25
+const vadRmsStart    = 0.015
+const vadRmsEnd      = 0.008
 /* ============================ */
 
 const runtime = useRuntimeConfig()
@@ -71,15 +64,12 @@ let pc: RTCPeerConnection | null = null
 let dataChannel: RTCDataChannel | null = null
 const remoteAudio = ref<HTMLAudioElement | null>(null)
 const playbackActive = ref(false)
-
-// Track the last state to avoid sending duplicate messages
-let lastVadState: 'listening' | 'speaking' = 'listening'
+const activeTrackIds = new Set<string>() // Track active audio tracks to prevent duplicates
 
 /* Data Channel Management */
 function setupDataChannel() {
   if (!pc) return
 
-  // Create reliable data channel for control messages
   dataChannel = pc.createDataChannel('vad-control', {
     ordered: true,
     maxRetransmits: 3
@@ -87,7 +77,6 @@ function setupDataChannel() {
 
   dataChannel.onopen = () => {
     console.log('Data channel opened - bidirectional communication ready')
-    // Send initial state
     sendVadState('listening')
   }
 
@@ -99,7 +88,6 @@ function setupDataChannel() {
     console.error('Data channel error:', error)
   }
 
-  // Handle incoming messages from server
   dataChannel.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data)
@@ -127,14 +115,17 @@ function handleServerMessage(message: any) {
 
   switch (message.type) {
     case 'tts_status':
-      // Server can notify about TTS playback status
       if (message.playing !== undefined) {
         playbackActive.value = message.playing
+        if (remoteAudio.value) {
+          remoteAudio.value.muted = message.playing && vadState.value === 'speaking'
+        }
       }
       break
-    case 'processing_state':
-      // Server can notify about its current processing state
-      status.value = message.message || `Server: ${message.state}`
+    case 'server_waiting':
+      if (message.hasMoreChunks) {
+        status.value = 'Server is waiting for your response'
+      }
       break
     case 'error':
       console.error('Server error:', message.error)
@@ -150,9 +141,7 @@ function resetIdleTimer() {
   if (idleTimer) clearTimeout(idleTimer)
   idleTimer = window.setTimeout(() => {
     if (!isOpen.value) return
-    // Local, gentle UI nudge; keep server path clean and keyless
     try {
-      // quick beep using WebAudio (allowed after user interacted)
       if (!audioCtx) return
       const o = audioCtx.createOscillator()
       const g = audioCtx.createGain()
@@ -173,7 +162,7 @@ function computeRms(buf: Float32Array) {
   return Math.sqrt(s / buf.length)
 }
 
-/* Local VAD loop (UI + sends events to server) */
+/* Local VAD loop */
 async function startAnalysis() {
   if (!audioCtx || !analyser) return
 
@@ -183,7 +172,7 @@ async function startAnalysis() {
   vadState.value = 'listening'
   speakingSince = 0
   silenceSince = 0
-  lastVadState = 'listening'
+  let lastVadState: 'listening' | 'speaking' = 'listening'
 
   if (analysisTimer) clearInterval(analysisTimer)
   analysisTimer = window.setInterval(() => {
@@ -200,11 +189,10 @@ async function startAnalysis() {
           status.value = '…capturing (server is listening)'
           silenceSince = 0
           resetIdleTimer()
-
-          // Notify server that user started speaking
           if (lastVadState !== 'speaking') {
             sendVadState('speaking')
             lastVadState = 'speaking'
+            if (remoteAudio.value) remoteAudio.value.muted = true
           }
         }
       } else {
@@ -217,10 +205,9 @@ async function startAnalysis() {
           vadState.value = 'listening'
           status.value = 'Listening…'
           speakingSince = 0
-
-          // Notify server that user finished talking
           sendVadState('finished_talking')
           lastVadState = 'listening'
+          if (remoteAudio.value) remoteAudio.value.muted = false
         }
       } else {
         silenceSince = 0
@@ -236,7 +223,7 @@ function stopAnalysis() {
   rmsBuf = null
 }
 
-/* Open WebRTC session to the gateway */
+/* Open WebRTC session */
 async function openSession() {
   if (isOpen.value) return
   try {
@@ -248,36 +235,42 @@ async function openSession() {
       video: false
     })
 
-    // Prepare audio graph for UI VAD + remote playback
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
     sourceNode = audioCtx.createMediaStreamSource(mediaStream)
     analyser = audioCtx.createAnalyser()
     analyser.fftSize = 2048
     sourceNode.connect(analyser)
 
-    // WebRTC peer
     pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     })
 
-    // Set up data channel BEFORE creating offer
     setupDataChannel()
-
-    // Send mic → gateway
     mediaStream.getTracks().forEach(t => pc!.addTrack(t, mediaStream!))
 
-    // Receive TTS/audio ← gateway
     const remoteStream = new MediaStream()
     pc.ontrack = (ev) => {
-      remoteStream.addTrack(ev.track)
-      if (remoteAudio.value) remoteAudio.value.srcObject = remoteStream
-      // Playback activity indicator
-      ev.track.onunmute = () => { playbackActive.value = true }
-      ev.track.onmute = () => { playbackActive.value = false }
-      ev.track.onended = () => { playbackActive.value = false }
+      if (ev.track.kind === 'audio' && !activeTrackIds.has(ev.track.id)) {
+        console.log(`Adding audio track: ${ev.track.id}`)
+        activeTrackIds.add(ev.track.id)
+        remoteStream.addTrack(ev.track)
+        if (remoteAudio.value) {
+          remoteAudio.value.srcObject = remoteStream
+          remoteAudio.value.muted = vadState.value === 'speaking'
+        }
+        ev.track.onunmute = () => { playbackActive.value = true }
+        ev.track.onmute = () => { playbackActive.value = false }
+        ev.track.onended = () => {
+          playbackActive.value = false
+          activeTrackIds.delete(ev.track.id)
+          console.log(`Removed audio track: ${ev.track.id}`)
+        }
+      } else if (ev.track.kind === 'audio') {
+        console.warn(`Duplicate audio track ignored: ${ev.track.id}`)
+        ev.track.stop()
+      }
     }
 
-    // Handle incoming data channels (if server creates them)
     pc.ondatachannel = (event) => {
       const incomingChannel = event.channel
       incomingChannel.onmessage = (msgEvent) => {
@@ -290,7 +283,6 @@ async function openSession() {
       }
     }
 
-    // ICE and connection state handling
     pc.oniceconnectionstatechange = () => {
       const s = pc?.iceConnectionState
       if (s === 'failed' || s === 'closed') {
@@ -307,7 +299,6 @@ async function openSession() {
       }
     }
 
-    // SDP offer → gateway
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
 
@@ -340,7 +331,6 @@ async function closeSession() {
 
   if (idleTimer) { clearTimeout(idleTimer); idleTimer = null }
 
-  // Close data channel
   if (dataChannel) {
     try {
       dataChannel.close()
@@ -361,7 +351,7 @@ async function closeSession() {
   if (pc) {
     try {
       pc.getSenders()?.forEach(s => { try { s.track?.stop() } catch {} })
-      pc.getReceivers()?.forEach(r => { try { r.track?.stop() } catch {} })
+      pc.getReceivers()?.forEach(r => { try { r.track?.stop(); activeTrackIds.delete(r.track.id) } catch {} })
       pc.close()
     } catch {}
     pc = null
@@ -369,16 +359,18 @@ async function closeSession() {
 
   if (remoteAudio.value) {
     const ms = remoteAudio.value.srcObject as MediaStream | null
-    ms?.getTracks().forEach(t => t.stop())
+    ms?.getTracks().forEach(t => {
+      t.stop()
+      activeTrackIds.delete(t.id)
+      console.log(`Removed audio track: ${t.id}`)
+    })
     remoteAudio.value.srcObject = null
   }
 
   isOpen.value = false
   vadState.value = 'idle'
   status.value = 'Stopped.'
-  lastVadState = 'listening'
 }
-
 async function toggle() {
   if (isOpen.value) await closeSession()
   else await openSession()
