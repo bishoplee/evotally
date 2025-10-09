@@ -102,14 +102,38 @@ function setupDataChannel() {
     status.value = 'Data channel error, please try again'
   }
 
+  // In your frontend code, update the dataChannel.onmessage handler:
   dataChannel.onmessage = (event) => {
     try {
-      const message = JSON.parse(event.data)
-      handleServerMessage(message)
+      const message = JSON.parse(event.data);
+      console.log('Received from server:', message);
+
+      switch (message.type) {
+        case 'vad_ack':
+          console.log(`[Client] Server acknowledged VAD state: ${message.state}`);
+          // You can use this acknowledgment for timing or debugging
+          break;
+
+        case 'server_waiting':
+          console.log('[Client] Server is waiting for response');
+          // The server is ready for you to speak
+          break;
+
+        case 'tts_status':
+          console.log('[Client] TTS status update:', message);
+          break;
+
+        case 'error':
+          console.error('[Client] Server error:', message.error);
+          break;
+
+        default:
+          console.log('[Client] Unknown message type:', message.type);
+      }
     } catch (e) {
-      console.error('[Client] Failed to parse server message:', e)
+      console.error('Failed to parse server message:', e);
     }
-  }
+  };
 }
 
 function sendVadState(state: 'listening' | 'speaking' | 'finished_talking') {
