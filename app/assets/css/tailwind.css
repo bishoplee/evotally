@@ -2,3 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme inline {
+    /* Primary #016d77 */
+    --color-primary-50:  #f0f6f7;
+    --color-primary-100: #cfe7e9;
+    --color-primary-200: #a4d4d7;
+    --color-primary-300: #6fbbc1;
+    --color-primary-400: #3aa1aa;
+    --color-primary-500: #1b8790;
+    --color-primary-600: #016d77; /* base */
+    --color-primary-700: #075860;
+    --color-primary-800: #0a454c;
+    --color-primary-900: #09363b;
+
+    /* Secondary #fb8d68 */
+    --color-secondary-50:  #fff5f1;
+    --color-secondary-100: #ffe5db;
+    --color-secondary-200: #ffcab9;
+    --color-secondary-300: #ffac92;
+    --color-secondary-400: #ff946f;
+    --color-secondary-500: #ff845a;
+    --color-secondary-600: #fb8d68; /* base */
+    --color-secondary-700: #e56a3d;
+    --color-secondary-800: #b94f2a;
+    --color-secondary-900: #7a331b;
+
+}
+
+

@@ -1,0 +1,57 @@
+// server/middleware/auth.global.ts
+import { defineEventHandler, getRequestHeader, getCookie, createError } from 'h3'
+import { prisma } from '~/server/utils/db'
+import { verifyBearer } from '~/server/utils/jwt' // or your verifyBearer
+// ^ change import to your existing helper
+
+const PUBLIC_PATHS = new Set([
+  '/api/auth/login',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+  '/api/auth/register',
+  '/health',
+  '/api/auth/me'
+])
+
+export default defineEventHandler(async (event) => {
+  // Only guard API routes
+  if (!event.path?.startsWith('/api/')) return
+  if (PUBLIC_PATHS.has(event.path)) return
+
+  // 1) Try Authorization: Bearer <access>
+  const authHeader = getRequestHeader(event, 'authorization') || ''
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  if (bearer) {
+    const payload = await verifyBearer(bearer).catch(() => null) // <-- changed
+    if (payload?.sub) {
+      event.context.user = {
+        id: String(payload.sub),
+        tenantId: String(payload.tenantId ?? payload.tid ?? ''), // keep claim name consistent
+        persona: payload.persona as string | undefined,
+      }
+      return
+    }
+  }
+
+  // 2) Fallback: refresh cookie (hydrate context so route can proceed)
+  const refresh = getCookie(event, 'refresh_token')
+  if (refresh) {
+    const token_hash = (await import('node:crypto')).createHash('sha256').update(refresh).digest('hex')
+    console.log(token_hash)
+    const rec = await prisma.refreshToken.findFirst({
+      where: { token_hash, revoked_at: null },
+      include: { user: true } // pull user to hydrate context
+    })
+    console.log('Rec', rec);
+    if (rec && rec.expires_at > new Date() && rec.user) {
+      event.context.user = {
+        id: rec.user.id,
+        tenantId: (rec.user as any).tenantId ?? '', // ensure tenant present on User model
+        persona: rec.user.persona_default
+      }
+      return
+    }
+  }
+
+  throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+})

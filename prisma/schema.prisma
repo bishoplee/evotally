@@ -13,27 +13,34 @@ model User {
   email             String    @unique
   password_hash     String
   display_name      String?
+  nickname          String?
+  first_name        String?
+  last_name         String?
   persona_default   String    @default("spouse")
   settings          Json      @default("{}")
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
   email_verified_at DateTime?
+  timezone          String?   @default("America/New_York")
+  voice             Voice?
+  tenantId          String?
 
   facts  Fact[]
   tokens RefreshToken[]
 
   // NEW: relations
-  sessions Session[]
+  sessions    Session[]
+  evoProfiles EvoProfile[]
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   userId     String
-  token_hash String
-  created_at DateTime  @default(now())
+  token_hash String   @unique       // <— make this unique
+  created_at DateTime @default(now())
   expires_at DateTime
   revoked_at DateTime?
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expires_at])
@@ -114,4 +121,24 @@ model ToolCall {
   turn Turn @relation(fields: [turnId], references: [id], onDelete: Cascade)
 
   @@index([name])
+}
+
+model EvoProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique // <- unique by itself
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  //tenantId  String? // optional, NOT part of a unique or id
+  sections  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Voice {
+  id              String @id @default(cuid())
+  userId          String @unique
+  user            User   @relation(fields: [userId], references: [id])
+  elevenVoiceId   String
+  stability       Float? @default(0.4)
+  similarityBoost Float? @default(0.85)
 }

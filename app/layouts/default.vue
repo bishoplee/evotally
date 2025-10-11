@@ -1,13 +1,27 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { useAuth } from '~/stores/auth'
+
+// grab route once in setup (Nuxt auto-imports useRoute)
+const route = useRoute()
 const auth = useAuth()
+const { ready, isAuthed, accessToken } = storeToRefs(auth)
+
 const links = [
   { to: '/', label: 'Home' },
   { to: '/facts', label: 'Facts' },
-  { to: '/facts/upload', label: 'Upload' },
   { to: '/voice', label: 'Voice' },
-    { to: '/profile', label: 'Profile' },
+  { to: '/profile', label: 'Profile' },
 ]
+
+async function onLogout() {
+  //try {
+    await auth.logout()
+  // } finally {
+  //   const redirect = encodeURIComponent(route.fullPath || '/')
+  //   await navigateTo(`/login?redirect=${redirect}`, { replace: true })
+  // }
+}
 </script>
 
 <template>
@@ -20,17 +34,28 @@ const links = [
             {{ l.label }}
           </NuxtLink>
         </div>
+
         <div class="flex items-center gap-3">
-          <NuxtLink v-if="!auth.accessToken" to="/login" class="text-sm text-indigo-600">Login</NuxtLink>
-          <button v-else class="text-sm text-gray-600 hover:text-black" @click="auth.logout().then(()=>navigateTo('/login'))">
-            Logout
-          </button>
+          <div v-if="!ready" class="w-16 h-6 rounded bg-black/5 animate-pulse" />
+          <template v-else>
+            <NuxtLink v-if="isAuthed ? !isAuthed : !accessToken" to="/login" class="text-sm text-indigo-600">
+              Login
+            </NuxtLink>
+            <button
+              v-else
+              type="button"
+              class="text-sm text-gray-600 hover:text-black"
+              @click="onLogout"
+            >
+              Logout
+            </button>
+          </template>
         </div>
       </nav>
     </header>
+
     <main class="mx-auto max-w-5xl p-4">
       <slot />
     </main>
   </div>
 </template>
-
