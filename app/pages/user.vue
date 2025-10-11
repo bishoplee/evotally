@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-3xl mx-auto p-6 space-y-6">
-    <Breadcrumbs :items="[{ label: 'Home', to: '/' }, { label: 'Profile' }]" />
 
     <div>
       <h1 class="text-2xl font-semibold">Your Profile</h1>
@@ -21,7 +20,7 @@
             <label class="block text-sm font-medium text-gray-700">Name</label>
             <input
               v-model="profile.name"
-              class="mt-1 block w-full rounded-md border-gray-300"
+              class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               placeholder="Your name"
             />
           </div>
@@ -29,7 +28,7 @@
             <label class="block text-sm font-medium text-gray-700">Email</label>
             <input
               v-model="profile.email"
-              class="mt-1 block w-full rounded-md border-gray-300"
+              class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               placeholder="you@example.com"
             />
             <p class="text-xs text-gray-500 mt-1">
@@ -40,7 +39,7 @@
             <label class="block text-sm font-medium text-gray-700">Timezone</label>
             <input
               v-model="profile.timezone"
-              class="mt-1 block w-full rounded-md border-gray-300"
+              class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               placeholder="America/New_York"
             />
             <p class="text-xs text-gray-500 mt-1">Detected: {{ detectedTz }}</p>
@@ -56,7 +55,7 @@
             <label class="block text-sm font-medium text-gray-700">Voice ID</label>
             <input
               v-model="voice.elevenVoiceId"
-              class="mt-1 block w-full rounded-md border-gray-300"
+              class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               placeholder="VOICEXXXXXXXXXXXXXXXX"
             />
             <p class="text-xs text-gray-500 mt-1">
@@ -73,7 +72,7 @@
                 min="0"
                 max="1"
                 v-model.number="voice.stability"
-                class="mt-1 block w-full rounded-md border-gray-300"
+                class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               />
             </div>
             <div>
@@ -84,7 +83,7 @@
                 min="0"
                 max="1"
                 v-model.number="voice.similarityBoost"
-                class="mt-1 block w-full rounded-md border-gray-300"
+                class="mt-1 block w-full rounded-md border border-gray-300 p-2"
               />
             </div>
           </div>
@@ -101,11 +100,6 @@
       >
         {{ saving ? 'Saving…' : 'Save profile' }}
       </button>
-
-      <label class="flex items-center gap-2 text-sm">
-        <input type="checkbox" v-model="autoReindexAfterSave" class="rounded" />
-        Auto reindex facts after save
-      </label>
 
       <span class="text-sm" :class="ok ? 'text-green-600' : 'text-gray-600'">{{ msg }}</span>
     </div>
@@ -149,7 +143,7 @@
             v-model="q"
             @input="loadContacts"
             placeholder="Search name or email"
-            class="block w-64 rounded-md border-gray-300 text-sm"
+            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
           />
         </div>
       </div>
@@ -171,11 +165,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import Breadcrumbs from '@/components/Breadcrumbs.vue'
-import { useAuth } from '@/app/stores/auth'
-
-// Page meta
-useHead({ title: 'Your Profile · Evo' })
 
 const auth = useAuth()
 await auth.ensure()
