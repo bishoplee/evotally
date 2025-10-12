@@ -9,14 +9,58 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <button @click="toggle" class="px-4 py-2 rounded-md text-white"
-              :class="isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'">
-        {{ isOpen ? 'Stop' : 'Talk' }}
-      </button>
+      <!-- Pulsating circular Talk button -->
+<button
+  @click="toggle"
+  class="mic-btn"
+  :class="{
+    'is-open': isOpen,
+    'is-speaking': vadState === 'speaking',
+    'is-listening': isOpen && vadState === 'listening'
+  }"
+  :aria-pressed="isOpen"
+  :title="isOpen ? 'Stop' : 'Talk'"
+  :style="{
+    transform: `scale(${(1 + level * 0.15).toFixed(3)})`,
+    boxShadow: isOpen
+      ? `0 0 ${Math.round(8 + level * 16)}px rgba(1,109,119,0.55), 0 0 ${Math.round(16 + level * 20)}px rgba(251,141,104,0.25)`
+      : 'none'
+  }"
+>
+  <!-- ripple rings -->
+  <span class="ring ring-1" aria-hidden="true"></span>
+  <span class="ring ring-2" aria-hidden="true"></span>
+
+  <!-- mic glyph -->
+  <svg viewBox="0 0 24 24" class="mic-icon" aria-hidden="true">
+    <path
+      d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"
+      fill="currentColor"
+    />
+  </svg>
+
+  <span class="mic-label">{{ isOpen ? (vadState === 'speaking' ? 'Listening to you…' : 'Listening…') : 'Talk' }}</span>
+</button>
+
 
       <span class="text-sm text-gray-600">
         {{ status }}
       </span>
+    </div>
+
+
+    <!-- Companion selector (disabled while connected) -->
+    <div class="mt-3 flex items-center gap-2">
+      <label class="text-xs text-gray-600">Companion:</label>
+      <select v-model="companion" :disabled="isOpen"
+              class="text-sm border rounded-md px-2 py-1">
+        <option value="spouse_partner">Spouse / Partner</option>
+        <option value="friend">Friend</option>
+        <option value="coach">Coach</option>
+        <option value="planner">Planner</option>
+        <option value="study_buddy">Study Buddy</option>
+      </select>
+      <span class="text-xs text-gray-500">Choose before starting.</span>
     </div>
 
     <div class="mt-3 text-xs text-gray-500">
@@ -42,13 +86,20 @@ const vadRmsEnd      = 0.008
 /* ============================ */
 
 const runtime = useRuntimeConfig()
-const gatewayURL = (runtime.public?.gatewayUrl as string) || (import.meta as any).env.VITE_GATEWAY_URL || 'http://127.0.0.1:5000'
+const gatewayURL =
+  (runtime.public?.gatewayUrl as string) ||
+  (import.meta as any).env.VITE_GATEWAY_URL ||
+  'http://127.0.0.1:5000'
 
 const auth = useAuth()
 
 const isOpen   = ref(false)
 const status   = ref('Click "Talk" to start the mic.')
 const vadState = ref<'idle' | 'listening' | 'speaking'>('idle')
+
+/** user-chosen companion/persona for this session */
+const companion = ref<'spouse_partner' | 'friend' | 'coach' | 'planner' | 'study_buddy'>('spouse_partner')
+const level = ref(0)
 
 let mediaStream: MediaStream | null = null
 let audioCtx: AudioContext | null = null
@@ -83,108 +134,59 @@ async function ensureAudioContext() {
 function setupDataChannel() {
   if (!pc) return
 
-  dataChannel = pc.createDataChannel('vad-control', {
-    ordered: true,
-    maxRetransmits: 3
-  })
+  dataChannel = pc.createDataChannel('vad-control', { ordered: true, maxRetransmits: 3 })
 
   dataChannel.onopen = () => {
     console.log('[Client] Data channel opened - bidirectional communication ready')
     sendVadState('listening')
   }
-
-  dataChannel.onclose = () => {
-    console.log('[Client] Data channel closed')
-  }
-
+  dataChannel.onclose = () => { console.log('[Client] Data channel closed') }
   dataChannel.onerror = (error) => {
     console.error('[Client] Data channel error:', error)
     status.value = 'Data channel error, please try again'
   }
 
-  // In your frontend code, update the dataChannel.onmessage handler:
   dataChannel.onmessage = (event) => {
     try {
-      const message = JSON.parse(event.data);
-      console.log('Received from server:', message);
-
+      const message = JSON.parse(event.data)
       switch (message.type) {
         case 'vad_ack':
-          console.log(`[Client] Server acknowledged VAD state: ${message.state}`);
-          // You can use this acknowledgment for timing or debugging
-          break;
-
+          // ack for timing/debug
+          break
         case 'server_waiting':
-          console.log('[Client] Server is waiting for response');
-          // The server is ready for you to speak
-          break;
-
+          status.value = 'Server is waiting for your response'
+          break
         case 'tts_status':
-          console.log('[Client] TTS status update:', message);
-          break;
-
+          if (message.playing !== undefined) {
+            playbackActive.value = message.playing
+            if (remoteAudio.value) {
+              remoteAudio.value.muted = message.playing && vadState.value === 'speaking'
+              if (message.playing) {
+                remoteAudio.value.play().catch(e => console.error('[Client] Audio playback failed:', e))
+              }
+            }
+          }
+          break
         case 'error':
-          console.error('[Client] Server error:', message.error);
-          break;
-
+          status.value = `Server error: ${message.error}`
+          break
         default:
-          console.log('[Client] Unknown message type:', message.type);
+          // ignore
+          break
       }
     } catch (e) {
-      console.error('Failed to parse server message:', e);
+      console.error('Failed to parse server message:', e)
     }
-  };
+  }
 }
 
 function sendVadState(state: 'listening' | 'speaking' | 'finished_talking') {
   if (dataChannel && dataChannel.readyState === 'open') {
-    const message = {
-      type: 'vad_state',
-      state: state,
-      timestamp: Date.now()
-    }
     try {
-      dataChannel.send(JSON.stringify(message))
-      console.log('[Client] Sent VAD state:', state)
+      dataChannel.send(JSON.stringify({ type: 'vad_state', state, timestamp: Date.now() }))
     } catch (e) {
       console.error('[Client] Failed to send VAD state:', e)
     }
-  } else {
-    console.warn('[Client] Data channel not open, cannot send VAD state:', state)
-  }
-}
-
-function handleServerMessage(message: any) {
-  console.log('[Client] Received from server:', message)
-
-  switch (message.type) {
-    case 'tts_status':
-      if (message.playing !== undefined) {
-        playbackActive.value = message.playing
-        if (remoteAudio.value) {
-          remoteAudio.value.muted = message.playing && vadState.value === 'speaking'
-          console.log(`[Client] Playback active: ${message.playing}, audio muted: ${remoteAudio.value.muted}`)
-          if (message.playing) {
-            remoteAudio.value.play().catch(e => console.error('[Client] Audio playback failed:', e))
-          }
-        }
-      }
-      break
-    case 'server_waiting':
-      if (message.hasMoreChunks) {
-        status.value = 'Server is waiting for your response'
-        if (remoteAudio.value) {
-          remoteAudio.value.muted = vadState.value === 'speaking'
-          console.log(`[Client] Server waiting, audio muted: ${remoteAudio.value.muted}`)
-        }
-      }
-      break
-    case 'error':
-      console.error('[Client] Server error:', message.error)
-      status.value = `Server error: ${message.error}`
-      break
-    default:
-      console.log('[Client] Unknown message type:', message.type)
   }
 }
 
@@ -217,7 +219,6 @@ function computeRms(buf: Float32Array) {
 /* Local VAD loop */
 async function startAnalysis() {
   if (!audioCtx || !analyser) return
-
   await ensureAudioContext()
 
   if (!rmsBuf || rmsBuf.length !== analyser.fftSize) {
@@ -233,6 +234,9 @@ async function startAnalysis() {
     if (!analyser || !rmsBuf) return
     analyser.getFloatTimeDomainData(rmsBuf)
     const rms = computeRms(rmsBuf)
+    // normalize rms between the end/start thresholds so 0 = silence, 1 = clearly speaking
+    const norm = (rms - vadRmsEnd) / Math.max(1e-6, (vadRmsStart - vadRmsEnd))
+    level.value = Math.min(1, Math.max(0, norm))
     const t = Date.now()
 
     if (vadState.value !== 'speaking') {
@@ -248,7 +252,6 @@ async function startAnalysis() {
             lastVadState = 'speaking'
             if (remoteAudio.value) {
               remoteAudio.value.muted = true
-              console.log('[Client] Muted audio during speaking')
             }
           }
         }
@@ -266,8 +269,7 @@ async function startAnalysis() {
           lastVadState = 'listening'
           if (remoteAudio.value) {
             remoteAudio.value.muted = false
-            remoteAudio.value.play().catch(e => console.error('[Client] Audio playback failed after unmute:', e))
-            console.log('[Client] Unmuted audio after finished talking')
+            remoteAudio.value.play().catch(() => {})
           }
         }
       } else {
@@ -303,51 +305,26 @@ async function openSession() {
     analyser.fftSize = 2048
     sourceNode.connect(analyser)
 
-    pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    })
+    pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
 
     setupDataChannel()
-    mediaStream.getTracks().forEach(t => {
-      pc!.addTrack(t, mediaStream!)
-      console.log(`[Client] Added track: ${t.id}`)
-    })
+    mediaStream.getTracks().forEach(t => pc!.addTrack(t, mediaStream!))
 
     const remoteStream = new MediaStream()
     pc.ontrack = (ev) => {
       if (ev.track.kind === 'audio' && !activeTrackIds.has(ev.track.id)) {
-        console.log(`[Client] Adding audio track: ${ev.track.id}`)
         activeTrackIds.add(ev.track.id)
-        // Clear existing tracks from remoteStream
-        remoteStream.getTracks().forEach(t => {
-          if (t.id !== ev.track.id) {
-            t.stop()
-            activeTrackIds.delete(t.id)
-            console.log(`[Client] Removed stale track: ${t.id}`)
-          }
-        })
+        remoteStream.getTracks().forEach(t => { if (t.id !== ev.track.id) t.stop() })
         remoteStream.addTrack(ev.track)
         if (remoteAudio.value) {
           remoteAudio.value.srcObject = remoteStream
           remoteAudio.value.muted = vadState.value === 'speaking'
-          remoteAudio.value.play().catch(e => console.error('[Client] Audio playback failed:', e))
-          console.log(`[Client] Set remoteStream with track: ${ev.track.id}, muted: ${remoteAudio.value.muted}`)
+          remoteAudio.value.play().catch(() => {})
         }
-        ev.track.onunmute = () => {
-          playbackActive.value = true
-          console.log(`[Client] Track unmuted: ${ev.track.id}`)
-        }
-        ev.track.onmute = () => {
-          playbackActive.value = false
-          console.log(`[Client] Track muted: ${ev.track.id}`)
-        }
-        ev.track.onended = () => {
-          playbackActive.value = false
-          activeTrackIds.delete(ev.track.id)
-          console.log(`[Client] Track ended: ${ev.track.id}`)
-        }
+        ev.track.onunmute = () => { playbackActive.value = true }
+        ev.track.onmute = () => { playbackActive.value = false }
+        ev.track.onended = () => { playbackActive.value = false; activeTrackIds.delete(ev.track.id) }
       } else if (ev.track.kind === 'audio') {
-        console.warn(`[Client] Duplicate audio track ignored: ${ev.track.id}`)
         ev.track.stop()
       }
     }
@@ -355,12 +332,8 @@ async function openSession() {
     pc.ondatachannel = (event) => {
       const incomingChannel = event.channel
       incomingChannel.onmessage = (msgEvent) => {
-        try {
-          const message = JSON.parse(msgEvent.data)
-          handleServerMessage(message)
-        } catch (e) {
-          console.error('[Client] Failed to parse incoming channel message:', e)
-        }
+        try { handleServerMessage(JSON.parse(msgEvent.data)) }
+        catch {}
       }
     }
 
@@ -368,7 +341,6 @@ async function openSession() {
       const s = pc?.iceConnectionState
       if (s === 'failed' || s === 'closed') {
         status.value = `ICE connection failed: ${s}`
-        console.log(`[Client] ICE connection state: ${s}`)
         closeSession()
       }
     }
@@ -377,7 +349,6 @@ async function openSession() {
       const s = pc?.connectionState
       if (s === 'failed' || s === 'disconnected' || s === 'closed') {
         if (s !== 'failed') status.value = `Connection closed: ${s}`
-        console.log(`[Client] Connection state: ${s}`)
         closeSession()
       }
     }
@@ -385,14 +356,20 @@ async function openSession() {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
 
-    const headers: Record<string,string> = { 'Content-Type': 'application/json' }
-    if (auth.accessToken) headers.Authorization = `Bearer ${auth.accessToken}`
+    const headers: Record<string, string> = { 'content-type': 'application/json' }
+    if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
 
+    // Call the gateway directly (CORS is enabled there)
     const r = await fetch(`${gatewayURL}/webrtc-offer`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ sdp: offer.sdp })
+      body: JSON.stringify({
+        sdp: offer.sdp,
+        // sessionId: undefined, // optional: pass an existing session id to reuse
+        companion: companion.value // <-- user-chosen persona
+      })
     })
+
     if (!r.ok) throw new Error(`Offer failed: ${r.status}`)
     const { sdp } = await r.json()
     await pc.setRemoteDescription({ type: 'answer', sdp })
@@ -409,6 +386,13 @@ async function openSession() {
   }
 }
 
+/* Handle server messages passed from ondatachannel */
+function handleServerMessage(message: any) {
+  if (message?.type === 'tts_status' && remoteAudio.value) {
+    remoteAudio.value.muted = message.playing && vadState.value === 'speaking'
+  }
+}
+
 /* Close everything */
 async function closeSession() {
   stopAnalysis()
@@ -416,17 +400,11 @@ async function closeSession() {
   if (idleTimer) { clearTimeout(idleTimer); idleTimer = null }
 
   if (dataChannel) {
-    try {
-      dataChannel.close()
-      console.log('[Client] Data channel closed')
-    } catch {}
+    try { dataChannel.close() } catch {}
     dataChannel = null
   }
 
-  try { mediaStream?.getTracks().forEach(t => {
-    t.stop()
-    console.log(`[Client] Stopped media track: ${t.id}`)
-  }) } catch {}
+  try { mediaStream?.getTracks().forEach(t => t.stop()) } catch {}
   mediaStream = null
 
   try { sourceNode?.disconnect() } catch {}
@@ -438,28 +416,16 @@ async function closeSession() {
 
   if (pc) {
     try {
-      pc.getSenders()?.forEach(s => { try {
-        s.track?.stop()
-        console.log(`[Client] Stopped sender track: ${s.track?.id}`)
-      } catch {} })
-      pc.getReceivers()?.forEach(r => { try {
-        r.track?.stop()
-        activeTrackIds.delete(r.track.id)
-        console.log(`[Client] Stopped receiver track: ${r.track.id}`)
-      } catch {} })
+      pc.getSenders()?.forEach(s => { try { s.track?.stop() } catch {} })
+      pc.getReceivers()?.forEach(r => { try { r.track?.stop(); activeTrackIds.delete(r.track.id) } catch {} })
       pc.close()
-      console.log('[Client] RTCPeerConnection closed')
     } catch {}
     pc = null
   }
 
   if (remoteAudio.value) {
     const ms = remoteAudio.value.srcObject as MediaStream | null
-    ms?.getTracks().forEach(t => {
-      t.stop()
-      activeTrackIds.delete(t.id)
-      console.log(`[Client] Removed audio track: ${t.id}`)
-    })
+    ms?.getTracks().forEach(t => { try { t.stop() } catch {}; activeTrackIds.delete(t.id) })
     remoteAudio.value.srcObject = null
     remoteAudio.value.muted = false
   }
@@ -477,3 +443,93 @@ async function toggle() {
 
 onBeforeUnmount(closeSession)
 </script>
+
+<style scoped>
+.mic-btn {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+
+  /* idle */
+  background: #111827; /* gray-900 */
+  color: white;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease, color 200ms ease;
+}
+
+/* open base */
+.mic-btn.is-open {
+  background: var(--color-primary-600, #016d77);
+}
+
+/* gentle pulse when listening */
+.mic-btn.is-listening {
+  animation: micPulse 1200ms ease-in-out infinite;
+}
+
+/* stronger color when we detect speech (barge-in visual) */
+.mic-btn.is-speaking {
+  background: var(--color-secondary-600, #fb8d68);
+  animation: micPulseFast 750ms ease-in-out infinite;
+}
+
+.mic-icon {
+  width: 28px;
+  height: 28px;
+  z-index: 2;
+}
+
+.mic-label {
+  position: absolute;
+  bottom: -1.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #4b5563; /* gray-600 */
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgba(1, 109, 119, 0.18); /* primary tint */
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1);
+  pointer-events: none;
+}
+
+.mic-btn.is-open .ring-1 { animation: ringExpand 1600ms ease-out infinite; }
+.mic-btn.is-open .ring-2 { animation: ringExpand 1600ms ease-out 800ms infinite; }
+
+/* while speaking, accent the rings to secondary */
+.mic-btn.is-speaking .ring {
+  border-color: rgba(251, 141, 104, 0.28); /* secondary tint */
+}
+
+/* keyframes */
+@keyframes micPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.08); }
+}
+
+@keyframes micPulseFast {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.12); }
+}
+
+@keyframes ringExpand {
+  0%   { opacity: 0.0; transform: scale(1);   }
+  10%  { opacity: 0.6; }
+  100% { opacity: 0.0; transform: scale(1.45); }
+}
+</style>
