@@ -103,6 +103,10 @@ model Turn {
   session  Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   ToolCall ToolCall?
 
+  llm_raw   Json?    // entire response object from the LLM (incl. tool calls, choices, etc.)
+  llm_model String?  // model used for this turn
+  llm_usage Json?    // token usage (if available)
+
   @@unique([conversation_id, turn_no]) // enforce order uniqueness per conversation
   @@index([sessionId, turn_no])
   @@index([conversation_id, ts])
