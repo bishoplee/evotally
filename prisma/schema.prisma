@@ -25,6 +25,12 @@ model User {
   voices            Voice[]
   tenantId          String?
 
+  home_city         String?
+  home_region       String?   // state / province
+  home_country      String?
+  home_lat          Float?
+  home_lng          Float?
+
   facts  Fact[]
   tokens RefreshToken[]
 

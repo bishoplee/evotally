@@ -10,37 +10,37 @@
 
     <div class="flex items-center gap-3">
       <!-- Pulsating circular Talk button -->
-<button
-  @click="toggle"
-  class="mic-btn"
-  :class="{
+      <button
+          @click="toggle"
+          class="mic-btn"
+          :class="{
     'is-open': isOpen,
     'is-speaking': vadState === 'speaking',
     'is-listening': isOpen && vadState === 'listening'
   }"
-  :aria-pressed="isOpen"
-  :title="isOpen ? 'Stop' : 'Talk'"
-  :style="{
+          :aria-pressed="isOpen"
+          :title="isOpen ? 'Stop' : 'Talk'"
+          :style="{
     transform: `scale(${(1 + level * 0.15).toFixed(3)})`,
     boxShadow: isOpen
       ? `0 0 ${Math.round(8 + level * 16)}px rgba(1,109,119,0.55), 0 0 ${Math.round(16 + level * 20)}px rgba(251,141,104,0.25)`
       : 'none'
   }"
->
-  <!-- ripple rings -->
-  <span class="ring ring-1" aria-hidden="true"></span>
-  <span class="ring ring-2" aria-hidden="true"></span>
+      >
+        <!-- ripple rings -->
+        <span class="ring ring-1" aria-hidden="true"></span>
+        <span class="ring ring-2" aria-hidden="true"></span>
 
-  <!-- mic glyph -->
-  <svg viewBox="0 0 24 24" class="mic-icon" aria-hidden="true">
-    <path
-      d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"
-      fill="currentColor"
-    />
-  </svg>
+        <!-- mic glyph -->
+        <svg viewBox="0 0 24 24" class="mic-icon" aria-hidden="true">
+          <path
+              d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"
+              fill="currentColor"
+          />
+        </svg>
 
-  <span class="mic-label">{{ isOpen ? (vadState === 'speaking' ? 'Listening to you…' : 'Listening…') : 'Talk' }}</span>
-</button>
+        <span class="mic-label">{{ isOpen ? (vadState === 'speaking' ? 'Listening to you…' : 'Listening…') : 'Talk' }}</span>
+      </button>
 
 
       <span class="text-sm text-gray-600">
@@ -48,7 +48,7 @@
       </span>
     </div>
 
-
+    <a @click="doMe"> Click here to do me</a>
     <!-- Companion selector (disabled while connected) -->
     <div class="mt-3 flex items-center gap-2">
       <label class="text-xs text-gray-600">Companion:</label>
@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 /* ==== knobs you can tweak ==== */
@@ -87,9 +87,9 @@ const vadRmsEnd      = 0.008
 
 const runtime = useRuntimeConfig()
 const gatewayURL =
-  (runtime.public?.gatewayUrl as string) ||
-  (import.meta as any).env.VITE_GATEWAY_URL ||
-  'http://127.0.0.1:5000'
+    (runtime.public?.gatewayUrl as string) ||
+    (import.meta as any).env.VITE_GATEWAY_URL ||
+    'http://127.0.0.1:5000'
 
 const auth = useAuth()
 
@@ -100,6 +100,17 @@ const vadState = ref<'idle' | 'listening' | 'speaking'>('idle')
 /** user-chosen companion/persona for this session */
 const companion = ref<'spouse_partner' | 'friend' | 'coach' | 'planner' | 'study_buddy'>('spouse_partner')
 const level = ref(0)
+
+
+const doMe = () => {
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
+  fetch(`${gatewayURL}/whoami`, {
+        method: 'GET',
+        headers
+      }
+  )
+}
 
 let mediaStream: MediaStream | null = null
 let audioCtx: AudioContext | null = null
@@ -214,6 +225,23 @@ function computeRms(buf: Float32Array) {
   let s = 0
   for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i]
   return Math.sqrt(s / buf.length)
+}
+
+async function tryGetLiveLocation(): Promise<{lat:number; lng:number; accuracy?:number} | null> {
+  if (!('geolocation' in navigator)) return null;
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+          });
+        },
+        () => resolve(null),
+        { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
+    );
+  });
 }
 
 /* Local VAD loop */
@@ -353,6 +381,23 @@ async function openSession() {
       }
     }
 
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: userTimeZone });
+
+    // 2. Get Geolocation (Optional, requires user permission)
+    let coords = {};
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+      });
+      coords = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude
+      };
+    } catch (e) {
+      console.warn("Geolocation permission denied or timed out:", e.message);
+    }
+
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
 
@@ -366,7 +411,10 @@ async function openSession() {
       body: JSON.stringify({
         sdp: offer.sdp,
         // sessionId: undefined, // optional: pass an existing session id to reuse
-        companion: companion.value // <-- user-chosen persona
+        companion: companion.value, // <-- user-chosen persona
+        clientTimeZone: userTimeZone,
+        clientLocalTime: localTime,
+        clientGeolocation: coords,
       })
     })
 
