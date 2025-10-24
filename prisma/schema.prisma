@@ -24,47 +24,58 @@ model User {
   timezone          String?   @default("America/New_York")
   voices            Voice[]
   tenantId          String?
-
-  home_city         String?
-  home_region       String?   // state / province
-  home_country      String?
-  home_lat          Float?
-  home_lng          Float?
+  currentLat        Float?
+  currentLng        Float?
+  currentCity       String? // "Seattle"
+  currentRegion     String? // "Washington"
+  currentCountry    String? // "United States"
+  locationUpdated   DateTime?
 
   facts  Fact[]
   tokens RefreshToken[]
 
   // NEW: relations
-  sessions    Session[]
-  evoProfiles EvoProfile[]
+  sessions              Session[]
+  evoProfiles           EvoProfile[]
+  UserSummary           UserSummary?
+  UserFact              UserFact[]
+  FactCollectionSession FactCollectionSession[]
+  QuestionHistory       QuestionHistory[]
+  UserLocation          UserLocation[]
 }
 
 model RefreshToken {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   userId     String
-  token_hash String   @unique       // <— make this unique
-  created_at DateTime @default(now())
+  token_hash String    @unique // <— make this unique
+  created_at DateTime  @default(now())
   expires_at DateTime
   revoked_at DateTime?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expires_at])
 }
 
 model Fact {
-  id              String   @id @default(uuid())
-  userId          String
-  type            String // "trait" | "preference" | "bio" | "goal" | "note"
-  key             String? // e.g., favorite_cuisine
-  value           String? // e.g., Thai
-  text            String // full text
-  qdrant_point_id String? // mirror id in Qdrant
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String    @id @default(uuid())
+  userId           String
+  type             String // preference, personal, goal, concern, routine
+  text             String
+  key              String?
+  value            String?
+  qdrant_point_id  String? // mirror id in Qdrant
+  importance       Int       @default(5) // 1-10
+  source_turn_id   String?
+  last_accessed_at DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
 
-  @@index([userId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, text])
+  @@index([userId, importance])
+  @@index([userId, type])
 }
 
 // ---------- NEW MODELS BELOW ----------
@@ -109,9 +120,11 @@ model Turn {
   session  Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   ToolCall ToolCall?
 
-  llm_raw   Json?    // entire response object from the LLM (incl. tool calls, choices, etc.)
-  llm_model String?  // model used for this turn
-  llm_usage Json?    // token usage (if available)
+  llm_raw   Json? // entire response object from the LLM (incl. tool calls, choices, etc.)
+  llm_model String? // model used for this turn
+  llm_usage Json? // token usage (if available)
+
+  consolidated Boolean @default(false)
 
   @@unique([conversation_id, turn_no]) // enforce order uniqueness per conversation
   @@index([sessionId, turn_no])
@@ -143,31 +156,147 @@ model EvoProfile {
   updatedAt DateTime @updatedAt
 }
 
+//Summary here
+
+model UserSummary {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  summary    String   @db.Text
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
 model Voice {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  provider        String   // e.g., "elevenlabs", "azure_tts"
-  voiceId         String   // provider's voice identifier
+  provider String // e.g., "elevenlabs", "azure_tts"
+  voiceId  String // provider's voice identifier
 
-  stability       Float?   @default(0.4)
-  similarityBoost Float?   @default(0.85)
+  stability       Float?  @default(0.4)
+  similarityBoost Float?  @default(0.85)
   settings        Json?
   label           String?
-  isDefault       Boolean  @default(false)
+  isDefault       Boolean @default(false)
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // one config per provider per user
   @@unique([userId, provider])
-
   @@index([userId])
   @@index([provider])
 }
 
+model UserFact {
+  id         String    @id @default(uuid())
+  userId     String
+  category   String
+  factKey    String
+  factValue  String
+  questionId String?
+  confidence Float     @default(1.0)
+  source     String    @default("conversation")
+  verified   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  expiresAt  DateTime?
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, factKey])
+  @@index([userId, category])
+  @@index([userId, createdAt])
+}
+
+model FactCollectionSession {
+  id             String    @id @default(uuid())
+  userId         String
+  sessionType    String    @default("progressive")
+  questionsAsked Int       @default(0)
+  questionsTotal Int
+  completed      Boolean   @default(false)
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  context        Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completed])
+}
+
+model QuestionHistory {
+  id         String    @id @default(uuid())
+  userId     String
+  questionId String
+  askedAt    DateTime  @default(now())
+  answered   Boolean   @default(false)
+  answeredAt DateTime?
+  skipped    Boolean   @default(false)
+  context    Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, questionId])
+  @@index([userId, askedAt])
+}
+
+model UserLocation {
+  id     String @id @default(uuid())
+  userId String
+
+  // Coordinates
+  lat Float
+  lng Float
+
+  // Geocoded results (cached)
+  city    String
+  region  String // State/Province
+  country String
+
+  // Additional details (optional)
+  postalCode String?
+  timezone   String?
+
+  // Metadata
+  source   String @default("browser") // browser, ip, manual
+  accuracy Float? // meters
+
+  // Timestamps
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Geospatial index for nearby lookups
+  @@index([lat, lng])
+  @@index([userId, lastUsedAt])
+}
+
+// Global location cache (shared across users)
+model LocationCache {
+  id String @id @default(uuid())
+
+  // Coordinates (rounded to ~111m precision)
+  latRounded Float // Round to 3 decimal places
+  lngRounded Float // Round to 3 decimal places
+
+  // Geocoded results
+  city       String
+  region     String
+  country    String
+  postalCode String?
+  timezone   String?
+
+  // Cache metadata
+  hitCount  Int       @default(1)
+  lastHitAt DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  expiresAt DateTime? // Optional TTL
+
+  @@unique([latRounded, lngRounded])
+  @@index([lastHitAt])
+}
