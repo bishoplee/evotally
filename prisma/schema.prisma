@@ -42,6 +42,7 @@ model User {
   FactCollectionSession FactCollectionSession[]
   QuestionHistory       QuestionHistory[]
   UserLocation          UserLocation[]
+  assistantProfile      UserAssistantProfile?
 }
 
 model RefreshToken {
@@ -192,24 +193,24 @@ model Voice {
 }
 
 model UserFact {
-  id         String    @id @default(uuid())
-  userId     String
-  category   String
-  factKey    String
-  factValue  String
-  questionId String?
-  confidence Float     @default(1.0)
-  source     String    @default("conversation")
-  verified   Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  expiresAt  DateTime?
+  id              String   @id @default(uuid())
+  userId          String
+  category        String
+  factKey         String
+  factValue       String      // ← Clean LLM-extracted value
+  rawAnswer       String?     // ← NEW: Original user answer
+  source          String   @default("conversation")
+  verified        Boolean  @default(false)
+  confidence      String   @default("medium")
+  lastUpdated     DateTime @default(now()) @updatedAt
+  createdAt       DateTime @default(now())
+  metadata        Json?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, factKey])
   @@index([userId, category])
-  @@index([userId, createdAt])
+  @@index([userId, verified])
 }
 
 model FactCollectionSession {
@@ -300,3 +301,33 @@ model LocationCache {
   @@unique([latRounded, lngRounded])
   @@index([lastHitAt])
 }
+
+model UserAssistantProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+
+  // Core identity
+  name             String   @default("Evo")
+  gender           String   @default("female")
+  personality      String?
+
+  // Voice settings
+  voiceId          String?
+  voiceStability   Float?   @default(0.5)
+  voiceSimilarity  Float?   @default(0.75)
+  provider        String   @default("elevenlabs") // default now, flexible later
+
+  // Personality & behavior
+  bio              String?  @db.Text
+  traits           Json?
+  speakingStyle    String?
+
+  // Relationship context
+  relationshipType String   @default("spouse_partner")
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

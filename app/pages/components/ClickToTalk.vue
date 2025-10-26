@@ -48,7 +48,6 @@
       </span>
     </div>
 
-    <a @click="doMe"> Click here to do me</a>
     <!-- Companion selector (disabled while connected) -->
     <div class="mt-3 flex items-center gap-2">
       <label class="text-xs text-gray-600">Companion:</label>
