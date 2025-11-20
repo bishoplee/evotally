@@ -29,7 +29,7 @@ type SessionRow = {
 
 const auth = useAuth()
 const rt = useRuntimeConfig()
-const gatewayUrl = 'https://gw.cimb.us:5000'
+const gatewayUrl = 'https://gw.cimb.us'
 
 /* ---------- state ---------- */
 const loading = ref(true)
@@ -80,7 +80,7 @@ async function loadAuthedBits() {
     me.value = meResp?.user || null
 
     // Assistant profile
-    const ap = await $fetch<{ profile: AssistantProfile }>('/api/assistant-profile', { credentials: 'include' }).catch(() => null)
+    const ap = await $fetch<{ profile: AssistantProfile }>('/api/assistant/profile', { credentials: 'include' }).catch(() => null)
     if (ap?.profile) assistant.value = { ...assistant.value, ...ap.profile }
 
     // Voices (provider defaults to elevenlabs for now)
@@ -116,6 +116,55 @@ async function pingGateway() {
     gateway.value = { ok: false }
   }
 }
+
+const deletingMemory = ref(false)
+const memoryStatus = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+
+async function deleteAllMemory() {
+  if (!isAuthed.value) return
+  const ok = window.confirm(
+    'This will delete all your conversations, facts, and summaries. This cannot be undone. Continue?'
+  )
+  if (!ok) return
+
+  deletingMemory.value = true
+  memoryStatus.value = null
+
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
+
+  try {
+    const resp = await fetch(`${gatewayUrl}/memory/reset`, {
+      method: 'POST',
+      credentials: 'include',
+      headers
+    })
+
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '')
+      throw new Error(text || `Request failed with status ${resp.status}`)
+    }
+
+    const json = await resp.json().catch(() => ({}))
+
+    // Clear local session list so UI reflects the wipe
+    recentSessions.value = []
+
+    memoryStatus.value = {
+      type: 'success',
+      message: 'All conversations and stored memory have been deleted.'
+    }
+    console.log('[MemoryReset] result:', json)
+  } catch (e: any) {
+    memoryStatus.value = {
+      type: 'error',
+      message: e?.message || 'Failed to delete memory.'
+    }
+  } finally {
+    deletingMemory.value = false
+  }
+}
+
 
 onMounted(async () => {
   loading.value = true
@@ -264,7 +313,20 @@ onMounted(async () => {
       <div class="md:col-span-2 p-5 bg-white rounded-xl border border-gray-200">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold">Recent Conversations</h3>
-          <NuxtLink to="/voice" class="text-sm text-brand-600 hover:text-brand-700">Open voice</NuxtLink>
+          <div class="flex items-center gap-3">
+            <button
+              v-if="isAuthed"
+              type="button"
+              class="px-2 py-1 rounded-md border border-red-300 text-xs text-red-700 hover:bg-red-50 disabled:opacity-50"
+              :disabled="deletingMemory"
+              @click="deleteAllMemory"
+            >
+              {{ deletingMemory ? 'Deleting…' : 'Delete all memory' }}
+            </button>
+            <NuxtLink to="/voice" class="text-sm text-brand-600 hover:text-brand-700">
+              Open voice
+            </NuxtLink>
+          </div>
         </div>
         <div v-if="!isAuthed" class="text-sm text-gray-600 mt-2">
           Sign in to see recent conversations.

@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Fact" ADD COLUMN     "access_count" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "confidence" DOUBLE PRECISION DEFAULT 1.0,
+ADD COLUMN     "replacedBy" TEXT,
+ADD COLUMN     "replaces" TEXT,
+ADD COLUMN     "source" TEXT NOT NULL DEFAULT 'conversation',
+ADD COLUMN     "status" TEXT NOT NULL DEFAULT 'active',
+ADD COLUMN     "validFrom" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "validUntil" TIMESTAMP(3);

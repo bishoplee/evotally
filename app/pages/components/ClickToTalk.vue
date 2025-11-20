@@ -9,39 +9,25 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Pulsating circular Talk button -->
-      <button
-          @click="toggle"
-          class="mic-btn"
-          :class="{
-    'is-open': isOpen,
-    'is-speaking': vadState === 'speaking',
-    'is-listening': isOpen && vadState === 'listening'
-  }"
-          :aria-pressed="isOpen"
-          :title="isOpen ? 'Stop' : 'Talk'"
-          :style="{
-    transform: `scale(${(1 + level * 0.15).toFixed(3)})`,
-    boxShadow: isOpen
-      ? `0 0 ${Math.round(8 + level * 16)}px rgba(1,109,119,0.55), 0 0 ${Math.round(16 + level * 20)}px rgba(251,141,104,0.25)`
-      : 'none'
-  }"
-      >
-        <!-- ripple rings -->
-        <span class="ring ring-1" aria-hidden="true"></span>
-        <span class="ring ring-2" aria-hidden="true"></span>
+      <!-- Enhanced Audio-Reactive Orb -->
+      <div class="orb-container" @click="toggle">
+        <canvas ref="orbCanvas" class="orb-canvas" width="200" height="200"></canvas>
 
-        <!-- mic glyph -->
-        <svg viewBox="0 0 24 24" class="mic-icon" aria-hidden="true">
-          <path
+        <!-- Center mic icon -->
+        <div class="orb-center-content">
+          <svg viewBox="0 0 24 24" class="mic-icon" :class="{ 'is-active': isOpen }">
+            <path
               d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"
               fill="currentColor"
-          />
-        </svg>
+            />
+          </svg>
+        </div>
 
-        <span class="mic-label">{{ isOpen ? (vadState === 'speaking' ? 'Listening to you…' : 'Listening…') : 'Talk' }}</span>
-      </button>
-
+        <!-- Label below -->
+        <span class="orb-label">
+          {{ isOpen ? (vadState === 'speaking' ? 'Listening to you…' : 'Listening…') : 'Talk' }}
+        </span>
+      </div>
 
       <span class="text-sm text-gray-600">
         {{ status }}
@@ -71,13 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount, onMounted } from 'vue'
+import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 /* ==== knobs you can tweak ==== */
 const frameMs        = 50
 const startMs        = 200
-const endMs          = 300     // Reduced from 400ms for faster VAD response
+const endMs          = 300
 const silenceMs      = endMs
 const idleNudgeSec   = 25
 const vadRmsStart    = 0.015
@@ -95,22 +81,191 @@ const auth = useAuth()
 const isOpen   = ref(false)
 const status   = ref('Click "Talk" to start the mic.')
 const vadState = ref<'idle' | 'listening' | 'speaking'>('idle')
-
-/** user-chosen companion/persona for this session */
 const companion = ref<'spouse_partner' | 'friend' | 'coach' | 'planner' | 'study_buddy'>('spouse_partner')
 const level = ref(0)
 
+// Canvas refs
+const orbCanvas = ref<HTMLCanvasElement | null>(null)
+let ctx: CanvasRenderingContext2D | null = null
+let animationFrameId: number | null = null
 
-const doMe = () => {
-  const headers: Record<string, string> = { 'content-type': 'application/json' }
-  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
-  fetch(`${gatewayURL}/whoami`, {
-        method: 'GET',
-        headers
-      }
-  )
+// Orb animation state
+interface Particle {
+  angle: number
+  distance: number
+  size: number
+  speed: number
+  opacity: number
 }
 
+const particles: Particle[] = []
+const numParticles = 12
+let orbRotation = 0
+let orbPulse = 0
+
+// Initialize particles
+function initParticles() {
+  particles.length = 0
+  for (let i = 0; i < numParticles; i++) {
+    particles.push({
+      angle: (Math.PI * 2 * i) / numParticles,
+      distance: 30 + Math.random() * 10,
+      size: 2 + Math.random() * 2,
+      speed: 0.005 + Math.random() * 0.01,
+      opacity: 0.3 + Math.random() * 0.4
+    })
+  }
+}
+
+// Draw the orb
+function drawOrb() {
+  if (!ctx || !orbCanvas.value) return
+
+  const canvas = orbCanvas.value
+  const centerX = canvas.width / 2
+  const centerY = canvas.height / 2
+  const baseRadius = 50
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  // Update animation state
+  orbRotation += 0.005
+  orbPulse = Math.sin(Date.now() * 0.002) * 0.1
+
+  // Calculate audio-reactive radius
+  const audioReactiveRadius = baseRadius * (1 + level.value * 0.3 + orbPulse)
+
+  // Determine colors based on state
+  let primaryColor, secondaryColor, glowColor
+
+  if (vadState.value === 'speaking') {
+    primaryColor = '#fb8d68' // Secondary/orange
+    secondaryColor = '#f97316'
+    glowColor = 'rgba(251, 141, 104, 0.4)'
+  } else if (vadState.value === 'listening') {
+    primaryColor = '#016d77' // Primary/teal
+    secondaryColor = '#0891b2'
+    glowColor = 'rgba(1, 109, 119, 0.4)'
+  } else {
+    primaryColor = '#6b7280' // Gray
+    secondaryColor = '#9ca3af'
+    glowColor = 'rgba(107, 114, 128, 0.3)'
+  }
+
+  // Draw outer glow
+  if (isOpen.value) {
+    const gradient = ctx.createRadialGradient(centerX, centerY, audioReactiveRadius * 0.5, centerX, centerY, audioReactiveRadius * 1.5)
+    gradient.addColorStop(0, glowColor)
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }
+
+  // Draw main orb with gradient
+  const mainGradient = ctx.createRadialGradient(
+    centerX - audioReactiveRadius * 0.3,
+    centerY - audioReactiveRadius * 0.3,
+    0,
+    centerX,
+    centerY,
+    audioReactiveRadius
+  )
+  mainGradient.addColorStop(0, primaryColor)
+  mainGradient.addColorStop(1, secondaryColor)
+
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, audioReactiveRadius, 0, Math.PI * 2)
+  ctx.fillStyle = mainGradient
+  ctx.fill()
+
+  // Draw particles when active
+  if (isOpen.value) {
+    particles.forEach((particle, i) => {
+      // Update particle
+      particle.angle += particle.speed * (1 + level.value * 2)
+
+      // Audio-reactive distance
+      const reactiveDistance = particle.distance * (1 + level.value * 0.5)
+
+      const x = centerX + Math.cos(particle.angle + orbRotation) * reactiveDistance
+      const y = centerY + Math.sin(particle.angle + orbRotation) * reactiveDistance
+
+      // Draw particle
+      ctx.beginPath()
+      ctx.arc(x, y, particle.size, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity * (0.5 + level.value)})`
+      ctx.fill()
+    })
+  }
+
+  // Draw inner shimmer
+  if (isOpen.value && level.value > 0.1) {
+    const shimmerGradient = ctx.createRadialGradient(
+      centerX,
+      centerY,
+      0,
+      centerX,
+      centerY,
+      audioReactiveRadius * 0.6
+    )
+    shimmerGradient.addColorStop(0, `rgba(255, 255, 255, ${level.value * 0.4})`)
+    shimmerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+    ctx.beginPath()
+    ctx.arc(centerX, centerY, audioReactiveRadius * 0.6, 0, Math.PI * 2)
+    ctx.fillStyle = shimmerGradient
+    ctx.fill()
+  }
+
+  // Draw concentric rings when speaking
+  if (vadState.value === 'speaking') {
+    const time = Date.now() * 0.001
+    for (let i = 0; i < 3; i++) {
+      const offset = (time + i * 0.5) % 2
+      const ringRadius = audioReactiveRadius + offset * 20
+      const opacity = (1 - offset / 2) * 0.3
+
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+      ctx.lineWidth = 2
+      ctx.stroke()
+    }
+  }
+
+  // Continue animation
+  animationFrameId = requestAnimationFrame(drawOrb)
+}
+
+// Start orb animation
+function startOrbAnimation() {
+  if (!orbCanvas.value) return
+  ctx = orbCanvas.value.getContext('2d')
+  if (!ctx) return
+
+  initParticles()
+  drawOrb()
+}
+
+// Stop orb animation
+function stopOrbAnimation() {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+}
+
+// Watch for canvas mount
+onMounted(() => {
+  startOrbAnimation()
+})
+
+onBeforeUnmount(() => {
+  stopOrbAnimation()
+})
+
+// Rest of your original code below...
 let mediaStream: MediaStream | null = null
 let audioCtx: AudioContext | null = null
 let sourceNode: MediaStreamAudioSourceNode | null = null
@@ -127,7 +282,6 @@ const remoteAudio = ref<HTMLAudioElement | null>(null)
 const playbackActive = ref(false)
 const activeTrackIds = new Set<string>()
 
-/* Ensure AudioContext is resumed */
 async function ensureAudioContext() {
   if (audioCtx && audioCtx.state === 'suspended') {
     try {
@@ -140,7 +294,6 @@ async function ensureAudioContext() {
   }
 }
 
-/* Data Channel Management */
 function setupDataChannel() {
   if (!pc) return
 
@@ -161,7 +314,6 @@ function setupDataChannel() {
       const message = JSON.parse(event.data)
       switch (message.type) {
         case 'vad_ack':
-          // ack for timing/debug
           break
         case 'server_waiting':
           status.value = 'Server is waiting for your response'
@@ -181,7 +333,6 @@ function setupDataChannel() {
           status.value = `Server error: ${message.error}`
           break
         default:
-          // ignore
           break
       }
     } catch (e) {
@@ -200,7 +351,6 @@ function sendVadState(state: 'listening' | 'speaking' | 'finished_talking') {
   }
 }
 
-/* Helpers */
 function resetIdleTimer() {
   if (idleTimer) clearTimeout(idleTimer)
   idleTimer = window.setTimeout(() => {
@@ -226,24 +376,6 @@ function computeRms(buf: Float32Array) {
   return Math.sqrt(s / buf.length)
 }
 
-async function tryGetLiveLocation(): Promise<{lat:number; lng:number; accuracy?:number} | null> {
-  if (!('geolocation' in navigator)) return null;
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          resolve({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            accuracy: pos.coords.accuracy
-          });
-        },
-        () => resolve(null),
-        { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
-    );
-  });
-}
-
-/* Local VAD loop */
 async function startAnalysis() {
   if (!audioCtx || !analyser) return
   await ensureAudioContext()
@@ -261,65 +393,49 @@ async function startAnalysis() {
     if (!analyser || !rmsBuf) return
     analyser.getFloatTimeDomainData(rmsBuf)
     const rms = computeRms(rmsBuf)
-    // normalize rms between the end/start thresholds so 0 = silence, 1 = clearly speaking
-    const norm = (rms - vadRmsEnd) / Math.max(1e-6, (vadRmsStart - vadRmsEnd))
-    level.value = Math.min(1, Math.max(0, norm))
-    const t = Date.now()
+    level.value = Math.min(rms * 5, 1)
 
-    if (vadState.value !== 'speaking') {
-      if (rms >= vadRmsStart) {
-        if (!speakingSince) speakingSince = t
-        if (t - speakingSince >= startMs) {
-          vadState.value = 'speaking'
-          status.value = '…capturing (server is listening)'
-          silenceSince = 0
-          resetIdleTimer()
-          if (lastVadState !== 'speaking') {
-            sendVadState('speaking')
-            lastVadState = 'speaking'
-            if (remoteAudio.value) {
-              remoteAudio.value.muted = true
-            }
-          }
+    const now = Date.now()
+    if (rms > vadRmsStart) {
+      silenceSince = 0
+      if (speakingSince === 0) speakingSince = now
+      if (now - speakingSince >= startMs && vadState.value !== 'speaking') {
+        vadState.value = 'speaking'
+        if (lastVadState !== 'speaking') {
+          sendVadState('speaking')
+          lastVadState = 'speaking'
         }
-      } else {
-        speakingSince = 0
+        if (remoteAudio.value) remoteAudio.value.muted = true
       }
-    } else {
-      if (rms <= vadRmsEnd) {
-        if (!silenceSince) silenceSince = t
-        if (t - silenceSince >= endMs) {
-          vadState.value = 'listening'
-          status.value = 'Listening…'
-          speakingSince = 0
+    } else if (rms < vadRmsEnd) {
+      speakingSince = 0
+      if (silenceSince === 0) silenceSince = now
+      if (now - silenceSince >= endMs && vadState.value !== 'listening') {
+        vadState.value = 'listening'
+        if (lastVadState !== 'listening') {
           sendVadState('finished_talking')
           lastVadState = 'listening'
-          if (remoteAudio.value) {
-            remoteAudio.value.muted = false
-            remoteAudio.value.play().catch(() => {})
-          }
         }
-      } else {
-        silenceSince = 0
-        resetIdleTimer()
+        if (remoteAudio.value) remoteAudio.value.muted = false
       }
+    } else {
+      speakingSince = 0
+      silenceSince = 0
     }
   }, frameMs)
 }
 
 function stopAnalysis() {
-  if (analysisTimer) clearInterval(analysisTimer)
-  analysisTimer = null
-  rmsBuf = null
+  if (analysisTimer) {
+    clearInterval(analysisTimer)
+    analysisTimer = null
+  }
+  vadState.value = 'idle'
+  level.value = 0
 }
 
-/* Open WebRTC session */
 async function openSession() {
-  if (isOpen.value) return
   try {
-    status.value = 'Requesting microphone…'
-    await auth.ensure()
-
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       video: false
@@ -380,21 +496,20 @@ async function openSession() {
       }
     }
 
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const localTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: userTimeZone });
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const localTime = new Date().toLocaleTimeString('en-US', { hour12: false, timeZone: userTimeZone })
 
-    // 2. Get Geolocation (Optional, requires user permission)
-    let coords = {};
+    let coords = {}
     try {
       const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
-      });
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
+      }) as any
       coords = {
         lat: position.coords.latitude,
         lon: position.coords.longitude
-      };
-    } catch (e) {
-      console.warn("Geolocation permission denied or timed out:", e.message);
+      }
+    } catch (e: any) {
+      console.warn("Geolocation permission denied or timed out:", e.message)
     }
 
     const offer = await pc.createOffer()
@@ -403,14 +518,12 @@ async function openSession() {
     const headers: Record<string, string> = { 'content-type': 'application/json' }
     if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
 
-    // Call the gateway directly (CORS is enabled there)
     const r = await fetch(`${gatewayURL}/webrtc-offer`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         sdp: offer.sdp,
-        // sessionId: undefined, // optional: pass an existing session id to reuse
-        companion: companion.value, // <-- user-chosen persona
+        companion: companion.value,
         clientTimeZone: userTimeZone,
         clientLocalTime: localTime,
         clientGeolocation: coords,
@@ -433,14 +546,12 @@ async function openSession() {
   }
 }
 
-/* Handle server messages passed from ondatachannel */
 function handleServerMessage(message: any) {
   if (message?.type === 'tts_status' && remoteAudio.value) {
     remoteAudio.value.muted = message.playing && vadState.value === 'speaking'
   }
 }
 
-/* Close everything */
 async function closeSession() {
   stopAnalysis()
 
@@ -492,91 +603,70 @@ onBeforeUnmount(closeSession)
 </script>
 
 <style scoped>
-.mic-btn {
+.orb-container {
   position: relative;
-  width: 84px;
-  height: 84px;
-  border-radius: 9999px;
-  display: inline-flex;
+  width: 200px;
+  height: 200px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  outline: none;
-  border: none;
   cursor: pointer;
   user-select: none;
-
-  /* idle */
-  background: #111827; /* gray-900 */
-  color: white;
-  transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease, color 200ms ease;
 }
 
-/* open base */
-.mic-btn.is-open {
-  background: var(--color-primary-600, #016d77);
+.orb-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-/* gentle pulse when listening */
-.mic-btn.is-listening {
-  animation: micPulse 1200ms ease-in-out infinite;
-}
-
-/* stronger color when we detect speech (barge-in visual) */
-.mic-btn.is-speaking {
-  background: var(--color-secondary-600, #fb8d68);
-  animation: micPulseFast 750ms ease-in-out infinite;
+.orb-center-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .mic-icon {
-  width: 28px;
-  height: 28px;
-  z-index: 2;
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 200ms ease;
 }
 
-.mic-label {
+.mic-icon.is-active {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.orb-label {
   position: absolute;
-  bottom: -1.75rem;
+  bottom: -2rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
-  color: #4b5563; /* gray-600 */
+  color: #4b5563;
   white-space: nowrap;
   pointer-events: none;
+  font-weight: 500;
 }
 
-.ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  border: 2px solid rgba(1, 109, 119, 0.18); /* primary tint */
-  z-index: 1;
-  opacity: 0;
-  transform: scale(1);
-  pointer-events: none;
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
-.mic-btn.is-open .ring-1 { animation: ringExpand 1600ms ease-out infinite; }
-.mic-btn.is-open .ring-2 { animation: ringExpand 1600ms ease-out 800ms infinite; }
-
-/* while speaking, accent the rings to secondary */
-.mic-btn.is-speaking .ring {
-  border-color: rgba(251, 141, 104, 0.28); /* secondary tint */
+/* Hover effect */
+.orb-container:hover .mic-icon {
+  transform: scale(1.05);
 }
 
-/* keyframes */
-@keyframes micPulse {
-  0%, 100% { filter: brightness(1); }
-  50%      { filter: brightness(1.08); }
-}
-
-@keyframes micPulseFast {
-  0%, 100% { filter: brightness(1); }
-  50%      { filter: brightness(1.12); }
-}
-
-@keyframes ringExpand {
-  0%   { opacity: 0.0; transform: scale(1);   }
-  10%  { opacity: 0.6; }
-  100% { opacity: 0.0; transform: scale(1.45); }
+.orb-container:active .mic-icon {
+  transform: scale(0.95);
 }
 </style>

@@ -72,6 +72,21 @@ model Fact {
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
 
+  // NEW: Temporal tracking
+  status     String   @default("active") // "active", "past", "outdated", "deleted"
+  validFrom  DateTime @default(now())
+  validUntil DateTime?
+
+  // Metadata
+  source     String   @default("conversation") // "conversation", "consolidation", "pattern", "explicit"
+  confidence Float?   @default(1.0) // 0-1 confidence score
+
+  // Relationship tracking
+  replacedBy String?  // ID of fact that supersedes this one
+  replaces   String?  // ID of fact this one supersedes
+
+  access_count Int    @default(0)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, type, text])
@@ -160,10 +175,15 @@ model EvoProfile {
 //Summary here
 
 model UserSummary {
-  id         String   @id @default(uuid())
-  userId     String   @unique
-  summary    String   @db.Text
-  updated_at DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  summary         String   @db.Text
+  lastInteraction DateTime
+  totalSessions   Int      @default(0)
+  keyTopics       Json?    // Store array of key topics discussed
+  recentHighlight String?  @db.Text // Most recent notable thing
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -331,3 +351,32 @@ model UserAssistantProfile {
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model MemoryDebugTrace {
+  id              String   @id @default(cuid())
+
+  // who/where
+  tenantId        String
+  sessionId       String?
+  conversationId  String?
+
+  // inputs & prompts
+  inputText       String
+  memoryPrompt    String   // output of formatMemoryForPrompt(...)
+  systemPrompt    String   // final buildSystemPrompt(...)
+
+  // retrieval payloads (store what you passed to prompts)
+  longTermHits    Json     // memoryContext.longTerm (processed/reranked items)
+  shortTermTurns  Json?    // optional: memoryContext.shortTerm slice
+  workingTurns    Json?    // optional: memoryContext.working slice
+
+  // handy debug/meta
+  coreFactsCount  Int?
+  modelUsed       String?
+  sources         Json?    // web/tool sources if any
+  usage           Json?    // token usage if you capture it
+
+  createdAt       DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([sessionId, createdAt])
+}
