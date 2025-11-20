@@ -164,9 +164,11 @@ async function load() {
   await auth.ensure()
   loading.value = true
   err.value = ''
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
   try {
     facts.value = await $fetch<Fact[]>('/api/facts', {
-      headers: auth.bearer
+      headers
     })
     // Reset to page 1 whenever we reload
     page.value = 1
