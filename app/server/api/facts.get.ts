@@ -1,40 +1,35 @@
+// server/api/facts.get.ts
+import { defineEventHandler, createError, getQuery } from 'h3'
 import { prisma } from '~/server/utils/db'
-import { verifyBearer } from '~/server/utils/jwt'
-import { getHeader, getQuery, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
-  const authHeader = getHeader(event, 'authorization')
-
-  if (!authHeader) {
-    // No token at all -> not authed
+  const userId = event.context.user?.id as string | undefined
+  if (!userId) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 
-  let sub: string
-  try {
-    const payload = await verifyBearer(authHeader)
-    sub = String(payload.sub)
-  } catch (err: any) {
-    console.warn('[facts.get] invalid JWT:', err?.message || err)
-    throw createError({ statusCode: 401, statusMessage: 'Invalid token' })
+  const q = getQuery(event) as any
+
+  const where: any = { userId }
+
+  if (q.type) {
+    where.type = String(q.type)
   }
 
-  const q = getQuery(event) as any
-  const where: any = { userId: sub }
-
-  if (q.type) where.type = String(q.type)
   if (q.q) {
+    const search = String(q.q)
     where.OR = [
-      { text:  { contains: String(q.q), mode: 'insensitive' } },
-      { key:   { contains: String(q.q), mode: 'insensitive' } },
-      { value: { contains: String(q.q), mode: 'insensitive' } },
+      { text:  { contains: search, mode: 'insensitive' } },
+      { key:   { contains: search, mode: 'insensitive' } },
+      { value: { contains: search, mode: 'insensitive' } },
     ]
   }
 
-  return await prisma.fact.findMany({
+  // Return all facts for this user, newest first
+  const facts = await prisma.fact.findMany({
     where,
     orderBy: { created_at: 'desc' }
   })
+
+  return facts
 })
-
-
