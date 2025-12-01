@@ -4,370 +4,247 @@ definePageMeta({ public: true })
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '~/stores/auth'
 
-type AssistantProfile = {
-  name?: string
-  gender?: 'male' | 'female'
-  relationshipType?: string
-  speakingStyle?: string
-  voiceId?: string | null
-}
-
-type VoiceRow = {
-  id: string
-  provider: string
-  voiceId: string
-  label?: string | null
-  isDefault?: boolean
-  settings?: Record<string, any> | null
-}
-
-type SessionRow = {
-  id: string
-  title?: string | null
-  started_at?: string
-}
-
 const auth = useAuth()
-const rt = useRuntimeConfig()
-const gatewayUrl = 'https://gw.cimb.us'
-
-/* ---------- state ---------- */
-const loading = ref(true)
-const err = ref('')
-
-const me = ref<{ id?: string; email?: string; display_name?: string } | null>(null)
-
-const assistant = ref<AssistantProfile>({
-  name: 'Evo',
-  gender: 'female',
-  relationshipType: 'spouse_partner',
-  speakingStyle: 'casual',
-  voiceId: null
-})
-
-const voices = ref<VoiceRow[]>([])
-const recentSessions = ref<SessionRow[]>([])
-
-const google = ref<{ connected: boolean; expiry?: string | null }>({ connected: false, expiry: null })
-const gateway = ref<{ ok: boolean; tts?: boolean; peers?: number } | null>(null)
-
 const isAuthed = computed(() => auth.isAuthed)
-const selectedVoice = computed(() => voices.value.find(v => v.voiceId === assistant.value.voiceId) || null)
-const assistantAvatar = computed(() => (assistant.value.gender === 'male' ? '🧑‍💼' : '👩‍💼'))
 
-/* ---------- helpers ---------- */
-function shortId(id?: string | null) {
-  if (!id) return '—'
-  return id.length > 12 ? id.slice(0, 6) + '…' + id.slice(-4) : id
-}
-function relLabel(tag?: string) {
-  const map: Record<string, string> = {
-    spouse_partner: 'Spouse / Partner',
-    friend: 'Friend',
-    coach: 'Coach'
+const features = [
+  {
+    icon: '🎤',
+    title: 'Natural Voice Conversations',
+    description: 'Talk naturally with your AI companion using advanced voice recognition and realistic text-to-speech.'
+  },
+  {
+    icon: '🧠',
+    title: 'Long-Term Memory',
+    description: 'Your assistant remembers your preferences, past conversations, and important details about your life.'
+  },
+  {
+    icon: '🤝',
+    title: 'Personalized Relationship',
+    description: 'Customize your assistant\'s personality, voice, and relationship style to match your needs.'
+  },
+  {
+    icon: '🔒',
+    title: 'Private & Secure',
+    description: 'Your conversations and data are encrypted and stored securely. You have full control over your information.'
   }
-  return map[tag || ''] || tag || '—'
-}
+]
 
-/* ---------- network ---------- */
-async function loadAuthedBits() {
-  try {
-    await auth.ensure()
-    if (!auth.isAuthed) return
-
-    // Identity (cheap)
-    const meResp = await $fetch<{ user: any | null }>('/api/auth/me', { credentials: 'include' }).catch(() => null)
-    me.value = meResp?.user || null
-
-    // Assistant profile
-    const ap = await $fetch<{ profile: AssistantProfile }>('/api/assistant/profile', { credentials: 'include' }).catch(() => null)
-    if (ap?.profile) assistant.value = { ...assistant.value, ...ap.profile }
-
-    // Voices (provider defaults to elevenlabs for now)
-    const vr = await $fetch<{ items: VoiceRow[] }>('/api/voices?provider=elevenlabs', { credentials: 'include' }).catch(() => ({ items: [] }))
-    voices.value = vr?.items || []
-
-    // Recent sessions (if you have this endpoint; otherwise harmless)
-    const sr = await $fetch<{ items: SessionRow[] }>('/api/sessions?limit=5', { credentials: 'include' }).catch(() => ({ items: [] }))
-    recentSessions.value = sr?.items || []
-
-    // Google status
-    const g = await $fetch<{ connected: boolean; expiry?: string }>(
-      '/api/integrations/google',
-      { credentials: 'include' }
-    ).catch(() => null)
-    if (g) google.value = { connected: !!g.connected, expiry: g.expiry || null }
-  } catch (e: any) {
-    err.value = e?.message || 'Failed to load dashboard data'
-  }
-}
-
-async function pingGateway() {
-  try {
-    const r = await fetch(`${gatewayUrl}/health`, { credentials: 'omit' })
-    if (!r.ok) throw new Error(String(r.status))
-    const j = await r.json().catch(() => ({}))
-    gateway.value = {
-      ok: true,
-      tts: Boolean(j?.eleven_voice),
-      peers: Number(j?.active_peers || 0)
-    }
-  } catch {
-    gateway.value = { ok: false }
-  }
-}
-
-const deletingMemory = ref(false)
-const memoryStatus = ref<{ type: 'success' | 'error'; message: string } | null>(null)
-
-async function deleteAllMemory() {
-  if (!isAuthed.value) return
-  const ok = window.confirm(
-    'This will delete all your conversations, facts, and summaries. This cannot be undone. Continue?'
-  )
-  if (!ok) return
-
-  deletingMemory.value = true
-  memoryStatus.value = null
-
-  const headers: Record<string, string> = { 'content-type': 'application/json' }
-  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
-
-  try {
-    const resp = await fetch(`${gatewayUrl}/memory/reset`, {
-      method: 'POST',
-      credentials: 'include',
-      headers
-    })
-
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '')
-      throw new Error(text || `Request failed with status ${resp.status}`)
-    }
-
-    const json = await resp.json().catch(() => ({}))
-
-    // Clear local session list so UI reflects the wipe
-    recentSessions.value = []
-
-    memoryStatus.value = {
-      type: 'success',
-      message: 'All conversations and stored memory have been deleted.'
-    }
-    console.log('[MemoryReset] result:', json)
-  } catch (e: any) {
-    memoryStatus.value = {
-      type: 'error',
-      message: e?.message || 'Failed to delete memory.'
-    }
-  } finally {
-    deletingMemory.value = false
-  }
-}
-
-
-onMounted(async () => {
-  loading.value = true
-  try {
-    await loadAuthedBits()
-    await pingGateway()
-  } finally {
-    loading.value = false
-  }
-})
+const stats = [
+  { value: '24/7', label: 'Always Available' },
+  { value: '100%', label: 'Private' },
+  { value: '∞', label: 'Unlimited Conversations' }
+]
 </script>
 
 <template>
-  <div class="mx-auto max-w-6xl p-6 space-y-8">
-    <!-- Hero / Welcome -->
-    <header class="flex items-start justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold">Welcome{{ me?.display_name ? `, ${me.display_name}` : '' }} 👋</h1>
-        <p class="text-sm text-gray-600">
-          Your AI companion with voice. Jump in with quick actions below.
-        </p>
-      </div>
-      <div class="flex items-center gap-3">
-        <NuxtLink
-          v-if="!isAuthed"
-          to="/login"
-          class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
-        >
-          Sign in
-        </NuxtLink>
-        <NuxtLink
-          v-if="!isAuthed"
-          to="/register"
-          class="px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-50 text-sm"
-        >
-          Create account
-        </NuxtLink>
-        <NuxtLink
-          v-else
-          to="/voice"
-          class="px-3 py-2 rounded-md bg-brand-600 hover:bg-brand-700 text-white text-sm"
-        >
-          Start talking
-        </NuxtLink>
-      </div>
-    </header>
+  <div>
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 sm:py-32">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-x-8 lg:gap-y-20">
+          <!-- Hero Content -->
+          <div class="relative z-10 mx-auto max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-6">
+            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              Your AI Companion
+              <span class="block text-primary-600 mt-2">That Actually Knows You</span>
+            </h1>
+            <p class="mt-6 text-lg leading-8 text-gray-600">
+              Experience conversations that feel real. Evotally learns from every interaction,
+              remembers what matters to you, and adapts to your needs—whether you need a friend,
+              coach, or partner.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+              <NuxtLink
+                v-if="!isAuthed"
+                to="/register"
+                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+              >
+                Get Started Free
+              </NuxtLink>
+              <NuxtLink
+                v-else
+                to="/voice"
+                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+              >
+                Start Talking
+              </NuxtLink>
+              <NuxtLink
+                v-if="!isAuthed"
+                to="/login"
+                class="btn-secondary text-lg px-8 py-4"
+              >
+                Sign In
+              </NuxtLink>
+              <NuxtLink
+                v-else
+                to="/assistant"
+                class="btn-secondary text-lg px-8 py-4"
+              >
+                Customize Assistant
+              </NuxtLink>
+            </div>
 
-    <!-- Status row -->
-    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-xl border border-gray-200 bg-white p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500">Auth</div>
-        <div class="mt-1 text-sm">
-          <span :class="isAuthed ? 'text-green-700' : 'text-gray-600'">
-            {{ isAuthed ? 'Signed in' : 'Guest' }}
-          </span>
-        </div>
-        <div v-if="me?.email" class="text-xs text-gray-500 mt-1">{{ me.email }}</div>
-      </div>
+            <!-- Stats -->
+            <div class="mt-12 grid grid-cols-3 gap-8">
+              <div v-for="stat in stats" :key="stat.label" class="text-center">
+                <div class="text-3xl font-bold text-primary-600">{{ stat.value }}</div>
+                <div class="mt-1 text-sm text-gray-600">{{ stat.label }}</div>
+              </div>
+            </div>
+          </div>
 
-      <div class="rounded-xl border border-gray-200 bg-white p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500">Gateway</div>
-        <div class="mt-1 text-sm">
-          <span v-if="gateway?.ok" class="text-green-700">Online</span>
-          <span v-else class="text-red-700">Offline</span>
-        </div>
-        <div class="text-xs text-gray-500 mt-1">
-          TTS: {{ gateway?.tts ? 'ready' : '—' }} • Peers: {{ gateway?.peers ?? '—' }}
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-gray-200 bg-white p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500">Google</div>
-        <div class="mt-1 text-sm">
-          <span :class="google.connected ? 'text-green-700' : 'text-gray-600'">
-            {{ google.connected ? 'Connected' : 'Not connected' }}
-          </span>
-        </div>
-        <div v-if="google.expiry" class="text-xs text-gray-500 mt-1">
-          Expires: {{ new Date(google.expiry).toLocaleString() }}
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-gray-200 bg-white p-4">
-        <div class="text-xs uppercase tracking-wide text-gray-500">Quick links</div>
-        <div class="mt-2 flex flex-wrap gap-2">
-          <NuxtLink to="/facts" class="text-sm text-brand-600 hover:text-brand-700">Facts</NuxtLink>
-          <NuxtLink to="/assistant" class="text-sm text-brand-600 hover:text-brand-700">Assistant</NuxtLink>
-          <NuxtLink to="/voice" class="text-sm text-brand-600 hover:text-brand-700">Voice</NuxtLink>
+          <!-- Hero Visual -->
+          <div class="relative mt-10 sm:mt-20 lg:col-span-5 lg:row-span-2 lg:mt-0 xl:col-span-6">
+            <div class="relative mx-auto aspect-square max-w-lg lg:max-w-none">
+              <!-- Animated Orb Preview -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="relative">
+                  <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 opacity-20 blur-3xl animate-pulse"></div>
+                  <div class="relative h-64 w-64 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 shadow-2xl flex items-center justify-center">
+                    <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"/>
+                    </svg>
+                  </div>
+                  <!-- Floating particles -->
+                  <div class="absolute top-0 left-0 w-4 h-4 rounded-full bg-secondary-400 opacity-60 animate-bounce" style="animation-delay: 0s;"></div>
+                  <div class="absolute top-1/4 right-0 w-3 h-3 rounded-full bg-primary-400 opacity-60 animate-bounce" style="animation-delay: 0.5s;"></div>
+                  <div class="absolute bottom-1/4 left-0 w-3 h-3 rounded-full bg-secondary-500 opacity-60 animate-bounce" style="animation-delay: 1s;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Assistant overview / Voice card -->
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="p-5 bg-white rounded-xl border border-gray-200">
-        <div class="flex items-center gap-3">
-          <div class="text-3xl">{{ assistantAvatar }}</div>
-          <div>
-            <h2 class="text-lg font-semibold">Assistant</h2>
-            <p class="text-sm text-gray-600">
-              {{ assistant.name || 'Evo' }} • <span class="capitalize">{{ assistant.gender }}</span> •
-              {{ relLabel(assistant.relationshipType) }} • {{ assistant.speakingStyle || 'casual' }}
-            </p>
+    <!-- Features Section -->
+    <section class="py-24 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Everything you need in an AI companion
+          </h2>
+          <p class="mt-4 text-lg text-gray-600">
+            Built for meaningful, long-term relationships with AI that truly understands you.
+          </p>
+        </div>
+
+        <div class="mt-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            v-for="feature in features"
+            :key="feature.title"
+            class="card hover:shadow-lg transition-shadow duration-300"
+          >
+            <div class="text-5xl mb-4">{{ feature.icon }}</div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
+            <p class="text-gray-600 text-sm">{{ feature.description }}</p>
           </div>
         </div>
-        <p class="text-sm text-gray-600 mt-3">
-          Your assistant’s personality and defaults live here.
-        </p>
-        <div class="mt-3">
-          <NuxtLink to="/assistant" class="px-3 py-2 rounded-md bg-gray-900 text-white text-sm hover:bg-black">
-            Update assistant
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-24 bg-gray-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            How Evotally Works
+          </h2>
+          <p class="mt-4 text-lg text-gray-600">
+            Getting started is simple. Start talking in minutes.
+          </p>
+        </div>
+
+        <div class="grid gap-8 lg:grid-cols-3">
+          <div class="relative">
+            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              1
+            </div>
+            <div class="card ml-4">
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Create Your Account</h3>
+              <p class="text-gray-600">
+                Sign up with email or Google in seconds. No credit card required to start.
+              </p>
+            </div>
+          </div>
+
+          <div class="relative">
+            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              2
+            </div>
+            <div class="card ml-4">
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Customize Your Assistant</h3>
+              <p class="text-gray-600">
+                Choose your assistant's personality, voice, and relationship type to match your needs.
+              </p>
+            </div>
+          </div>
+
+          <div class="relative">
+            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              3
+            </div>
+            <div class="card ml-4">
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Start Conversations</h3>
+              <p class="text-gray-600">
+                Click to talk or type to chat. Your assistant learns more about you with every interaction.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-12 text-center">
+          <NuxtLink
+            v-if="!isAuthed"
+            to="/register"
+            class="btn-primary text-lg px-8 py-4"
+          >
+            Start Your Journey
           </NuxtLink>
         </div>
       </div>
-
-      <div class="p-5 bg-white rounded-xl border border-gray-200">
-        <h3 class="text-lg font-semibold">Current Voice</h3>
-        <div v-if="!isAuthed" class="text-sm text-gray-600 mt-1">
-          Sign in to view and test your voice.
-        </div>
-        <template v-else>
-          <div class="mt-1 text-sm text-gray-700">
-            <div class="font-medium">{{ selectedVoice?.label || 'Custom voice' }}</div>
-            <div class="text-xs text-gray-500">
-              Provider: {{ selectedVoice?.provider || 'elevenlabs' }} • ID: {{ shortId(assistant.voiceId) }}
-            </div>
-            <div v-if="selectedVoice?.settings" class="text-xs text-gray-500 mt-1">
-              Stability: {{ (selectedVoice.settings.stability ?? 0.5).toFixed(2) }},
-              Similarity: {{ (selectedVoice.settings.similarityBoost ?? 0.75).toFixed(2) }}
-            </div>
-          </div>
-          <div class="mt-3 flex items-center gap-2">
-            <NuxtLink to="/voice" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700">
-              Test voice
-            </NuxtLink>
-            <NuxtLink to="/assistant" class="text-sm text-brand-600 hover:text-brand-700">
-              Change voice →
-            </NuxtLink>
-          </div>
-        </template>
-      </div>
     </section>
 
-    <!-- Recent activity + Next steps -->
-    <section class="grid md:grid-cols-3 gap-6">
-      <div class="md:col-span-2 p-5 bg-white rounded-xl border border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold">Recent Conversations</h3>
-          <div class="flex items-center gap-3">
-            <button
-              v-if="isAuthed"
-              type="button"
-              class="px-2 py-1 rounded-md border border-red-300 text-xs text-red-700 hover:bg-red-50 disabled:opacity-50"
-              :disabled="deletingMemory"
-              @click="deleteAllMemory"
+    <!-- CTA Section -->
+    <section class="bg-gradient-to-r from-primary-600 to-primary-700 py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-white sm:text-4xl">
+            Ready to meet your AI companion?
+          </h2>
+          <p class="mt-4 text-lg text-primary-100">
+            Join thousands experiencing the future of AI conversation.
+          </p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <NuxtLink
+              v-if="!isAuthed"
+              to="/register"
+              class="btn-secondary bg-white text-primary-700 hover:bg-gray-50 text-lg px-8 py-4"
             >
-              {{ deletingMemory ? 'Deleting…' : 'Delete all memory' }}
-            </button>
-            <NuxtLink to="/voice" class="text-sm text-brand-600 hover:text-brand-700">
-              Open voice
+              Get Started Free
+            </NuxtLink>
+            <NuxtLink
+              v-else
+              to="/voice"
+              class="btn-secondary bg-white text-primary-700 hover:bg-gray-50 text-lg px-8 py-4"
+            >
+              Go to Voice Chat
             </NuxtLink>
           </div>
         </div>
-        <div v-if="!isAuthed" class="text-sm text-gray-600 mt-2">
-          Sign in to see recent conversations.
-        </div>
-        <ul v-else class="mt-3 divide-y divide-gray-100">
-          <li v-if="recentSessions.length === 0" class="py-2 text-sm text-gray-600">
-            No sessions yet. Click “Start talking” to begin.
-          </li>
-          <li v-for="s in recentSessions" :key="s.id" class="py-2">
-            <div class="text-sm font-medium">{{ s.title || 'Conversation' }}</div>
-            <div class="text-xs text-gray-500">
-              {{ s.started_at ? new Date(s.started_at).toLocaleString() : '—' }}
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="p-5 bg-white rounded-xl border border-gray-200">
-        <h3 class="text-lg font-semibold">Next steps</h3>
-        <ul class="mt-2 text-sm list-disc ml-4 space-y-1 text-gray-700">
-          <li><NuxtLink to="/assistant" class="text-brand-600 hover:text-brand-700">Tune your assistant’s personality</NuxtLink></li>
-          <li><NuxtLink to="/voice" class="text-brand-600 hover:text-brand-700">Try click-to-talk and TTS</NuxtLink></li>
-          <li><NuxtLink to="/facts" class="text-brand-600 hover:text-brand-700">Add personal facts for better replies</NuxtLink></li>
-          <li><NuxtLink to="/profile" class="text-brand-600 hover:text-brand-700">Set your profile & timezone</NuxtLink></li>
-        </ul>
       </div>
     </section>
-
-    <div v-if="err" class="p-3 text-sm rounded-md bg-red-50 text-red-700 border border-red-200">
-      {{ err }}
-    </div>
   </div>
 </template>
 
 <style scoped>
-:root {
-  --brand-600: #016d77;
-  --brand-700: #075860;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
-.bg-brand-600 { background-color: var(--brand-600); }
-.hover\:bg-brand-700:hover { background-color: var(--brand-700); }
-.text-brand-600 { color: var(--brand-600); }
-.hover\:text-brand-700:hover { color: var(--brand-700); }
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
 </style>
