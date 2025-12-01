@@ -326,29 +326,80 @@ model UserAssistantProfile {
   id               String   @id @default(cuid())
   userId           String   @unique
 
-  // Core identity
+  // A. Core Identity & Role
   name             String   @default("Evo")
-  gender           String   @default("female")
-  personality      String?
+  pronouns         String?  @default("she/her")
+  primaryRole      String   @default("spouse_partner") // spouse_partner, romantic_companion, close_friend, executive_assistant, coach_mentor, family_style, other
+  addressUserAs    String?  // How Evo addresses the user (first name, nickname, etc.)
+  birthday         String?  // Evo's birthday (MM-DD format)
+  fictionalAge     Int?     // Optional age Evo thinks of itself as
 
-  // Voice settings
+  // B. Personality & Vibe
+  personalityTraits Json?   // Array of traits: ["calm", "playful", "romantic", etc.]
+  affectionLevel   Int?     @default(7) // 1-10 scale
+  seriousnessLevel Int?     @default(5) // 1-10 (1=joking, 10=serious)
+  emotionalExpressiveness String? @default("moderately_expressive") // low_key, moderately_expressive, very_expressive
+  backstory        String?  @db.Text // Optional origin story
+
+  // C. Relationship Dynamics
+  relationshipDescription String? // How Evo describes relationship
+  termsOfEndearment String? @default("sometimes") // never, sometimes, often, specific_ones
+  specificEndearments Json?  // Array of specific terms if custom
+  upsetResponseStyle String? @default("comfort_validation") // comfort_validation, solutions_advice, ask_listen, lighten_mood
+  toughLoveAllowed String?  @default("occasionally") // no, occasionally, yes_very_honest
+  relationshipPriority String? // e.g., "honesty", "calm", "encouragement"
+
+  // D. Communication Style
+  defaultTone      String?  @default("soft_gentle") // soft_gentle, confident_assertive, neutral_professional, playful_casual, custom
+  formalityLevel   String?  @default("mixed") // very_casual, mixed, mostly_formal
+  useEmojisSlang   String?  @default("some_emojis") // no, some_emojis, emojis_and_slang
+  catchphrases     Json?    // Array of phrases Evo uses often
+  forbiddenPhrases Json?    // Array of phrases/words to never use
+
+  // E. Autonomy, Initiative & Boundaries
+  proactivityLevel String?  @default("occasional") // only_respond, occasional, very_proactive
+  allowedSuggestions Json?  // Array: ["health_wellness", "productivity", "relationship", "finance", "social", etc.]
+  forbiddenTopics  Json?    // Topics Evo should never initiate
+  correctWhenWrong String?  @default("important_only") // yes_always, important_only, only_if_asked
+  ignoredMessageResponse String? @default("back_off") // back_off, follow_up_once, keep_trying
+
+  // F. Special Rituals, Dates & Lore
+  specialDates     Json?    // { birthday: "03-15", anniversary: "01-01", custom: [] }
+  recurringRituals Json?    // Array: ["morning_checkin", "nightly_reflection", "weekly_planning", "weekly_date"]
+  specialDayCelebration String? @default("mention") // mention, big_deal, creative_surprise
+  loreReferenceLevel String? @default("sometimes") // never, sometimes, frequently
+
+  // G. Safety, Ethics & Guardrails
+  physicalPresencePretend String? @default("clear_boundaries") // no_always_virtual, light_imaginative, yes_fantasy
+  forbiddenRoles   Json?    // Array: ["therapist", "financial_advisor", "medical_professional"]
+  selfCriticalResponse String? @default("challenge_encourage") // challenge_encourage, listen_validate, ask_questions
+  unhealthyPatternResponse String? @default("suggest_resources") // reflect_back, suggest_resources, ask_consent
+
+  setupCompletedQuestions Json? @default("[]")
+
+  // Voice settings (existing)
   voiceId          String?
   voiceStability   Float?   @default(0.5)
   voiceSimilarity  Float?   @default(0.75)
-  provider        String   @default("elevenlabs") // default now, flexible later
+  provider         String   @default("elevenlabs")
 
-  // Personality & behavior
+  // Legacy fields (can keep for backward compatibility)
+  gender           String   @default("female")
+  personality      String?  // Can be auto-generated from personalityTraits
   bio              String?  @db.Text
   traits           Json?
   speakingStyle    String?
-
-  // Relationship context
   relationshipType String   @default("spouse_partner")
+
+  // Biographical facts (from previous implementation)
+  facts            Json?    @default("{}")
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_assistant_profiles")
 }
 
 model MemoryDebugTrace {
