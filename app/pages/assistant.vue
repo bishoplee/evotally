@@ -12,6 +12,7 @@ type AssistantProfile = {
   voiceId?: string | null
   voiceStability?: number | null
   voiceSimilarity?: number | null
+  facts?: Record<string, { value: string; category?: string; updatedAt?: string }> | null
 }
 
 type UserVoice = {
@@ -66,6 +67,11 @@ const uploads = ref<UserVoice[]>([])
 // Upload form
 const uploadFile = ref<File | null>(null)
 const uploadLabel = ref<string>('')
+
+// Facts management
+const newFactKey = ref<string>('')
+const newFactValue = ref<string>('')
+const newFactCategory = ref<string>('general')
 
 // Helpers
 const $api = <T>(url: string, opts: any = {}) =>
@@ -172,6 +178,65 @@ function removeUpload(id: string) {
 const sortedUploads = computed(() =>
   [...uploads.value].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
 )
+
+const factsArray = computed(() => {
+  const facts = profile.value.facts || {}
+  return Object.entries(facts).map(([key, data]) => ({
+    key,
+    value: data.value,
+    category: data.category || 'general',
+    updatedAt: data.updatedAt,
+  }))
+})
+
+async function addFact() {
+  msg.value = ''
+  const key = newFactKey.value.trim()
+  const value = newFactValue.value.trim()
+
+  if (!key || !value) {
+    msg.value = 'Both fact key and value are required'
+    return
+  }
+
+  try {
+    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+      method: 'POST',
+      body: {
+        key,
+        value,
+        category: newFactCategory.value || 'general',
+      },
+    })
+
+    if (result.ok) {
+      profile.value.facts = result.facts
+      newFactKey.value = ''
+      newFactValue.value = ''
+      newFactCategory.value = 'general'
+      msg.value = 'Fact added successfully!'
+    }
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to add fact'
+  }
+}
+
+async function deleteFact(key: string) {
+  msg.value = ''
+  try {
+    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+      method: 'DELETE',
+      body: { key },
+    })
+
+    if (result.ok) {
+      profile.value.facts = result.facts
+      msg.value = 'Fact deleted successfully!'
+    }
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to delete fact'
+  }
+}
 
 onMounted(load)
 </script>
@@ -372,6 +437,86 @@ onMounted(load)
         </div>
 
       </section>
+    </div>
+
+    <!-- Assistant Facts Section -->
+    <div class="p-4 bg-white rounded-xl shadow border border-gray-100 space-y-4">
+      <h2 class="text-lg font-semibold">Assistant Facts</h2>
+      <p class="text-sm text-gray-600">Add biographical facts about your assistant (e.g., hobbies, background, preferences).</p>
+
+      <!-- Add new fact form -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-gray-50 rounded-lg">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Fact Key</label>
+          <input
+            v-model.trim="newFactKey"
+            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
+            placeholder="e.g., hometown, favorite_color"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Fact Value</label>
+          <input
+            v-model.trim="newFactValue"
+            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
+            placeholder="e.g., Seattle, blue"
+          />
+        </div>
+        <div class="md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700">Category</label>
+          <select
+            v-model="newFactCategory"
+            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
+          >
+            <option value="general">General</option>
+            <option value="background">Background</option>
+            <option value="preferences">Preferences</option>
+            <option value="personality">Personality</option>
+            <option value="interests">Interests</option>
+          </select>
+        </div>
+        <div class="md:col-span-5">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            @click="addFact"
+          >
+            Add Fact
+          </button>
+        </div>
+      </div>
+
+      <!-- Facts list -->
+      <div v-if="factsArray.length === 0" class="text-sm text-gray-600">
+        No facts added yet.
+      </div>
+      <div v-else class="space-y-2">
+        <div
+          v-for="fact in factsArray"
+          :key="fact.key"
+          class="flex items-start justify-between p-3 bg-gray-50 rounded-lg"
+        >
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-gray-900">{{ fact.key }}</span>
+              <span class="text-xs rounded bg-gray-200 px-2 py-0.5 text-gray-600">
+                {{ fact.category }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-700 mt-1">{{ fact.value }}</p>
+            <p v-if="fact.updatedAt" class="text-xs text-gray-500 mt-1">
+              Updated: {{ new Date(fact.updatedAt).toLocaleString() }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="ml-4 px-3 py-1 text-sm rounded-md border border-red-300 text-red-600 hover:bg-red-50"
+            @click="deleteFact(fact.key)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
