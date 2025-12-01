@@ -16,8 +16,6 @@ type VoiceRow = {
 }
 
 const auth = useAuth()
-const runtime = useRuntimeConfig()
-const gatewayUrl = 'https://gw.cimb.us:5000'
 
 // ---- State ----
 const loading = ref(true)
@@ -37,22 +35,22 @@ const profile = ref<{
 })
 
 const voices = ref<VoiceRow[]>([])
+const showVoiceSettings = ref(false)
+
 const selected = computed(() => {
   if (!profile.value.voiceId) return null
   return voices.value.find(v => v.voiceId === profile.value.voiceId) || null
 })
 
-// Friendly label for relationship
 const relationLabel = computed(() => {
   const map: Record<string, string> = {
     spouse_partner: 'Spouse / Partner',
     friend: 'Friend',
     coach: 'Coach'
   }
-  return map[profile.value.relationshipType || ''] || (profile.value.relationshipType || '—')
+  return map[profile.value.relationshipType || ''] || (profile.value.relationshipType || 'Companion')
 })
 
-// Avatar emoji (quick visual)
 const avatar = computed(() => (profile.value.gender === 'male' ? '🧑‍💼' : '👩‍💼'))
 
 async function load() {
@@ -86,7 +84,7 @@ async function say(text: string) {
   try {
     await auth.ensure()
     if (!auth.accessToken) throw new Error('Not authenticated')
-    const r = await fetch(`${gatewayUrl}/dev/tts`, {
+    const r = await fetch('https://gw.cimb.us:5000/dev/tts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,170 +99,185 @@ async function say(text: string) {
 }
 
 const sampleLines = [
-  "Hi, I'm your companion. How can I help you right now?",
-  "I can look up places nearby, manage your schedule, or just chat.",
-  "Would you like a quick check of the weather and your day?"
+  "Hi, I'm your companion. How can I help you today?",
+  "Tell me about your day so far.",
+  "I'm here to listen and help with whatever you need."
 ]
 
 onMounted(load)
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold">Evo - Your Companion</h1>
-      </div>
-      <NuxtLink
-        to="/assistant"
-        class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-        title="Edit assistant personality and voice"
-      >
-        Update Assistant
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-90" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 2.293a1 1 0 011.414 0L18 6.586V9a1 1 0 01-1 1h-1v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-1H3a1 1 0 01-1-1V8a2 2 0 012-2h5V5a1 1 0 01.293-.707l3-3zM11 6h2.586L11 3.414V6z"/></svg>
-      </NuxtLink>
-    </div>
-
-    <div v-if="err" class="p-3 text-sm rounded-md bg-red-50 text-red-700 border border-red-200">
-      {{ err }}
-    </div>
-
-    <!-- Click to Talk -->
-    <section>
-      <ClickToTalk />
-    </section>
-
-    <!-- Overview -->
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="p-4 bg-white rounded-xl shadow border border-gray-100">
-        <div class="flex items-center gap-3">
-          <div class="text-3xl">{{ avatar }}</div>
-          <div>
-            <h2 class="text-lg font-semibold">
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <div class="text-5xl">{{ avatar }}</div>
+          <div class="text-left">
+            <h1 class="text-3xl font-bold text-gray-900">
               {{ profile.name || 'Evo' }}
-            </h2>
+            </h1>
             <p class="text-sm text-gray-600">
-              {{ relationLabel }} • <span class="capitalize">{{ profile.gender || 'female' }}</span> •
-              <span class="capitalize">{{ profile.speakingStyle || 'casual' }}</span> style
+              Your {{ relationLabel }} • <span class="capitalize">{{ profile.speakingStyle || 'casual' }}</span> style
             </p>
           </div>
         </div>
-        <p class="text-sm text-gray-600 mt-3">
-          Your assistant’s behavior and voice are customizable. Click “Update Assistant” to change personality,
-          tone, and default voice.
+        <p class="text-lg text-gray-700 max-w-2xl mx-auto">
+          Click the orb below to start a voice conversation. I'll listen, remember, and respond naturally.
         </p>
       </div>
 
-      <!-- Current Voice -->
-      <div class="p-4 bg-white rounded-xl shadow border border-gray-100">
-        <h3 class="text-lg font-semibold mb-2">Current Voice</h3>
-        <div v-if="loading" class="text-sm text-gray-500">Loading voice…</div>
-        <div v-else class="space-y-2">
+      <!-- Error Display -->
+      <div v-if="err" class="max-w-2xl mx-auto mb-6">
+        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          {{ err }}
+        </div>
+      </div>
+
+      <!-- Main Voice Interface -->
+      <div class="max-w-4xl mx-auto">
+        <ClickToTalk />
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-12 max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
+          <button
+            @click="showVoiceSettings = !showVoiceSettings"
+            class="text-sm text-primary-600 hover:text-primary-700 font-medium"
+          >
+            {{ showVoiceSettings ? 'Hide' : 'Show' }} Voice Settings
+          </button>
+        </div>
+
+        <!-- Voice Settings Panel -->
+        <div v-if="showVoiceSettings" class="card mb-6 space-y-4">
           <div class="flex items-start justify-between">
             <div>
-              <div class="font-medium">
+              <h3 class="font-semibold text-gray-900 mb-1">Current Voice</h3>
+              <p class="text-sm text-gray-600">
                 {{ selected?.label || 'Custom voice' }}
-              </div>
-              <div class="text-xs text-gray-600">
-                Provider: {{ selected?.provider || 'elevenlabs' }} • ID: {{ shortId(profile.voiceId) }}
-              </div>
-              <div v-if="selected?.settings" class="text-xs text-gray-500 mt-1">
-                Stability: {{ (selected.settings.stability ?? 0.5).toFixed(2) }},
-                Similarity: {{ (selected.settings.similarityBoost ?? 0.75).toFixed(2) }}
-              </div>
+                <span class="text-gray-400">•</span>
+                {{ selected?.provider || 'elevenlabs' }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                ID: {{ shortId(profile.voiceId) }}
+              </p>
             </div>
-            <NuxtLink to="/assistant" class="text-sm text-brand-600 hover:text-brand-700">
-              Change voice →
+            <NuxtLink to="/assistant" class="btn-outline text-sm">
+              Change Voice
             </NuxtLink>
           </div>
 
-          <div class="mt-3">
-            <div class="flex flex-wrap items-center gap-2">
-              <button
-                class="px-3 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-               @click="say('Hi, this is a quick test of your  current voice.')"
-              >
-                Test: Greeting
-              </button>
+          <!-- Voice Test -->
+          <div class="pt-4 border-t border-gray-200">
+            <p class="text-sm font-medium text-gray-700 mb-3">Test Your Voice</p>
+            <div class="flex flex-wrap gap-2">
               <button
                 v-for="line in sampleLines"
                 :key="line"
-                class="px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-50 text-sm"
+                class="btn-secondary text-sm"
                 @click="say(line)"
               >
-                Say: "{{ line.slice(0, 28) }}…"
+                "{{ line.slice(0, 35) }}{{ line.length > 35 ? '...' : '' }}"
               </button>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
-              Uses your gateway’s /dev/tts endpoint with your current auth token.
+          </div>
+
+          <!-- Available Voices -->
+          <div v-if="voices.length > 0" class="pt-4 border-t border-gray-200">
+            <p class="text-sm font-medium text-gray-700 mb-3">Your Voices ({{ voices.length }})</p>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div
+                v-for="v in voices"
+                :key="v.id"
+                class="p-3 rounded-lg border transition-all duration-200"
+                :class="v.voiceId === profile.voiceId
+                  ? 'border-primary-300 bg-primary-50'
+                  : 'border-gray-200 hover:border-gray-300'"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm text-gray-900 truncate">
+                      {{ v.label || 'Untitled Voice' }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      {{ v.provider }} • {{ shortId(v.voiceId) }}
+                    </p>
+                  </div>
+                  <button
+                    class="ml-2 px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 hover:bg-primary-200"
+                    @click="say(`Testing ${v.label || 'this voice'}. How do I sound?`)"
+                  >
+                    Test
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid sm:grid-cols-3 gap-4">
+          <NuxtLink to="/assistant" class="card hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
+            <div class="text-3xl mb-3">⚙️</div>
+            <h3 class="font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+              Customize Assistant
+            </h3>
+            <p class="text-sm text-gray-600">
+              Update personality, voice, and speaking style
             </p>
+          </NuxtLink>
+
+          <NuxtLink to="/facts" class="card hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
+            <div class="text-3xl mb-3">📝</div>
+            <h3 class="font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+              View Your Facts
+            </h3>
+            <p class="text-sm text-gray-600">
+              See what your assistant knows about you
+            </p>
+          </NuxtLink>
+
+          <NuxtLink to="/profile" class="card hover:shadow-lg transition-shadow duration-300 cursor-pointer group">
+            <div class="text-3xl mb-3">👤</div>
+            <h3 class="font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+              Account Settings
+            </h3>
+            <p class="text-sm text-gray-600">
+              Manage your profile and preferences
+            </p>
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Tips Section -->
+      <div class="mt-12 max-w-4xl mx-auto">
+        <div class="card bg-gradient-to-br from-primary-50 to-white border-primary-100">
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">💡</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-gray-900 mb-2">Tips for Better Conversations</h3>
+              <ul class="space-y-2 text-sm text-gray-700">
+                <li class="flex items-start">
+                  <span class="text-primary-600 mr-2">•</span>
+                  <span>Speak naturally and clearly. The assistant will wait for you to finish before responding.</span>
+                </li>
+                <li class="flex items-start">
+                  <span class="text-primary-600 mr-2">•</span>
+                  <span>Share context about yourself. The more your assistant knows, the better it can help.</span>
+                </li>
+                <li class="flex items-start">
+                  <span class="text-primary-600 mr-2">•</span>
+                  <span>If you need to stop, just click the orb again. Your conversation is saved automatically.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Your Voices -->
-    <section class="p-4 bg-white rounded-xl shadow border border-gray-100">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-lg font-semibold">Your Voices (ElevenLabs)</h3>
-        <NuxtLink to="/assistant" class="text-sm text-brand-600 hover:text-brand-700">
-          Manage & upload →
-        </NuxtLink>
-      </div>
-      <div v-if="loading" class="text-sm text-gray-500">Loading voices…</div>
-      <div v-else-if="voices.length === 0" class="text-sm text-gray-600">
-        You have no uploaded voices yet. Visit the Assistant page to add one.
-      </div>
-      <ul v-else class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <li
-          v-for="v in voices"
-          :key="v.id"
-          class="rounded-xl border border-gray-200 p-3"
-          :class="v.voiceId === profile.voiceId ? 'ring-2 ring-brand-600' : ''"
-        >
-          <div class="flex items-start justify-between">
-            <div>
-              <div class="font-medium">
-                {{ v.label || 'Untitled Voice' }}
-              </div>
-              <div class="text-xs text-gray-600">
-                {{ v.provider }} • {{ shortId(v.voiceId) }}
-              </div>
-            </div>
-            <span
-              v-if="v.isDefault || v.voiceId === profile.voiceId"
-              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200"
-              title="This is your current/default voice"
-            >
-              Default
-            </span>
-          </div>
-          <div class="mt-2 flex items-center gap-2">
-            <button
-              class="px-3 py-1.5 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 text-xs"
-              @click="say(`Testing voice ${v.label || 'selection'}. How do I sound to you today?`)"
-            >
-              Test
-            </button>
-            <NuxtLink to="/assistant" class="text-xs text-brand-600 hover:text-brand-700">
-              Make default
-            </NuxtLink>
-          </div>
-        </li>
-      </ul>
-    </section>
+    </div>
   </div>
 </template>
-
-<style scoped>
-/* brand helpers (optional if Tailwind custom properties exist already) */
-:root {
-  --brand-600: #016d77;
-  --brand-700: #075860;
-}
-.bg-brand-600 { background-color: var(--brand-600); }
-.hover\:bg-brand-700:hover { background-color: var(--brand-700); }
-.text-brand-600 { color: var(--brand-600); }
-.hover\:text-brand-700:hover { color: var(--brand-700); }
-.ring-brand-600 { --tw-ring-color: var(--brand-600); }
-</style>
