@@ -1,47 +1,9 @@
 <template>
   <div class="facts-wrap">
     <h1 class="page-title">Your Facts</h1>
+    <p class="subtitle">Facts about you learned through conversations</p>
 
-    <!-- Add fact form -->
-    <form class="fact-form" @submit.prevent="add">
-      <div class="form-row">
-        <label class="label">Type</label>
-        <select v-model="type" class="input">
-          <option value="trait">trait</option>
-          <option value="preference">preference</option>
-          <option value="bio">bio</option>
-          <option value="goal">goal</option>
-          <option value="note">note</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label class="label">Key (optional)</label>
-        <input v-model="key" class="input" placeholder="e.g. favorite_food" />
-      </div>
-
-      <div class="form-row">
-        <label class="label">Value (optional)</label>
-        <input v-model="value" class="input" placeholder="e.g. jollof rice" />
-      </div>
-
-      <div class="form-row full">
-        <label class="label">Full text</label>
-        <textarea
-          v-model="text"
-          class="textarea"
-          placeholder="Full text (required)"
-          required
-        />
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-primary" :disabled="busy">
-          {{ busy ? 'Adding…' : 'Add fact' }}
-        </button>
-        <p v-if="err" class="err">{{ err }}</p>
-      </div>
-    </form>
+    <p v-if="err" class="err">{{ err }}</p>
 
     <!-- Facts list -->
     <section class="facts-section">
@@ -49,7 +11,7 @@
         <h2>All your facts</h2>
         <p v-if="loading" class="muted">Loading facts…</p>
         <p v-else-if="!loading && facts.length === 0" class="muted">
-          You don’t have any facts yet. Add one above to get started.
+          No facts yet. Your assistant will learn about you through conversations.
         </p>
       </div>
 
@@ -57,21 +19,31 @@
         <li v-for="f in pagedFacts" :key="f.id" class="fact-item">
           <div class="fact-header">
             <div class="fact-meta">
-              <span class="badge">{{ f.type }}</span>
-              <span v-if="f.key" class="meta-kv">
-                {{ f.key }}<span v-if="f.value">: {{ f.value }}</span>
+              <span class="badge">{{ f.category }}</span>
+              <span class="meta-kv">
+                <strong>{{ f.factKey }}</strong>
               </span>
+              <span v-if="f.verified" class="verified-badge">✓ Verified</span>
+              <span class="confidence-badge">{{ f.confidence }}</span>
             </div>
             <button class="btn-danger" @click="del(f.id)" :disabled="deletingId === f.id">
               {{ deletingId === f.id ? 'Deleting…' : 'Delete' }}
             </button>
           </div>
           <p class="fact-text">
-            {{ f.text }}
+            {{ f.factValue }}
           </p>
-          <p v-if="f.created_at" class="fact-date">
-            Added: {{ new Date(f.created_at).toLocaleString() }}
+          <p v-if="f.rawAnswer" class="fact-raw-answer">
+            <em>Original: "{{ f.rawAnswer }}"</em>
           </p>
+          <div class="fact-footer">
+            <span v-if="f.createdAt" class="fact-date">
+              Added: {{ new Date(f.createdAt).toLocaleString() }}
+            </span>
+            <span v-if="f.source" class="fact-source">
+              Source: {{ f.source }}
+            </span>
+          </div>
         </li>
       </ul>
 
@@ -105,26 +77,26 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useAuth } from '~/stores/auth'
 
-type Fact = {
+type UserFact = {
   id: string
-  type: string
-  key?: string | null
-  value?: string | null
-  text: string
-  created_at?: string
+  userId: string
+  category: string
+  factKey: string
+  factValue: string
+  rawAnswer?: string | null
+  source: string
+  verified: boolean
+  confidence: string
+  lastUpdated: string
+  createdAt: string
+  metadata?: any
 }
 
 const auth = useAuth()
 
 // Data
-const facts = ref<Fact[]>([])
+const facts = ref<UserFact[]>([])
 
-const type = ref('trait')
-const key = ref('')
-const value = ref('')
-const text = ref('')
-
-const busy = ref(false)
 const err = ref('')
 const loading = ref(false)
 const deletingId = ref<string | null>(null)
@@ -164,11 +136,9 @@ async function load() {
   await auth.ensure()
   loading.value = true
   err.value = ''
-  const headers: Record<string, string> = { 'content-type': 'application/json' }
-  if (auth.accessToken) headers.authorization = `Bearer ${auth.accessToken}`
   try {
-    facts.value = await $fetch<Fact[]>('/api/facts', {
-      headers
+    facts.value = await $fetch<UserFact[]>('/api/user-facts', {
+      credentials: 'include'
     })
     // Reset to page 1 whenever we reload
     page.value = 1
@@ -179,44 +149,14 @@ async function load() {
   }
 }
 
-async function add() {
-  busy.value = true
-  err.value = ''
-  try {
-    await auth.ensure()
-    await $fetch('/api/facts', {
-      method: 'POST',
-      headers: {
-        ...auth.bearer,
-        'Content-Type': 'application/json'
-      },
-      body: {
-        type: type.value,
-        key: key.value || undefined,
-        value: value.value || undefined,
-        text: text.value
-      }
-    })
-    // Reset form (keep type)
-    key.value = ''
-    value.value = ''
-    text.value = ''
-    await load()
-  } catch (e: any) {
-    err.value = e?.data?.message || 'Failed to add fact'
-  } finally {
-    busy.value = false
-  }
-}
-
 async function del(id: string) {
   err.value = ''
   deletingId.value = id
   try {
     await auth.ensure()
-    await $fetch(`/api/facts/${id}`, {
+    await $fetch(`/api/user-facts/${id}`, {
       method: 'DELETE',
-      headers: auth.bearer
+      credentials: 'include'
     })
     await load()
   } catch (e: any) {
@@ -239,85 +179,19 @@ onMounted(load)
 .page-title {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
 }
 
-/* Form */
-.fact-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .75rem;
-  padding: 1rem;
-  border-radius: .75rem;
-  border: 1px solid #e5e7eb;
+.subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
   margin-bottom: 1.5rem;
-  background: #fafafa;
-}
-
-.form-row {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-row.full {
-  grid-column: 1 / -1;
-}
-
-.label {
-  font-size: .8rem;
-  color: #4b5563;
-  margin-bottom: .2rem;
-}
-
-.input,
-.textarea,
-select.input {
-  border: 1px solid #d1d5db;
-  border-radius: .5rem;
-  padding: .4rem .55rem;
-  font-size: .9rem;
-  outline: none;
-}
-
-.input:focus,
-.textarea:focus,
-select.input:focus {
-  border-color: #016d77;
-  box-shadow: 0 0 0 1px rgba(1, 109, 119, 0.15);
-}
-
-.textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-}
-
-.btn-primary {
-  background-color: #016d77;
-  color: white;
-  border-radius: .5rem;
-  padding: .4rem .9rem;
-  border: none;
-  font-size: .9rem;
-  cursor: pointer;
-}
-.btn-primary:disabled {
-  opacity: .6;
-  cursor: default;
-}
-.btn-primary:not(:disabled):hover {
-  background-color: #075860;
 }
 
 .err {
   color: #b91c1c;
   font-size: .85rem;
+  margin-top: 0.5rem;
 }
 
 /* Facts list */
@@ -386,14 +260,47 @@ select.input:focus {
   color: #4b5563;
 }
 
-.fact-text {
-  margin-top: .35rem;
-  font-size: .9rem;
-  color: #111827;
+.verified-badge {
+  font-size: .7rem;
+  padding: 0.1rem .4rem;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #065f46;
+  letter-spacing: .03em;
 }
 
-.fact-date {
-  margin-top: .15rem;
+.confidence-badge {
+  font-size: .7rem;
+  padding: 0.1rem .4rem;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  text-transform: capitalize;
+}
+
+.fact-text {
+  margin-top: .35rem;
+  font-size: .95rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.fact-raw-answer {
+  margin-top: .25rem;
+  font-size: .8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.fact-footer {
+  margin-top: .35rem;
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.fact-date,
+.fact-source {
   font-size: .75rem;
   color: #6b7280;
 }
@@ -445,11 +352,5 @@ select.input:focus {
 .page-info {
   font-size: .85rem;
   color: #4b5563;
-}
-
-@media (max-width: 640px) {
-  .fact-form {
-    grid-template-columns: 1fr;
-  }
 }
 </style>
