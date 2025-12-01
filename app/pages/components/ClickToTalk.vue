@@ -96,12 +96,14 @@ interface Particle {
   size: number
   speed: number
   opacity: number
+  hue: number
 }
 
 const particles: Particle[] = []
-const numParticles = 12
+const numParticles = 20 // More particles for liveliness
 let orbRotation = 0
 let orbPulse = 0
+let breathePhase = 0
 
 // Initialize particles
 function initParticles() {
@@ -109,10 +111,11 @@ function initParticles() {
   for (let i = 0; i < numParticles; i++) {
     particles.push({
       angle: (Math.PI * 2 * i) / numParticles,
-      distance: 30 + Math.random() * 10,
-      size: 2 + Math.random() * 2,
-      speed: 0.005 + Math.random() * 0.01,
-      opacity: 0.3 + Math.random() * 0.4
+      distance: 30 + Math.random() * 15,
+      size: 2 + Math.random() * 3,
+      speed: 0.008 + Math.random() * 0.015,
+      opacity: 0.4 + Math.random() * 0.5,
+      hue: Math.random() * 360
     })
   }
 }
@@ -129,75 +132,120 @@ function drawOrb() {
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  // Update animation state
-  orbRotation += 0.005
-  orbPulse = Math.sin(Date.now() * 0.002) * 0.1
+  // Update animation state with more dynamic movement
+  const time = Date.now() * 0.001
+  orbRotation += 0.01
+  breathePhase += 0.02
+  orbPulse = Math.sin(breathePhase) * 0.12
 
-  // Calculate audio-reactive radius
-  const audioReactiveRadius = baseRadius * (1 + level.value * 0.3 + orbPulse)
+  // Calculate audio-reactive radius with breathing effect
+  const breathe = Math.sin(time * 1.2) * 0.05
+  const audioReactiveRadius = baseRadius * (1 + level.value * 0.4 + orbPulse + breathe)
 
-  // Determine colors based on state
-  let primaryColor, secondaryColor, glowColor
+  // Determine colors based on state with smooth transitions
+  let primaryColor, secondaryColor, tertiaryColor, glowColor
 
   if (vadState.value === 'speaking') {
-    primaryColor = '#fb8d68' // Secondary/orange
-    secondaryColor = '#f97316'
-    glowColor = 'rgba(251, 141, 104, 0.4)'
+    // Warm, energetic colors (secondary palette - coral/orange)
+    primaryColor = '#fb8d68'
+    secondaryColor = '#ff845a'
+    tertiaryColor = '#e56a3d'
+    glowColor = 'rgba(251, 141, 104, 0.5)'
   } else if (vadState.value === 'listening') {
-    primaryColor = '#016d77' // Primary/teal
-    secondaryColor = '#0891b2'
-    glowColor = 'rgba(1, 109, 119, 0.4)'
+    // Cool, calm colors (primary palette - teal/cyan)
+    primaryColor = '#016d77'
+    secondaryColor = '#1b8790'
+    tertiaryColor = '#3aa1aa'
+    glowColor = 'rgba(1, 109, 119, 0.5)'
   } else {
-    primaryColor = '#6b7280' // Gray
-    secondaryColor = '#9ca3af'
-    glowColor = 'rgba(107, 114, 128, 0.3)'
+    // Subtle breathing animation even when idle
+    const idlePulse = Math.sin(time * 0.5) * 0.5 + 0.5
+    primaryColor = `hsl(200, ${20 + idlePulse * 10}%, ${50 + idlePulse * 5}%)`
+    secondaryColor = `hsl(200, ${15 + idlePulse * 8}%, ${60 + idlePulse * 5}%)`
+    tertiaryColor = `hsl(200, ${10 + idlePulse * 5}%, ${70 + idlePulse * 5}%)`
+    glowColor = `rgba(107, 114, 128, ${0.2 + idlePulse * 0.1})`
   }
 
-  // Draw outer glow
-  if (isOpen.value) {
-    const gradient = ctx.createRadialGradient(centerX, centerY, audioReactiveRadius * 0.5, centerX, centerY, audioReactiveRadius * 1.5)
-    gradient.addColorStop(0, glowColor)
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-  }
+  // Draw multi-layer outer glow for depth
+  const glowRadius1 = audioReactiveRadius * (isOpen.value ? 1.8 : 1.3)
+  const glowRadius2 = audioReactiveRadius * (isOpen.value ? 1.4 : 1.1)
 
-  // Draw main orb with gradient
+  const glowGradient = ctx.createRadialGradient(centerX, centerY, audioReactiveRadius * 0.5, centerX, centerY, glowRadius1)
+  glowGradient.addColorStop(0, glowColor)
+  glowGradient.addColorStop(0.5, glowColor.replace(/[\d.]+\)/, '0.2)'))
+  glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
+  ctx.fillStyle = glowGradient
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  // Draw main orb with enhanced gradient
+  const lightAngle = time * 0.3
+  const lightX = centerX + Math.cos(lightAngle) * audioReactiveRadius * 0.4
+  const lightY = centerY + Math.sin(lightAngle) * audioReactiveRadius * 0.4
+
   const mainGradient = ctx.createRadialGradient(
-    centerX - audioReactiveRadius * 0.3,
-    centerY - audioReactiveRadius * 0.3,
+    lightX,
+    lightY,
     0,
     centerX,
     centerY,
     audioReactiveRadius
   )
   mainGradient.addColorStop(0, primaryColor)
-  mainGradient.addColorStop(1, secondaryColor)
+  mainGradient.addColorStop(0.5, secondaryColor)
+  mainGradient.addColorStop(1, tertiaryColor)
 
   ctx.beginPath()
   ctx.arc(centerX, centerY, audioReactiveRadius, 0, Math.PI * 2)
   ctx.fillStyle = mainGradient
   ctx.fill()
 
-  // Draw particles when active
-  if (isOpen.value) {
-    particles.forEach((particle, i) => {
-      // Update particle
-      particle.angle += particle.speed * (1 + level.value * 2)
+  // Add subtle edge highlight
+  ctx.beginPath()
+  ctx.arc(centerX, centerY, audioReactiveRadius, 0, Math.PI * 2)
+  ctx.strokeStyle = `rgba(255, 255, 255, ${isOpen.value ? 0.3 : 0.15})`
+  ctx.lineWidth = isOpen.value ? 2 : 1
+  ctx.stroke()
 
-      // Audio-reactive distance
-      const reactiveDistance = particle.distance * (1 + level.value * 0.5)
+  // Draw floating particles - always visible for liveliness
+  particles.forEach((particle, i) => {
+    // Update particle with organic movement
+    particle.angle += particle.speed * (1 + level.value * 3)
 
-      const x = centerX + Math.cos(particle.angle + orbRotation) * reactiveDistance
-      const y = centerY + Math.sin(particle.angle + orbRotation) * reactiveDistance
+    // Audio-reactive distance with wave effect
+    const waveOffset = Math.sin(time * 2 + i * 0.5) * 5
+    const reactiveDistance = (particle.distance + waveOffset) * (1 + level.value * 0.8)
 
-      // Draw particle
-      ctx.beginPath()
-      ctx.arc(x, y, particle.size, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity * (0.5 + level.value)})`
-      ctx.fill()
-    })
-  }
+    const x = centerX + Math.cos(particle.angle + orbRotation * 1.5) * reactiveDistance
+    const y = centerY + Math.sin(particle.angle + orbRotation * 1.5) * reactiveDistance
+
+    // Draw particle trail for movement
+    if (isOpen.value && level.value > 0.1) {
+      const trailLength = 3
+      for (let t = 0; t < trailLength; t++) {
+        const trailAngle = particle.angle + orbRotation * 1.5 - (t * 0.02)
+        const trailDist = reactiveDistance * (1 - t * 0.05)
+        const tx = centerX + Math.cos(trailAngle) * trailDist
+        const ty = centerY + Math.sin(trailAngle) * trailDist
+        const trailOpacity = particle.opacity * (1 - t / trailLength) * 0.3
+
+        ctx.beginPath()
+        ctx.arc(tx, ty, particle.size * (1 - t * 0.2), 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${trailOpacity})`
+        ctx.fill()
+      }
+    }
+
+    // Draw main particle with enhanced visibility
+    const particleGlow = ctx.createRadialGradient(x, y, 0, x, y, particle.size * 2)
+    const baseOpacity = isOpen.value ? particle.opacity * (0.6 + level.value * 0.4) : particle.opacity * 0.3
+    particleGlow.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity})`)
+    particleGlow.addColorStop(1, `rgba(255, 255, 255, 0)`)
+
+    ctx.beginPath()
+    ctx.arc(x, y, particle.size * 2, 0, Math.PI * 2)
+    ctx.fillStyle = particleGlow
+    ctx.fill()
+  })
 
   // Draw inner shimmer
   if (isOpen.value && level.value > 0.1) {
@@ -218,19 +266,38 @@ function drawOrb() {
     ctx.fill()
   }
 
-  // Draw concentric rings when speaking
+  // Draw animated energy rings when speaking
   if (vadState.value === 'speaking') {
-    const time = Date.now() * 0.001
-    for (let i = 0; i < 3; i++) {
-      const offset = (time + i * 0.5) % 2
-      const ringRadius = audioReactiveRadius + offset * 20
-      const opacity = (1 - offset / 2) * 0.3
+    for (let i = 0; i < 4; i++) {
+      const offset = (time * 1.5 + i * 0.4) % 2
+      const ringRadius = audioReactiveRadius + offset * 25
+      const opacity = (1 - offset / 2) * 0.4 * (1 + level.value * 0.5)
 
+      // Draw pulsing ring
       ctx.beginPath()
       ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2)
       ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
-      ctx.lineWidth = 2
+      ctx.lineWidth = 3
       ctx.stroke()
+    }
+  }
+
+  // Draw orbiting energy dots when listening
+  if (vadState.value === 'listening' && isOpen.value) {
+    for (let i = 0; i < 3; i++) {
+      const dotAngle = time * 2 + (i * Math.PI * 2 / 3)
+      const dotDistance = audioReactiveRadius * 1.2
+      const dotX = centerX + Math.cos(dotAngle) * dotDistance
+      const dotY = centerY + Math.sin(dotAngle) * dotDistance
+
+      const dotGradient = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 4)
+      dotGradient.addColorStop(0, 'rgba(27, 135, 144, 0.8)')
+      dotGradient.addColorStop(1, 'rgba(27, 135, 144, 0)')
+
+      ctx.beginPath()
+      ctx.arc(dotX, dotY, 4, 0, Math.PI * 2)
+      ctx.fillStyle = dotGradient
+      ctx.fill()
     }
   }
 
