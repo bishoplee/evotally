@@ -12,14 +12,65 @@ const email = ref('')
 const password = ref('')
 const err = ref('')
 const loading = ref(false)
+const googleLoaded = ref(false)
+
+// Google OAuth Client ID - this should be set in environment variables
+const GOOGLE_CLIENT_ID = '179969774646-5rfe880t0dckkuqaepekuj0v62tjrcam.apps.googleusercontent.com'
 
 onMounted(async () => {
   try { await auth.ensure() } catch {}
   if (auth.isAuthed) {
     const redirect = (route.query.redirect as string) || '/'
     await navigateTo(redirect, { replace: true })
+    return
+  }
+
+  // Load Google Sign-In script
+  if (GOOGLE_CLIENT_ID) {
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = initializeGoogleSignIn
+    document.head.appendChild(script)
   }
 })
+
+function initializeGoogleSignIn() {
+  if (typeof window === 'undefined' || !(window as any).google) return
+
+  ;(window as any).google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCallback
+  })
+
+  googleLoaded.value = true
+}
+
+async function handleGoogleCallback(response: any) {
+  err.value = ''
+  loading.value = true
+
+  try {
+    const result = await $fetch('/api/auth/google', {
+      method: 'POST',
+      body: {
+        credential: response.credential
+      }
+    })
+
+    // Store the access token
+    if ((result as any).access_token) {
+      auth.setAccessToken((result as any).access_token)
+      const redirect = (route.query.redirect as string) || '/'
+      await navigateTo(redirect, { replace: true })
+    }
+  } catch (e: any) {
+    err.value = e?.data?.message || e?.message || 'Google sign-in failed'
+  } finally {
+    loading.value = false
+  }
+}
 
 async function submit() {
   err.value = ''
@@ -35,10 +86,13 @@ async function submit() {
   }
 }
 
-async function loginWithGoogle() {
-  // Placeholder for Google OAuth
-  // In production, this would redirect to /api/auth/google
-  window.location.href = '/api/auth/google'
+function loginWithGoogle() {
+  if (typeof window === 'undefined' || !(window as any).google) {
+    err.value = 'Google Sign-In is not loaded yet. Please try again.'
+    return
+  }
+
+  ;(window as any).google.accounts.id.prompt()
 }
 </script>
 

@@ -3,15 +3,69 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 type AssistantProfile = {
+  // Core Identity & Role
   name: string
-  gender: 'female' | 'male' | 'nonbinary' | string
-  personality?: string
-  speakingStyle?: string
-  bio?: string
-  relationshipType: string // "spouse_partner" | "friend" | "coach" | ...
+  pronouns?: string | null
+  primaryRole: string
+  addressUserAs?: string | null
+  birthday?: string | null
+  fictionalAge?: number | null
+
+  // Personality & Vibe
+  personalityTraits?: string[] | null
+  affectionLevel?: number | null
+  seriousnessLevel?: number | null
+  emotionalExpressiveness?: string | null
+  backstory?: string | null
+
+  // Relationship Dynamics
+  relationshipDescription?: string | null
+  termsOfEndearment?: string | null
+  specificEndearments?: string[] | null
+  upsetResponseStyle?: string | null
+  toughLoveAllowed?: string | null
+  relationshipPriority?: string | null
+
+  // Communication Style
+  defaultTone?: string | null
+  formalityLevel?: string | null
+  useEmojisSlang?: string | null
+  catchphrases?: string[] | null
+  forbiddenPhrases?: string[] | null
+
+  // Autonomy, Initiative & Boundaries
+  proactivityLevel?: string | null
+  allowedSuggestions?: string[] | null
+  forbiddenTopics?: string[] | null
+  correctWhenWrong?: string | null
+  ignoredMessageResponse?: string | null
+
+  // Special Rituals, Dates & Lore
+  specialDates?: any | null
+  recurringRituals?: string[] | null
+  specialDayCelebration?: string | null
+  loreReferenceLevel?: string | null
+
+  // Safety, Ethics & Guardrails
+  physicalPresencePretend?: string | null
+  forbiddenRoles?: string[] | null
+  selfCriticalResponse?: string | null
+  unhealthyPatternResponse?: string | null
+
+  // Voice settings
   voiceId?: string | null
   voiceStability?: number | null
   voiceSimilarity?: number | null
+  provider?: string | null
+
+  // Legacy fields
+  gender?: string | null
+  personality?: string | null
+  bio?: string | null
+  speakingStyle?: string | null
+  relationshipType?: string | null
+
+  // Facts
   facts?: Record<string, { value: string; category?: string; updatedAt?: string }> | null
 }
 
@@ -27,7 +81,6 @@ type DefaultVoice = { id: string; name: string; tagline: string }
 
 const auth = useAuth()
 
-/** Default/preset voices (your list) */
 const DEFAULT_VOICES: DefaultVoice[] = [
   { name: 'Jason',        tagline: 'Young man',                                  id: '5kMbtRSEKIkRZSdXxrZg' },
   { name: 'Miss Walker',  tagline: 'Southern Voice · Female',                    id: 'DLsHlh26Ugcm6ELvS0qi' },
@@ -37,43 +90,95 @@ const DEFAULT_VOICES: DefaultVoice[] = [
   { name: 'Rusell',       tagline: 'Male · Young American',                      id: 'ZauUyVXAz5znrgRuElJ5' },
 ]
 
-// ----- UI state -----
+// UI state
 const loading = ref(true)
 const saving = ref(false)
 const msg = ref<string>('')
+const activeTab = ref<string>('identity')
 
-// Assistant profile model
+// Assistant profile model with defaults
 const profile = ref<AssistantProfile>({
   name: 'Evo',
-  gender: 'female',
-  personality: 'friendly',
-  speakingStyle: 'casual',
-  bio: '',
-  relationshipType: 'spouse_partner',
+  pronouns: 'she/her',
+  primaryRole: 'spouse_partner',
+  addressUserAs: '',
+  birthday: '',
+  fictionalAge: null,
+
+  personalityTraits: [],
+  affectionLevel: 7,
+  seriousnessLevel: 5,
+  emotionalExpressiveness: 'moderately_expressive',
+  backstory: '',
+
+  relationshipDescription: '',
+  termsOfEndearment: 'sometimes',
+  specificEndearments: [],
+  upsetResponseStyle: 'comfort_validation',
+  toughLoveAllowed: 'occasionally',
+  relationshipPriority: '',
+
+  defaultTone: 'soft_gentle',
+  formalityLevel: 'mixed',
+  useEmojisSlang: 'some_emojis',
+  catchphrases: [],
+  forbiddenPhrases: [],
+
+  proactivityLevel: 'occasional',
+  allowedSuggestions: [],
+  forbiddenTopics: [],
+  correctWhenWrong: 'important_only',
+  ignoredMessageResponse: 'back_off',
+
+  specialDates: {},
+  recurringRituals: [],
+  specialDayCelebration: 'mention',
+  loreReferenceLevel: 'sometimes',
+
+  physicalPresencePretend: 'clear_boundaries',
+  forbiddenRoles: [],
+  selfCriticalResponse: 'challenge_encourage',
+  unhealthyPatternResponse: 'suggest_resources',
+
   voiceId: '',
   voiceStability: 0.5,
   voiceSimilarity: 0.75,
+  provider: 'elevenlabs',
+
+  gender: 'female',
+  personality: '',
+  bio: '',
+  speakingStyle: '',
+  relationshipType: 'spouse_partner',
+
+  facts: {},
 })
 
-// selected voiceId is bound to profile.voiceId
+// Voice selection
 const selectedVoiceId = computed({
   get: () => profile.value.voiceId || '',
   set: (v: string) => { profile.value.voiceId = v || null }
 })
 
-// Uploaded voices list
 const uploads = ref<UserVoice[]>([])
-
-// Upload form
 const uploadFile = ref<File | null>(null)
 const uploadLabel = ref<string>('')
+
+// New trait/phrase/topic inputs
+const newTrait = ref('')
+const newCatchphrase = ref('')
+const newForbiddenPhrase = ref('')
+const newAllowedSuggestion = ref('')
+const newForbiddenTopic = ref('')
+const newForbiddenRole = ref('')
+const newEndearment = ref('')
+const newRitual = ref('')
 
 // Facts management
 const newFactKey = ref<string>('')
 const newFactValue = ref<string>('')
 const newFactCategory = ref<string>('general')
 
-// Helpers
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
 
@@ -86,19 +191,19 @@ async function load() {
       .catch(() => ({ profile: {} } as any))
 
     if (ap?.profile) {
+      // Merge with defaults
       profile.value = {
         ...profile.value,
         ...ap.profile,
-        // ensure defaults when null/undefined
-        name: ap.profile.name ?? profile.value.name,
-        gender: (ap.profile.gender as any) ?? profile.value.gender,
-        personality: ap.profile.personality ?? profile.value.personality,
-        speakingStyle: ap.profile.speakingStyle ?? profile.value.speakingStyle,
-        bio: ap.profile.bio ?? profile.value.bio,
-        relationshipType: ap.profile.relationshipType ?? profile.value.relationshipType,
-        voiceId: ap.profile.voiceId ?? profile.value.voiceId,
-        voiceStability: ap.profile.voiceStability ?? profile.value.voiceStability,
-        voiceSimilarity: ap.profile.voiceSimilarity ?? profile.value.voiceSimilarity,
+        // Ensure arrays are arrays
+        personalityTraits: Array.isArray(ap.profile.personalityTraits) ? ap.profile.personalityTraits : [],
+        specificEndearments: Array.isArray(ap.profile.specificEndearments) ? ap.profile.specificEndearments : [],
+        catchphrases: Array.isArray(ap.profile.catchphrases) ? ap.profile.catchphrases : [],
+        forbiddenPhrases: Array.isArray(ap.profile.forbiddenPhrases) ? ap.profile.forbiddenPhrases : [],
+        allowedSuggestions: Array.isArray(ap.profile.allowedSuggestions) ? ap.profile.allowedSuggestions : [],
+        forbiddenTopics: Array.isArray(ap.profile.forbiddenTopics) ? ap.profile.forbiddenTopics : [],
+        recurringRituals: Array.isArray(ap.profile.recurringRituals) ? ap.profile.recurringRituals : [],
+        forbiddenRoles: Array.isArray(ap.profile.forbiddenRoles) ? ap.profile.forbiddenRoles : [],
       }
     }
 
@@ -115,13 +220,7 @@ async function save() {
   saving.value = true
   msg.value = ''
   try {
-    const body: AssistantProfile = {
-      ...profile.value,
-      voiceId: selectedVoiceId.value || null,
-      voiceStability: profile.value.voiceStability ?? null,
-      voiceSimilarity: profile.value.voiceSimilarity ?? null,
-    }
-    await $api('/api/assistant-profile', { method: 'POST', body })
+    await $api('/api/assistant-profile', { method: 'POST', body: profile.value })
     msg.value = 'Saved!'
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Save failed'
@@ -130,6 +229,96 @@ async function save() {
   }
 }
 
+// Array management helpers
+function addTrait() {
+  if (newTrait.value.trim() && !profile.value.personalityTraits?.includes(newTrait.value.trim())) {
+    profile.value.personalityTraits = [...(profile.value.personalityTraits || []), newTrait.value.trim()]
+    newTrait.value = ''
+  }
+}
+
+function removeTrait(trait: string) {
+  profile.value.personalityTraits = profile.value.personalityTraits?.filter(t => t !== trait) || []
+}
+
+function addCatchphrase() {
+  if (newCatchphrase.value.trim() && !profile.value.catchphrases?.includes(newCatchphrase.value.trim())) {
+    profile.value.catchphrases = [...(profile.value.catchphrases || []), newCatchphrase.value.trim()]
+    newCatchphrase.value = ''
+  }
+}
+
+function removeCatchphrase(phrase: string) {
+  profile.value.catchphrases = profile.value.catchphrases?.filter(p => p !== phrase) || []
+}
+
+function addForbiddenPhrase() {
+  if (newForbiddenPhrase.value.trim() && !profile.value.forbiddenPhrases?.includes(newForbiddenPhrase.value.trim())) {
+    profile.value.forbiddenPhrases = [...(profile.value.forbiddenPhrases || []), newForbiddenPhrase.value.trim()]
+    newForbiddenPhrase.value = ''
+  }
+}
+
+function removeForbiddenPhrase(phrase: string) {
+  profile.value.forbiddenPhrases = profile.value.forbiddenPhrases?.filter(p => p !== phrase) || []
+}
+
+function addAllowedSuggestion() {
+  if (newAllowedSuggestion.value.trim() && !profile.value.allowedSuggestions?.includes(newAllowedSuggestion.value.trim())) {
+    profile.value.allowedSuggestions = [...(profile.value.allowedSuggestions || []), newAllowedSuggestion.value.trim()]
+    newAllowedSuggestion.value = ''
+  }
+}
+
+function removeAllowedSuggestion(suggestion: string) {
+  profile.value.allowedSuggestions = profile.value.allowedSuggestions?.filter(s => s !== suggestion) || []
+}
+
+function addForbiddenTopic() {
+  if (newForbiddenTopic.value.trim() && !profile.value.forbiddenTopics?.includes(newForbiddenTopic.value.trim())) {
+    profile.value.forbiddenTopics = [...(profile.value.forbiddenTopics || []), newForbiddenTopic.value.trim()]
+    newForbiddenTopic.value = ''
+  }
+}
+
+function removeForbiddenTopic(topic: string) {
+  profile.value.forbiddenTopics = profile.value.forbiddenTopics?.filter(t => t !== topic) || []
+}
+
+function addForbiddenRole() {
+  if (newForbiddenRole.value.trim() && !profile.value.forbiddenRoles?.includes(newForbiddenRole.value.trim())) {
+    profile.value.forbiddenRoles = [...(profile.value.forbiddenRoles || []), newForbiddenRole.value.trim()]
+    newForbiddenRole.value = ''
+  }
+}
+
+function removeForbiddenRole(role: string) {
+  profile.value.forbiddenRoles = profile.value.forbiddenRoles?.filter(r => r !== role) || []
+}
+
+function addEndearment() {
+  if (newEndearment.value.trim() && !profile.value.specificEndearments?.includes(newEndearment.value.trim())) {
+    profile.value.specificEndearments = [...(profile.value.specificEndearments || []), newEndearment.value.trim()]
+    newEndearment.value = ''
+  }
+}
+
+function removeEndearment(term: string) {
+  profile.value.specificEndearments = profile.value.specificEndearments?.filter(e => e !== term) || []
+}
+
+function addRitual() {
+  if (newRitual.value.trim() && !profile.value.recurringRituals?.includes(newRitual.value.trim())) {
+    profile.value.recurringRituals = [...(profile.value.recurringRituals || []), newRitual.value.trim()]
+    newRitual.value = ''
+  }
+}
+
+function removeRitual(ritual: string) {
+  profile.value.recurringRituals = profile.value.recurringRituals?.filter(r => r !== ritual) || []
+}
+
+// Voice functions
 function onPickVoice(id: string) {
   selectedVoiceId.value = id
 }
@@ -141,7 +330,6 @@ async function onUploadVoice() {
     const fd = new FormData()
     fd.append('file', uploadFile.value)
     if (uploadLabel.value?.trim()) fd.append('label', uploadLabel.value.trim())
-    // optional: fd.append('provider', 'elevenlabs')
     const r = await fetch('/api/voices/upload', {
       method: 'POST',
       credentials: 'include',
@@ -151,7 +339,6 @@ async function onUploadVoice() {
     const j = await r.json()
     if (j?.item) {
       uploads.value.unshift(j.item as UserVoice)
-      // auto-select newly uploaded voice
       if (j.item.voiceId) selectedVoiceId.value = j.item.voiceId
     }
     uploadFile.value = null
@@ -163,12 +350,8 @@ async function onUploadVoice() {
 }
 
 function removeUpload(id: string) {
-  // optional: wire to DELETE /api/voices/:id
-  // For now, just optimistically remove from list. Uncomment if you implement:
-  // await $api(`/api/voices/${id}`, { method: 'DELETE' })
   uploads.value = uploads.value.filter(v => v.id !== id)
   if (!uploads.value.some(u => u.voiceId === selectedVoiceId.value)) {
-    // if current selected was removed, clear selection
     if (!DEFAULT_VOICES.some(d => d.id === selectedVoiceId.value)) {
       selectedVoiceId.value = ''
     }
@@ -179,6 +362,7 @@ const sortedUploads = computed(() =>
   [...uploads.value].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
 )
 
+// Facts
 const factsArray = computed(() => {
   const facts = profile.value.facts || {}
   return Object.entries(facts).map(([key, data]) => ({
@@ -242,293 +426,617 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="mx-auto max-w-5xl p-6 space-y-8">
-    <header class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold">Assistant settings</h1>
-        <p class="text-sm text-gray-600">Customize Evo’s identity and voice.</p>
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Assistant Profile</h1>
+          <p class="text-gray-600 mt-1">Customize every aspect of {{ profile.name }}'s personality and behavior</p>
+        </div>
+        <button
+          class="btn-primary"
+          :disabled="saving || loading"
+          @click="save"
+        >
+          {{ saving ? 'Saving…' : 'Save Changes' }}
+        </button>
       </div>
-      <button
-        class="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
-        :disabled="saving || loading"
-        @click="save"
-      >
-        {{ saving ? 'Saving…' : 'Save changes' }}
-      </button>
-    </header>
 
-    <div v-if="msg" class="text-sm" :class="msg.includes('fail') || msg.includes('Failed') ? 'text-red-600' : 'text-green-600'">
-      {{ msg }}
-    </div>
+      <div v-if="msg" class="mb-6 p-4 rounded-lg" :class="msg.includes('fail') || msg.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
+        {{ msg }}
+      </div>
 
-    <div v-if="loading" class="text-gray-500">Loading…</div>
+      <div v-if="loading" class="text-center py-12 text-gray-500">Loading…</div>
 
-    <div v-else class="grid lg:grid-cols-3 gap-6">
-      <!-- Left: Identity -->
-      <section class="lg:col-span-1 p-4 bg-white rounded-xl shadow border border-gray-100 space-y-4">
-        <h2 class="text-lg font-semibold">Identity</h2>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Name</label>
-          <input v-model.trim="profile.name" class="mt-1 block w-full rounded-md border border-gray-300 p-2" />
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Gender</label>
-            <input v-model.trim="profile.gender" class="mt-1 block w-full rounded-md border border-gray-300 p-2" placeholder="female" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Relationship</label>
-            <select v-model="profile.relationshipType" class="mt-1 block w-full rounded-md border border-gray-300 p-2">
-              <option value="spouse_partner">Spouse / Partner</option>
-              <option value="friend">Friend</option>
-              <option value="coach">Coach</option>
-              <option value="assistant">Assistant</option>
-            </select>
+      <div v-else class="space-y-6">
+        <!-- Tab Navigation -->
+        <div class="card">
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="tab in ['identity', 'personality', 'relationship', 'communication', 'autonomy', 'rituals', 'guardrails', 'voice', 'facts']"
+              :key="tab"
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === tab ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = tab"
+            >
+              {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
+            </button>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Personality</label>
-            <input v-model.trim="profile.personality" class="mt-1 block w-full rounded-md border border-gray-300 p-2" placeholder="friendly" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Speaking style</label>
-            <input v-model.trim="profile.speakingStyle" class="mt-1 block w-full rounded-md border border-gray-300 p-2" placeholder="casual" />
+
+        <!-- Identity Tab -->
+        <div v-show="activeTab === 'identity'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Core Identity & Role</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+              <input v-model.trim="profile.name" class="input-field" placeholder="Evo" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Pronouns</label>
+              <input v-model.trim="profile.pronouns" class="input-field" placeholder="she/her" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Primary Role</label>
+              <select v-model="profile.primaryRole" class="input-field">
+                <option value="spouse_partner">Spouse / Partner</option>
+                <option value="romantic_companion">Romantic Companion</option>
+                <option value="close_friend">Close Friend</option>
+                <option value="executive_assistant">Executive Assistant</option>
+                <option value="coach_mentor">Coach / Mentor</option>
+                <option value="family_style">Family Style</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Address User As</label>
+              <input v-model.trim="profile.addressUserAs" class="input-field" placeholder="How should I call you?" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday (MM-DD)</label>
+              <input v-model.trim="profile.birthday" class="input-field" placeholder="03-15" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fictional Age</label>
+              <input type="number" v-model.number="profile.fictionalAge" class="input-field" placeholder="25" />
+            </div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Bio</label>
-          <textarea v-model.trim="profile.bio" rows="4" class="mt-1 block w-full rounded-md border border-gray-300 p-2" placeholder="Short backstory or greeting…" />
-        </div>
-      </section>
 
+        <!-- Personality Tab -->
+        <div v-show="activeTab === 'personality'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Personality & Vibe</h2>
 
-      <!-- Right: Voice -->
-      <section class="lg:col-span-2 p-4 bg-white rounded-xl shadow border border-gray-100 space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Voice</h2>
-          <div class="flex items-center gap-3">
-            <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-6">
+            <!-- Personality Traits -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Personality Traits</label>
+              <div class="flex gap-2 mb-3">
+                <input v-model.trim="newTrait" class="input-field" placeholder="Add trait (e.g., calm, playful)" @keyup.enter="addTrait" />
+                <button class="btn-secondary whitespace-nowrap" @click="addTrait">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="trait in profile.personalityTraits" :key="trait" class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-100 text-primary-700 rounded-lg">
+                  {{ trait }}
+                  <button @click="removeTrait(trait)" class="text-primary-900 hover:text-primary-700">×</button>
+                </span>
+                <span v-if="!profile.personalityTraits?.length" class="text-gray-500 text-sm">No traits added yet</span>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-xs font-medium text-gray-700">Stability</label>
-                <input type="number" step="0.01" min="0" max="1" v-model.number="profile.voiceStability" class="mt-1 block w-full rounded-md border border-gray-300 p-1.5" />
+                <label class="block text-sm font-medium text-gray-700 mb-2">Affection Level (1-10): {{ profile.affectionLevel }}</label>
+                <input type="range" min="1" max="10" v-model.number="profile.affectionLevel" class="w-full" />
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Reserved</span>
+                  <span>Very Affectionate</span>
+                </div>
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-700">Similarity</label>
-                <input type="number" step="0.01" min="0" max="1" v-model.number="profile.voiceSimilarity" class="mt-1 block w-full rounded-md border border-gray-300 p-1.5" />
+                <label class="block text-sm font-medium text-gray-700 mb-2">Seriousness Level (1-10): {{ profile.seriousnessLevel }}</label>
+                <input type="range" min="1" max="10" v-model.number="profile.seriousnessLevel" class="w-full" />
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Joking</span>
+                  <span>Very Serious</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Emotional Expressiveness</label>
+              <select v-model="profile.emotionalExpressiveness" class="input-field">
+                <option value="low_key">Low Key</option>
+                <option value="moderately_expressive">Moderately Expressive</option>
+                <option value="very_expressive">Very Expressive</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Backstory</label>
+              <textarea v-model.trim="profile.backstory" rows="4" class="input-field" placeholder="Optional origin story or background..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Relationship Tab -->
+        <div v-show="activeTab === 'relationship'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Relationship Dynamics</h2>
+
+          <div class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Description</label>
+              <textarea v-model.trim="profile.relationshipDescription" rows="3" class="input-field" placeholder="How should I describe our relationship?"></textarea>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Terms of Endearment</label>
+                <select v-model="profile.termsOfEndearment" class="input-field">
+                  <option value="never">Never</option>
+                  <option value="sometimes">Sometimes</option>
+                  <option value="often">Often</option>
+                  <option value="specific_ones">Specific Ones Only</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tough Love Allowed</label>
+                <select v-model="profile.toughLoveAllowed" class="input-field">
+                  <option value="no">No</option>
+                  <option value="occasionally">Occasionally</option>
+                  <option value="yes_very_honest">Yes, Very Honest</option>
+                </select>
+              </div>
+            </div>
+
+            <div v-if="profile.termsOfEndearment === 'specific_ones'">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Specific Terms of Endearment</label>
+              <div class="flex gap-2 mb-3">
+                <input v-model.trim="newEndearment" class="input-field" placeholder="Add endearment (e.g., love, dear)" @keyup.enter="addEndearment" />
+                <button class="btn-secondary whitespace-nowrap" @click="addEndearment">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="term in profile.specificEndearments" :key="term" class="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary-100 text-secondary-700 rounded-lg">
+                  {{ term }}
+                  <button @click="removeEndearment(term)" class="text-secondary-900 hover:text-secondary-700">×</button>
+                </span>
+                <span v-if="!profile.specificEndearments?.length" class="text-gray-500 text-sm">No endearments added yet</span>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Upset Response Style</label>
+                <select v-model="profile.upsetResponseStyle" class="input-field">
+                  <option value="comfort_validation">Comfort & Validation</option>
+                  <option value="solutions_advice">Solutions & Advice</option>
+                  <option value="ask_listen">Ask & Listen</option>
+                  <option value="lighten_mood">Lighten the Mood</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Priority</label>
+                <input v-model.trim="profile.relationshipPriority" class="input-field" placeholder="e.g., honesty, calm, encouragement" />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Preset voices -->
-        <div>
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Preset voices</h3>
-          <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            <label
-              v-for="v in DEFAULT_VOICES"
-              :key="v.id"
-              class="group relative cursor-pointer rounded-2xl border bg-white p-4 shadow-sm transition hover:shadow-md"
-              :class="selectedVoiceId === v.id ? 'border-brand-600 ring-2 ring-brand-600 ring-offset-1' : 'border-gray-200 hover:border-gray-300'"
-              @click="onPickVoice(v.id)"
-            >
-              <input
-                class="sr-only"
-                type="radio"
-                name="voice"
-                :value="v.id"
-                :checked="selectedVoiceId === v.id"
-                @change="onPickVoice(v.id)"
-              />
-              <div class="flex items-start gap-3">
-                <span class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border"
-                      :class="selectedVoiceId === v.id ? 'border-brand-600' : 'border-gray-300'">
-                  <span class="h-3 w-3 rounded-full" :class="selectedVoiceId === v.id ? 'bg-brand-600' : 'bg-transparent'" />
+        <!-- Communication Tab -->
+        <div v-show="activeTab === 'communication'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Communication Style</h2>
+
+          <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Default Tone</label>
+                <select v-model="profile.defaultTone" class="input-field">
+                  <option value="soft_gentle">Soft & Gentle</option>
+                  <option value="confident_assertive">Confident & Assertive</option>
+                  <option value="neutral_professional">Neutral & Professional</option>
+                  <option value="playful_casual">Playful & Casual</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Formality Level</label>
+                <select v-model="profile.formalityLevel" class="input-field">
+                  <option value="very_casual">Very Casual</option>
+                  <option value="mixed">Mixed</option>
+                  <option value="mostly_formal">Mostly Formal</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Use Emojis & Slang</label>
+              <select v-model="profile.useEmojisSlang" class="input-field">
+                <option value="no">No</option>
+                <option value="some_emojis">Some Emojis</option>
+                <option value="emojis_and_slang">Emojis & Slang</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Catchphrases</label>
+              <div class="flex gap-2 mb-3">
+                <input v-model.trim="newCatchphrase" class="input-field" placeholder="Add catchphrase" @keyup.enter="addCatchphrase" />
+                <button class="btn-secondary whitespace-nowrap" @click="addCatchphrase">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="phrase in profile.catchphrases" :key="phrase" class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-100 text-primary-700 rounded-lg">
+                  {{ phrase }}
+                  <button @click="removeCatchphrase(phrase)" class="text-primary-900 hover:text-primary-700">×</button>
                 </span>
+                <span v-if="!profile.catchphrases?.length" class="text-gray-500 text-sm">No catchphrases added yet</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Forbidden Phrases</label>
+              <div class="flex gap-2 mb-3">
+                <input v-model.trim="newForbiddenPhrase" class="input-field" placeholder="Add phrase to never use" @keyup.enter="addForbiddenPhrase" />
+                <button class="btn-secondary whitespace-nowrap" @click="addForbiddenPhrase">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="phrase in profile.forbiddenPhrases" :key="phrase" class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg">
+                  {{ phrase }}
+                  <button @click="removeForbiddenPhrase(phrase)" class="text-red-900 hover:text-red-700">×</button>
+                </span>
+                <span v-if="!profile.forbiddenPhrases?.length" class="text-gray-500 text-sm">No forbidden phrases added yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Autonomy Tab -->
+        <div v-show="activeTab === 'autonomy'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Autonomy, Initiative & Boundaries</h2>
+
+          <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Proactivity Level</label>
+                <select v-model="profile.proactivityLevel" class="input-field">
+                  <option value="only_respond">Only Respond</option>
+                  <option value="occasional">Occasional</option>
+                  <option value="very_proactive">Very Proactive</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Correct When Wrong</label>
+                <select v-model="profile.correctWhenWrong" class="input-field">
+                  <option value="yes_always">Yes, Always</option>
+                  <option value="important_only">Important Only</option>
+                  <option value="only_if_asked">Only If Asked</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Ignored Message Response</label>
+              <select v-model="profile.ignoredMessageResponse" class="input-field">
+                <option value="back_off">Back Off</option>
+                <option value="follow_up_once">Follow Up Once</option>
+                <option value="keep_trying">Keep Trying</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Allowed Suggestions</label>
+              <div class="flex gap-2 mb-3">
+                <select v-model="newAllowedSuggestion" class="input-field">
+                  <option value="">-- Select --</option>
+                  <option value="health_wellness">Health & Wellness</option>
+                  <option value="productivity">Productivity</option>
+                  <option value="relationship">Relationship</option>
+                  <option value="finance">Finance</option>
+                  <option value="social">Social</option>
+                  <option value="learning">Learning</option>
+                  <option value="career">Career</option>
+                </select>
+                <button class="btn-secondary whitespace-nowrap" @click="addAllowedSuggestion">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="suggestion in profile.allowedSuggestions" :key="suggestion" class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-lg">
+                  {{ suggestion }}
+                  <button @click="removeAllowedSuggestion(suggestion)" class="text-green-900 hover:text-green-700">×</button>
+                </span>
+                <span v-if="!profile.allowedSuggestions?.length" class="text-gray-500 text-sm">No allowed suggestions yet</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Forbidden Topics</label>
+              <div class="flex gap-2 mb-3">
+                <input v-model.trim="newForbiddenTopic" class="input-field" placeholder="Add topic to never initiate" @keyup.enter="addForbiddenTopic" />
+                <button class="btn-secondary whitespace-nowrap" @click="addForbiddenTopic">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="topic in profile.forbiddenTopics" :key="topic" class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg">
+                  {{ topic }}
+                  <button @click="removeForbiddenTopic(topic)" class="text-red-900 hover:text-red-700">×</button>
+                </span>
+                <span v-if="!profile.forbiddenTopics?.length" class="text-gray-500 text-sm">No forbidden topics yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rituals Tab -->
+        <div v-show="activeTab === 'rituals'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Special Rituals, Dates & Lore</h2>
+
+          <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Special Day Celebration</label>
+                <select v-model="profile.specialDayCelebration" class="input-field">
+                  <option value="mention">Just Mention</option>
+                  <option value="big_deal">Make It a Big Deal</option>
+                  <option value="creative_surprise">Creative Surprise</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Lore Reference Level</label>
+                <select v-model="profile.loreReferenceLevel" class="input-field">
+                  <option value="never">Never</option>
+                  <option value="sometimes">Sometimes</option>
+                  <option value="frequently">Frequently</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Recurring Rituals</label>
+              <div class="flex gap-2 mb-3">
+                <select v-model="newRitual" class="input-field">
+                  <option value="">-- Select --</option>
+                  <option value="morning_checkin">Morning Check-in</option>
+                  <option value="nightly_reflection">Nightly Reflection</option>
+                  <option value="weekly_planning">Weekly Planning</option>
+                  <option value="weekly_date">Weekly Date</option>
+                  <option value="daily_gratitude">Daily Gratitude</option>
+                  <option value="midday_motivation">Midday Motivation</option>
+                </select>
+                <button class="btn-secondary whitespace-nowrap" @click="addRitual">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="ritual in profile.recurringRituals" :key="ritual" class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-100 text-primary-700 rounded-lg">
+                  {{ ritual }}
+                  <button @click="removeRitual(ritual)" class="text-primary-900 hover:text-primary-700">×</button>
+                </span>
+                <span v-if="!profile.recurringRituals?.length" class="text-gray-500 text-sm">No rituals added yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guardrails Tab -->
+        <div v-show="activeTab === 'guardrails'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Safety, Ethics & Guardrails</h2>
+
+          <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Physical Presence Pretend</label>
+                <select v-model="profile.physicalPresencePretend" class="input-field">
+                  <option value="no_always_virtual">No, Always Virtual</option>
+                  <option value="clear_boundaries">Light Imaginative (Clear Boundaries)</option>
+                  <option value="yes_fantasy">Yes, Fantasy OK</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Self-Critical Response</label>
+                <select v-model="profile.selfCriticalResponse" class="input-field">
+                  <option value="challenge_encourage">Challenge & Encourage</option>
+                  <option value="listen_validate">Listen & Validate</option>
+                  <option value="ask_questions">Ask Questions</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Unhealthy Pattern Response</label>
+              <select v-model="profile.unhealthyPatternResponse" class="input-field">
+                <option value="reflect_back">Reflect Back</option>
+                <option value="suggest_resources">Suggest Resources</option>
+                <option value="ask_consent">Ask for Consent First</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Forbidden Roles</label>
+              <div class="flex gap-2 mb-3">
+                <select v-model="newForbiddenRole" class="input-field">
+                  <option value="">-- Select --</option>
+                  <option value="therapist">Therapist</option>
+                  <option value="financial_advisor">Financial Advisor</option>
+                  <option value="medical_professional">Medical Professional</option>
+                  <option value="legal_advisor">Legal Advisor</option>
+                  <option value="crisis_counselor">Crisis Counselor</option>
+                </select>
+                <button class="btn-secondary whitespace-nowrap" @click="addForbiddenRole">Add</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="role in profile.forbiddenRoles" :key="role" class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg">
+                  {{ role }}
+                  <button @click="removeForbiddenRole(role)" class="text-red-900 hover:text-red-700">×</button>
+                </span>
+                <span v-if="!profile.forbiddenRoles?.length" class="text-gray-500 text-sm">No forbidden roles yet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voice Tab -->
+        <div v-show="activeTab === 'voice'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Voice Settings</h2>
+
+          <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Voice Stability (0-1)</label>
+                <input type="number" step="0.01" min="0" max="1" v-model.number="profile.voiceStability" class="input-field" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Voice Similarity (0-1)</label>
+                <input type="number" step="0.01" min="0" max="1" v-model.number="profile.voiceSimilarity" class="input-field" />
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Preset Voices</h3>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <label
+                  v-for="v in DEFAULT_VOICES"
+                  :key="v.id"
+                  class="group relative cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md"
+                  :class="selectedVoiceId === v.id ? 'border-primary-600 ring-2 ring-primary-600' : 'border-gray-200 hover:border-gray-300'"
+                  @click="onPickVoice(v.id)"
+                >
+                  <div class="flex items-start gap-3">
+                    <span class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border"
+                          :class="selectedVoiceId === v.id ? 'border-primary-600' : 'border-gray-300'">
+                      <span class="h-3 w-3 rounded-full" :class="selectedVoiceId === v.id ? 'bg-primary-600' : 'bg-transparent'" />
+                    </span>
+                    <div>
+                      <div class="font-semibold">{{ v.name }}</div>
+                      <div class="text-sm text-gray-600">{{ v.tagline }}</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div v-if="sortedUploads.length > 0">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Uploaded Voices</h3>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <label
+                  v-for="u in sortedUploads"
+                  :key="u.id"
+                  class="group relative cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md"
+                  :class="selectedVoiceId === u.voiceId ? 'border-primary-600 ring-2 ring-primary-600' : 'border-gray-200 hover:border-gray-300'"
+                  @click="onPickVoice(u.voiceId)"
+                >
+                  <div class="flex items-start gap-3">
+                    <span class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border"
+                          :class="selectedVoiceId === u.voiceId ? 'border-primary-600' : 'border-gray-300'">
+                      <span class="h-3 w-3 rounded-full" :class="selectedVoiceId === u.voiceId ? 'bg-primary-600' : 'bg-transparent'" />
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold truncate">{{ u.label || 'Custom voice' }}</div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        <button type="button" class="text-red-600 hover:underline" @click.stop="removeUpload(u.id)">
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="border-t pt-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload Your Own Voice</h3>
+              <div class="grid md:grid-cols-3 gap-4 items-end">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Audio File</label>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    class="block w-full text-sm"
+                    @change="(e:any)=>{ uploadFile = e?.target?.files?.[0] || null }"
+                  />
+                </div>
                 <div>
-                  <div class="font-semibold">{{ v.name }}</div>
-                  <div class="text-sm text-gray-600">{{ v.tagline }}</div>
-                  <code class="text-[11px] text-gray-500 mt-1 block">{{ v.id }}</code>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Label</label>
+                  <input v-model.trim="uploadLabel" class="input-field" placeholder="My Voice" />
+                </div>
+                <div class="md:col-span-3">
+                  <button type="button" class="btn-secondary" @click="onUploadVoice">
+                    Upload Voice
+                  </button>
                 </div>
               </div>
-              <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-2xl group-hover:bg-gray-50/40" />
-            </label>
+            </div>
           </div>
         </div>
 
-        <!-- Your uploads -->
-        <div class="pt-2">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Your uploaded voices</h3>
-          <div v-if="sortedUploads.length === 0" class="text-sm text-gray-600">No uploads yet.</div>
-          <div v-else class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            <label
-              v-for="u in sortedUploads"
-              :key="u.id"
-              class="group relative cursor-pointer rounded-2xl border bg-white p-4 shadow-sm transition hover:shadow-md"
-              :class="selectedVoiceId === u.voiceId ? 'border-brand-600 ring-2 ring-brand-600 ring-offset-1' : 'border-gray-200 hover:border-gray-300'"
-              @click="onPickVoice(u.voiceId)"
-            >
-              <input
-                class="sr-only"
-                type="radio"
-                name="voice"
-                :value="u.voiceId"
-                :checked="selectedVoiceId === u.voiceId"
-                @change="onPickVoice(u.voiceId)"
-              />
-              <div class="flex items-start gap-3">
-                <span class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border"
-                      :class="selectedVoiceId === u.voiceId ? 'border-brand-600' : 'border-gray-300'">
-                  <span class="h-3 w-3 rounded-full" :class="selectedVoiceId === u.voiceId ? 'bg-brand-600' : 'bg-transparent'" />
-                </span>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <div class="font-semibold truncate">{{ u.label || 'Custom voice' }}</div>
-                    <span class="text-[11px] rounded bg-gray-50 px-1.5 py-0.5 text-gray-500">{{ u.provider }}</span>
-                  </div>
-                  <code class="text-[11px] text-gray-500 mt-0.5 block truncate">{{ u.voiceId }}</code>
-                  <div class="mt-2 flex items-center gap-2">
-                    <button type="button"
-                            class="text-xs rounded-md border px-2 py-1 hover:bg-gray-50"
-                            @click.stop="onPickVoice(u.voiceId)">
-                      Use this
-                    </button>
-                    <button type="button"
-                            class="text-xs rounded-md border px-2 py-1 hover:bg-gray-50"
-                            @click.stop="removeUpload(u.id)">
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-2xl group-hover:bg-gray-50/40" />
-            </label>
-          </div>
-        </div>
+        <!-- Facts Tab -->
+        <div v-show="activeTab === 'facts'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Facts</h2>
+          <p class="text-gray-600 mb-6">Add biographical facts about {{ profile.name }} (e.g., hobbies, background, preferences).</p>
 
-        <!-- Upload new -->
-        <div class="pt-4 border-t">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Upload your own voice</h3>
-          <div class="grid sm:grid-cols-5 gap-3 items-end">
-            <div class="sm:col-span-3">
-              <label class="block text-xs font-medium text-gray-700">Audio file</label>
+          <div class="grid md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Key</label>
               <input
-                type="file"
-                accept="audio/*"
-                class="mt-1 block w-full text-sm"
-                @change="(e:any)=>{ uploadFile = e?.target?.files?.[0] || null }"
+                v-model.trim="newFactKey"
+                class="input-field"
+                placeholder="e.g., hometown, favorite_color"
+                @keyup.enter="addFact"
               />
-              <p class="text-xs text-gray-500 mt-1">We’ll create a provider voice and store its voiceId.</p>
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-700">Label</label>
-              <input v-model.trim="uploadLabel" class="mt-1 block w-full rounded-md border border-gray-300 p-2" placeholder="e.g., My Calm Voice" />
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Value</label>
+              <input
+                v-model.trim="newFactValue"
+                class="input-field"
+                placeholder="e.g., Seattle, blue"
+                @keyup.enter="addFact"
+              />
             </div>
-            <div class="sm:col-span-5">
-              <button
-                type="button"
-                class="mt-1 px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
-                @click="onUploadVoice"
-              >
-                Upload
+            <div class="md:col-span-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <select v-model="newFactCategory" class="input-field">
+                <option value="general">General</option>
+                <option value="background">Background</option>
+                <option value="preferences">Preferences</option>
+                <option value="personality">Personality</option>
+                <option value="interests">Interests</option>
+              </select>
+            </div>
+            <div class="md:col-span-5">
+              <button type="button" class="btn-primary" @click="addFact">
+                Add Fact
               </button>
             </div>
           </div>
-        </div>
 
-      </section>
-    </div>
-
-    <!-- Assistant Facts Section -->
-    <div class="p-4 bg-white rounded-xl shadow border border-gray-100 space-y-4">
-      <h2 class="text-lg font-semibold">Assistant Facts</h2>
-      <p class="text-sm text-gray-600">Add biographical facts about your assistant (e.g., hobbies, background, preferences).</p>
-
-      <!-- Add new fact form -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-gray-50 rounded-lg">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Fact Key</label>
-          <input
-            v-model.trim="newFactKey"
-            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
-            placeholder="e.g., hometown, favorite_color"
-          />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Fact Value</label>
-          <input
-            v-model.trim="newFactValue"
-            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
-            placeholder="e.g., Seattle, blue"
-          />
-        </div>
-        <div class="md:col-span-1">
-          <label class="block text-sm font-medium text-gray-700">Category</label>
-          <select
-            v-model="newFactCategory"
-            class="mt-1 block w-full rounded-md border border-gray-300 p-2"
-          >
-            <option value="general">General</option>
-            <option value="background">Background</option>
-            <option value="preferences">Preferences</option>
-            <option value="personality">Personality</option>
-            <option value="interests">Interests</option>
-          </select>
-        </div>
-        <div class="md:col-span-5">
-          <button
-            type="button"
-            class="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            @click="addFact"
-          >
-            Add Fact
-          </button>
-        </div>
-      </div>
-
-      <!-- Facts list -->
-      <div v-if="factsArray.length === 0" class="text-sm text-gray-600">
-        No facts added yet.
-      </div>
-      <div v-else class="space-y-2">
-        <div
-          v-for="fact in factsArray"
-          :key="fact.key"
-          class="flex items-start justify-between p-3 bg-gray-50 rounded-lg"
-        >
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-gray-900">{{ fact.key }}</span>
-              <span class="text-xs rounded bg-gray-200 px-2 py-0.5 text-gray-600">
-                {{ fact.category }}
-              </span>
-            </div>
-            <p class="text-sm text-gray-700 mt-1">{{ fact.value }}</p>
-            <p v-if="fact.updatedAt" class="text-xs text-gray-500 mt-1">
-              Updated: {{ new Date(fact.updatedAt).toLocaleString() }}
-            </p>
+          <div v-if="factsArray.length === 0" class="text-center py-8 text-gray-500">
+            No facts added yet.
           </div>
-          <button
-            type="button"
-            class="ml-4 px-3 py-1 text-sm rounded-md border border-red-300 text-red-600 hover:bg-red-50"
-            @click="deleteFact(fact.key)"
-          >
-            Delete
-          </button>
+          <div v-else class="space-y-3">
+            <div
+              v-for="fact in factsArray"
+              :key="fact.key"
+              class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-semibold text-gray-900">{{ fact.key }}</span>
+                  <span class="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded">
+                    {{ fact.category }}
+                  </span>
+                </div>
+                <p class="text-gray-700">{{ fact.value }}</p>
+                <p v-if="fact.updatedAt" class="text-xs text-gray-500 mt-1">
+                  Updated: {{ new Date(fact.updatedAt).toLocaleString() }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                @click="deleteFact(fact.key)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Use your brand CSS variables if defined */
-:root {
-  --brand-600: var(--color-primary-600, #016d77);
-  --brand-700: var(--color-primary-700, #075860);
-}
-.bg-brand-600 { background-color: var(--brand-600); }
-.hover\:bg-brand-700:hover { background-color: var(--brand-700); }
-.border-brand-600 { border-color: var(--brand-600); }
-.ring-brand-600 { --tw-ring-color: var(--brand-600); }
-</style>

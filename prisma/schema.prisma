@@ -11,7 +11,7 @@ datasource db {
 model User {
   id                String    @id @default(uuid())
   email             String    @unique
-  password_hash     String
+  password_hash     String?
   display_name      String?
   nickname          String?
   first_name        String?
@@ -22,6 +22,7 @@ model User {
   updated_at        DateTime  @updatedAt
   email_verified_at DateTime?
   timezone          String?   @default("America/New_York")
+  googleId          String?   @unique
   voices            Voice[]
   tenantId          String?
   currentLat        Float?
