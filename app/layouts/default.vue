@@ -11,6 +11,7 @@ const mobileMenuOpen = ref(false)
 const navLinks = [
   { to: '/', label: 'Home', icon: '🏠' },
   { to: '/assistant', label: 'Assistant', icon: '🤖' },
+  { to: '/profile', label: 'Your Profile', icon: '👤' },
   { to: '/facts', label: 'Facts', icon: '📝' },
   { to: '/voice', label: 'Voice', icon: '🎤' },
 ]
@@ -60,9 +61,6 @@ function closeMobileMenu() {
             <div v-if="!ready" class="w-20 h-9 rounded-lg bg-gray-200 animate-pulse" />
             <template v-else>
               <template v-if="isAuthed || accessToken">
-                <NuxtLink to="/profile" class="hidden sm:block text-sm text-gray-600 hover:text-gray-900">
-                  Profile
-                </NuxtLink>
                 <button
                   type="button"
                   class="btn-outline text-sm"
@@ -110,14 +108,6 @@ function closeMobileMenu() {
             >
               <span class="mr-2">{{ link.icon }}</span>
               {{ link.label }}
-            </NuxtLink>
-            <NuxtLink
-              v-if="isAuthed || accessToken"
-              to="/profile"
-              class="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              @click="closeMobileMenu"
-            >
-              Profile
             </NuxtLink>
           </div>
         </div>
