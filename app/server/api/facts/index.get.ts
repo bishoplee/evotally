@@ -9,9 +9,11 @@ export default defineEventHandler(async (e) => {
   const q = getQuery(e)
   const search = String(q.q || '').trim()
   const type = String(q.type || '').trim()
+  const owner = String(q.owner || '').trim() // 'user' or 'assistant'
 
   const where:any = { userId: String(sub) }
   if (type) where.type = type
+  if (owner) where.owner = owner // Filter by owner if specified
   if (search) where.OR = [
     { text: { contains: search, mode: 'insensitive' } },
     { key:  { contains: search, mode: 'insensitive' } },

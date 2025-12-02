@@ -62,6 +62,7 @@ model RefreshToken {
 model Fact {
   id               String    @id @default(uuid())
   userId           String
+  owner            String    @default("user") // "user" or "assistant"
   type             String // preference, personal, goal, concern, routine
   text             String
   key              String?

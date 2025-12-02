@@ -175,9 +175,27 @@ const newEndearment = ref('')
 const newRitual = ref('')
 
 // Facts management
-const newFactKey = ref<string>('')
-const newFactValue = ref<string>('')
-const newFactCategory = ref<string>('general')
+type Fact = {
+  id: string
+  userId: string
+  owner: string // "user" or "assistant"
+  type: string // preference, personal, goal, concern, routine
+  text: string
+  key?: string | null
+  value?: string | null
+  importance: number // 1-10
+  status: string // "active", "past", "outdated", "deleted"
+  validFrom: string
+  validUntil?: string | null
+  source: string
+  created_at: string
+  updated_at: string
+}
+
+const assistantFacts = ref<Fact[]>([])
+const newFactText = ref<string>('')
+const newFactType = ref<string>('personal')
+const newFactImportance = ref<number>(5)
 
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
@@ -209,10 +227,27 @@ async function load() {
 
     const v = await $api<{ items: UserVoice[] }>('/api/voices').catch(() => ({ items: [] }))
     uploads.value = Array.isArray(v?.items) ? v.items : []
+
+    // Load assistant facts
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to load assistant profile'
   } finally {
     loading.value = false
+  }
+}
+
+async function loadAssistantFacts() {
+  try {
+    if (!auth.accessToken) return
+    assistantFacts.value = await $fetch<Fact[]>('/api/facts?owner=assistant', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+  } catch (e: any) {
+    console.error('Failed to load assistant facts:', e)
   }
 }
 
@@ -363,60 +398,57 @@ const sortedUploads = computed(() =>
 )
 
 // Facts
-const factsArray = computed(() => {
-  const facts = profile.value.facts || {}
-  return Object.entries(facts).map(([key, data]) => ({
-    key,
-    value: data.value,
-    category: data.category || 'general',
-    updatedAt: data.updatedAt,
-  }))
-})
-
 async function addFact() {
   msg.value = ''
-  const key = newFactKey.value.trim()
-  const value = newFactValue.value.trim()
+  const text = newFactText.value.trim()
 
-  if (!key || !value) {
-    msg.value = 'Both fact key and value are required'
+  if (!text) {
+    msg.value = 'Fact text is required'
     return
   }
 
   try {
-    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+    if (!auth.accessToken) return
+    await $fetch('/api/facts', {
       method: 'POST',
-      body: {
-        key,
-        value,
-        category: newFactCategory.value || 'general',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
       },
+      body: {
+        owner: 'assistant',
+        type: newFactType.value,
+        text,
+        importance: newFactImportance.value
+      }
     })
 
-    if (result.ok) {
-      profile.value.facts = result.facts
-      newFactKey.value = ''
-      newFactValue.value = ''
-      newFactCategory.value = 'general'
-      msg.value = 'Fact added successfully!'
-    }
+    newFactText.value = ''
+    newFactType.value = 'personal'
+    newFactImportance.value = 5
+    msg.value = 'Fact added successfully!'
+
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to add fact'
   }
 }
 
-async function deleteFact(key: string) {
+async function deleteFact(id: string) {
   msg.value = ''
   try {
-    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+    if (!auth.accessToken) return
+    await $fetch(`/api/facts/${id}`, {
       method: 'DELETE',
-      body: { key },
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
     })
 
-    if (result.ok) {
-      profile.value.facts = result.facts
-      msg.value = 'Fact deleted successfully!'
-    }
+    msg.value = 'Fact deleted successfully!'
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to delete fact'
   }
@@ -969,67 +1001,81 @@ onMounted(load)
           <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Facts</h2>
           <p class="text-gray-600 mb-6">Add biographical facts about {{ profile.name }} (e.g., hobbies, background, preferences).</p>
 
-          <div class="grid md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+          <div class="grid md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Key</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Text</label>
               <input
-                v-model.trim="newFactKey"
+                v-model.trim="newFactText"
                 class="input-field"
-                placeholder="e.g., hometown, favorite_color"
-                @keyup.enter="addFact"
-              />
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Value</label>
-              <input
-                v-model.trim="newFactValue"
-                class="input-field"
-                placeholder="e.g., Seattle, blue"
+                placeholder="e.g., loves hiking in the Pacific Northwest"
                 @keyup.enter="addFact"
               />
             </div>
             <div class="md:col-span-1">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select v-model="newFactCategory" class="input-field">
-                <option value="general">General</option>
-                <option value="background">Background</option>
-                <option value="preferences">Preferences</option>
-                <option value="personality">Personality</option>
-                <option value="interests">Interests</option>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <select v-model="newFactType" class="input-field">
+                <option value="preference">Preference</option>
+                <option value="personal">Personal</option>
+                <option value="goal">Goal</option>
+                <option value="concern">Concern</option>
+                <option value="routine">Routine</option>
               </select>
             </div>
-            <div class="md:col-span-5">
+            <div class="md:col-span-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Importance (1-10)</label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                v-model.number="newFactImportance"
+                class="input-field"
+              />
+            </div>
+            <div class="md:col-span-4">
               <button type="button" class="btn-primary" @click="addFact">
                 Add Fact
               </button>
             </div>
           </div>
 
-          <div v-if="factsArray.length === 0" class="text-center py-8 text-gray-500">
+          <div v-if="assistantFacts.length === 0" class="text-center py-8 text-gray-500">
             No facts added yet.
           </div>
           <div v-else class="space-y-3">
             <div
-              v-for="fact in factsArray"
-              :key="fact.key"
+              v-for="fact in assistantFacts"
+              :key="fact.id"
               class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="font-semibold text-gray-900">{{ fact.key }}</span>
-                  <span class="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded">
-                    {{ fact.category }}
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-xs px-2 py-0.5 rounded font-medium"
+                    :class="{
+                      'bg-blue-100 text-blue-700': fact.type === 'preference',
+                      'bg-green-100 text-green-700': fact.type === 'personal',
+                      'bg-purple-100 text-purple-700': fact.type === 'goal',
+                      'bg-yellow-100 text-yellow-700': fact.type === 'concern',
+                      'bg-pink-100 text-pink-700': fact.type === 'routine'
+                    }">
+                    {{ fact.type }}
+                  </span>
+                  <span v-if="fact.status !== 'active'" class="text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">
+                    {{ fact.status }}
+                  </span>
+                  <span v-if="fact.importance >= 7" class="text-xs text-yellow-600">
+                    {{ '⭐'.repeat(Math.min(fact.importance - 6, 4)) }}
                   </span>
                 </div>
-                <p class="text-gray-700">{{ fact.value }}</p>
-                <p v-if="fact.updatedAt" class="text-xs text-gray-500 mt-1">
-                  Updated: {{ new Date(fact.updatedAt).toLocaleString() }}
-                </p>
+                <p class="text-gray-900 font-medium">{{ fact.text }}</p>
+                <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                  <span>Added: {{ new Date(fact.created_at).toLocaleDateString() }}</span>
+                  <span v-if="fact.source !== 'conversation'">Source: {{ fact.source }}</span>
+                </div>
               </div>
               <button
                 type="button"
                 class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                @click="deleteFact(fact.key)"
+                @click="deleteFact(fact.id)"
               >
                 Delete
               </button>

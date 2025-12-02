@@ -125,6 +125,7 @@ import { useAuth } from '~/stores/auth'
 type Fact = {
   id: string
   userId: string
+  owner: string // "user" or "assistant"
   type: string // preference, personal, goal, concern, routine
   text: string
   key?: string | null
@@ -192,7 +193,7 @@ async function load() {
   loading.value = true
   err.value = ''
   try {
-    facts.value = await $fetch<Fact[]>('/api/facts', {
+    facts.value = await $fetch<Fact[]>('/api/facts?owner=user', {
       credentials: 'include',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`
