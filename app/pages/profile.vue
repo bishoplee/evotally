@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div>
@@ -27,25 +27,39 @@
 
       <div v-if="store.loading" class="text-center py-12 text-gray-500">Loading…</div>
 
-      <div v-else class="space-y-4">
-        <details
+      <div v-else class="space-y-6">
+        <!-- Tab Navigation -->
+        <div class="card">
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="(section, key) in (store.registry || {})"
+              :key="key"
+              class="px-4 py-2 rounded-lg font-medium transition-colors relative"
+              :class="activeTab === key ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = key"
+            >
+              {{ title(key) }}
+              <span
+                v-if="section.weight"
+                class="ml-2 text-xs px-1.5 py-0.5 rounded"
+                :class="activeTab === key ? 'bg-primary-700' : 'bg-gray-200 text-gray-600'"
+              >
+                {{ section.weight }}pts
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Content -->
+        <div
           v-for="(section, key) in (store.registry || {})"
           :key="key"
-          class="card group hover:shadow-md transition-shadow"
+          v-show="activeTab === key"
+          class="card"
         >
-          <summary class="cursor-pointer font-semibold text-lg text-gray-900 flex items-center justify-between">
-            <span>{{ title(key) }}</span>
-            <span class="inline-flex items-center gap-2">
-              <span class="text-xs font-normal px-2 py-1 bg-primary-100 text-primary-700 rounded">
-                {{ section.weight }} pts
-              </span>
-              <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </span>
-          </summary>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ title(key) }}</h2>
 
-          <div class="mt-6 space-y-6">
+          <div class="space-y-6">
             <div v-for="q in (section?.questions || [])" :key="q.id" class="space-y-2">
               <label class="block text-sm font-medium text-gray-700">{{ q.prompt }}</label>
 
@@ -84,7 +98,7 @@
               </button>
             </div>
           </div>
-        </details>
+        </div>
       </div>
     </div>
   </div>
@@ -99,6 +113,7 @@ import EvoProfileWizard from "~/pages/components/EvoProfileWizard.vue"
 
 const store = useEvoProfile()
 const showWizard = ref(false)
+const activeTab = ref<string>('')
 
 // local shadow state for edits
 const local = reactive<Record<string, Record<string, string>>>({})
@@ -167,11 +182,17 @@ onMounted(async () => {
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
-  for (const k in (store.registry || {})) {
+  const keys = Object.keys(store.registry || {})
+  for (const k of keys) {
     const target = sectionLocal(k)
     const existing = (store.sections?.[k] || {}) as Record<string, string>
     // copy existing answers in
     for (const qid in existing) target[qid] = existing[qid]
+  }
+
+  // Set first tab as active by default
+  if (keys.length > 0 && !activeTab.value) {
+    activeTab.value = keys[0]
   }
 })
 
