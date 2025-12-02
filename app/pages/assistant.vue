@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 type AssistantProfile = {
@@ -81,6 +81,36 @@ type DefaultVoice = { id: string; name: string; tagline: string }
 
 const auth = useAuth()
 
+// Relationship type to primary role mapping
+const RELATIONSHIP_TO_PRIMARY: Record<string, string> = {
+  wife: 'spouse_partner',
+  husband: 'spouse_partner',
+  spouse: 'spouse_partner',
+  girlfriend: 'romantic_companion',
+  boyfriend: 'romantic_companion',
+  partner: 'romantic_companion',
+  fiancee: 'romantic_companion',
+  fiance: 'romantic_companion',
+
+  best_friend: 'close_friend',
+  buddy: 'close_friend',
+  friend: 'close_friend',
+
+  sister: 'family_style',
+  brother: 'family_style',
+  big_sister: 'family_style',
+  big_brother: 'family_style',
+
+  executive_assistant: 'executive_assistant',
+  assistant: 'executive_assistant',
+
+  coach: 'coach_mentor',
+  mentor: 'coach_mentor',
+
+  // fallback
+  other: 'other'
+}
+
 const DEFAULT_VOICES: DefaultVoice[] = [
   { name: 'Jason',        tagline: 'Young man',                                  id: '5kMbtRSEKIkRZSdXxrZg' },
   { name: 'Miss Walker',  tagline: 'Southern Voice · Female',                    id: 'DLsHlh26Ugcm6ELvS0qi' },
@@ -152,6 +182,19 @@ const profile = ref<AssistantProfile>({
   relationshipType: 'spouse_partner',
 
   facts: {},
+})
+
+// Derive primaryRole from relationshipType
+const derivedPrimaryRole = computed(() => {
+  const relType = profile.value.relationshipType || 'other'
+  return RELATIONSHIP_TO_PRIMARY[relType] || 'other'
+})
+
+// Update primaryRole when relationshipType changes
+watch(() => profile.value.relationshipType, (newRelType) => {
+  if (newRelType) {
+    profile.value.primaryRole = RELATIONSHIP_TO_PRIMARY[newRelType] || 'other'
+  }
 })
 
 // Voice selection
@@ -510,24 +553,48 @@ onMounted(load)
               <input v-model.trim="profile.pronouns" class="input-field" placeholder="she/her" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Primary Role</label>
-              <select v-model="profile.primaryRole" class="input-field">
-                <option value="spouse_partner">Spouse / Partner</option>
-                <option value="romantic_companion">Romantic Companion</option>
-                <option value="close_friend">Close Friend</option>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Type</label>
+              <select v-model="profile.relationshipType" class="input-field">
+                <option value="wife">Wife</option>
+                <option value="husband">Husband</option>
+                <option value="spouse">Spouse</option>
+                <option value="girlfriend">Girlfriend</option>
+                <option value="boyfriend">Boyfriend</option>
+                <option value="partner">Partner</option>
+                <option value="fiancee">Fiancée</option>
+                <option value="fiance">Fiancé</option>
+                <option value="best_friend">Best Friend</option>
+                <option value="buddy">Buddy</option>
+                <option value="friend">Friend</option>
+                <option value="sister">Sister</option>
+                <option value="brother">Brother</option>
+                <option value="big_sister">Big Sister</option>
+                <option value="big_brother">Big Brother</option>
                 <option value="executive_assistant">Executive Assistant</option>
-                <option value="coach_mentor">Coach / Mentor</option>
-                <option value="family_style">Family Style</option>
+                <option value="assistant">Assistant</option>
+                <option value="coach">Coach</option>
+                <option value="mentor">Mentor</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Primary Role (Auto-derived)</label>
+              <input :value="derivedPrimaryRole" class="input-field bg-gray-100" disabled readonly />
+              <p class="text-xs text-gray-500 mt-1">Automatically set based on relationship type</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Address User As</label>
               <input v-model.trim="profile.addressUserAs" class="input-field" placeholder="How should I call you?" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday (MM-DD)</label>
-              <input v-model.trim="profile.birthday" class="input-field" placeholder="03-15" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday</label>
+              <input
+                type="date"
+                v-model="profile.birthday"
+                class="input-field"
+                placeholder="MM-DD-YYYY"
+              />
+              <p class="text-xs text-gray-500 mt-1">Full date (YYYY-MM-DD) or just month-day (MM-DD)</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Fictional Age</label>
