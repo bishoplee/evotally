@@ -99,9 +99,9 @@ model Fact {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, type, text])
-  @@index([userId, importance])
-  @@index([userId, type])
+  @@unique([userId, owner, type, text])
+  //@@index([userId, importance])
+  //@@index([userId, type])
 }
 
 // ---------- NEW MODELS BELOW ----------
