@@ -331,7 +331,7 @@ model UserAssistantProfile {
   // A. Core Identity & Role
   name             String   @default("Evo")
   pronouns         String?  @default("she/her")
-  primaryRole      String   @default("spouse_partner") // spouse_partner, romantic_companion, close_friend, executive_assistant, coach_mentor, family_style, other
+  primaryRole      String   @default("close_friend") // spouse_partner, romantic_companion, close_friend, executive_assistant, coach_mentor, family_style, other
   addressUserAs    String?  // How Evo addresses the user (first name, nickname, etc.)
   birthday         String?  // Evo's birthday (MM-DD format)
   fictionalAge     Int?     // Optional age Evo thinks of itself as
@@ -391,7 +391,7 @@ model UserAssistantProfile {
   bio              String?  @db.Text
   traits           Json?
   speakingStyle    String?
-  relationshipType String   @default("spouse_partner")
+  relationshipType String   @default("friend")
 
   // Biographical facts (from previous implementation)
   facts            Json?    @default("{}")
