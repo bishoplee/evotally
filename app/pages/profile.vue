@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Your Evo Profile</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Your Profile</h1>
           <p class="text-gray-600 mt-1">Complete your profile for more personalized responses</p>
         </div>
         <EvoProfileProgress :pct="store.progressPct" :score="store.score" />
@@ -25,12 +25,19 @@
         </div>
       </div>
 
-      <div v-if="store.loading" class="text-center py-12 text-gray-500">Loading…</div>
+      <div v-if="loading" class="text-center py-12 text-gray-500">Loading…</div>
 
       <div v-else class="space-y-6">
         <!-- Tab Navigation -->
         <div class="card">
           <div class="flex flex-wrap gap-2">
+            <button
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'basic' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = 'basic'"
+            >
+              Basic Info
+            </button>
             <button
               v-for="(section, key) in (store.registry || {})"
               :key="key"
@@ -47,6 +54,94 @@
                 {{ section.weight }}pts
               </span>
             </button>
+          </div>
+        </div>
+
+        <!-- Basic Info Tab -->
+        <div v-show="activeTab === 'basic'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
+
+          <div class="space-y-8">
+            <!-- Personal Information -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input v-model.trim="basicInfo.first_name" class="input-field" placeholder="Your first name" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                  <input v-model.trim="basicInfo.last_name" class="input-field" placeholder="Your last name" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input v-model.trim="basicInfo.email" type="email" class="input-field" placeholder="you@example.com" />
+                  <p class="text-xs text-gray-500 mt-1">Used only for context; not sent to third parties.</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Birthday</label>
+                  <input v-model="basicInfo.birthday" type="date" class="input-field" />
+                  <p class="text-xs text-gray-500 mt-1">Your birthday (YYYY-MM-DD)</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                  <input v-model.trim="basicInfo.timezone" class="input-field" placeholder="America/New_York" />
+                  <p class="text-xs text-gray-500 mt-1">Detected: {{ detectedTz }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Residence -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Place of Residence</h3>
+              <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <input v-model.trim="basicInfo.city" class="input-field" placeholder="Seattle" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">State/Province</label>
+                  <input v-model.trim="basicInfo.region" class="input-field" placeholder="Washington" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                  <input v-model.trim="basicInfo.country" class="input-field" placeholder="United States" />
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">Where you permanently live (different from your current location)</p>
+            </div>
+
+            <!-- Current Location (Auto-Detected) -->
+            <div v-if="currentLocation.city || currentLocation.region || currentLocation.country">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Location (Auto-Detected)</h3>
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">📍</span>
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-900">
+                      {{ currentLocation.city }}{{ currentLocation.region ? ', ' + currentLocation.region : '' }}{{ currentLocation.country ? ', ' + currentLocation.country : '' }}
+                    </p>
+                    <p class="text-xs text-gray-600 mt-1">
+                      Automatically detected from your browser's location. This updates when you refresh the page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-6 border-t">
+            <button
+              class="btn-primary"
+              @click="saveBasicInfo"
+              :disabled="savingBasic"
+            >
+              {{ savingBasic ? 'Saving…' : 'Save Basic Info' }}
+            </button>
+            <span v-if="basicMsg" class="ml-4 text-sm" :class="basicMsg.includes('fail') ? 'text-red-600' : 'text-green-600'">
+              {{ basicMsg }}
+            </span>
           </div>
         </div>
 
@@ -108,12 +203,35 @@
 
 <script setup lang="ts">
 import { useEvoProfile } from '@/stores/evoProfile'
+import { useAuth } from '~/stores/auth'
 import EvoProfileProgress from "~/pages/components/EvoProfileProgress.vue"
 import EvoProfileWizard from "~/pages/components/EvoProfileWizard.vue"
 
+const auth = useAuth()
 const store = useEvoProfile()
 const showWizard = ref(false)
-const activeTab = ref<string>('')
+const activeTab = ref<string>('basic')
+const loading = ref(false)
+
+// Basic info state
+const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'
+const basicInfo = ref({
+  first_name: '',
+  last_name: '',
+  email: '',
+  birthday: '',
+  timezone: detectedTz,
+  city: '',
+  region: '',
+  country: ''
+})
+const currentLocation = ref({
+  city: '',
+  region: '',
+  country: ''
+})
+const savingBasic = ref(false)
+const basicMsg = ref('')
 
 // local shadow state for edits
 const local = reactive<Record<string, Record<string, string>>>({})
@@ -178,7 +296,76 @@ function onEdit(sectionKey: string, qid: string) {
   scheduleAutosave(sectionKey, qid, 600)
 }
 
+// Load basic user info
+async function loadBasicInfo() {
+  try {
+    loading.value = true
+    await auth.ensure()
+    const response = await $fetch<{ user: any }>('/api/auth/me', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    if (response?.user) {
+      basicInfo.value.first_name = response.user.first_name || ''
+      basicInfo.value.last_name = response.user.last_name || ''
+      basicInfo.value.email = response.user.email || ''
+      basicInfo.value.birthday = response.user.birthday || ''
+      basicInfo.value.timezone = response.user.timezone || detectedTz
+      basicInfo.value.city = response.user.city || ''
+      basicInfo.value.region = response.user.region || ''
+      basicInfo.value.country = response.user.country || ''
+
+      // Load current location (auto-detected)
+      currentLocation.value.city = response.user.currentCity || ''
+      currentLocation.value.region = response.user.currentRegion || ''
+      currentLocation.value.country = response.user.currentCountry || ''
+    }
+  } catch (e) {
+    console.error('Failed to load basic info:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Save basic user info
+async function saveBasicInfo() {
+  try {
+    savingBasic.value = true
+    basicMsg.value = ''
+
+    await $fetch('/api/user/profile', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        first_name: basicInfo.value.first_name?.trim() || null,
+        last_name: basicInfo.value.last_name?.trim() || null,
+        email: basicInfo.value.email?.trim() || null,
+        birthday: basicInfo.value.birthday || null,
+        timezone: basicInfo.value.timezone?.trim() || detectedTz,
+        city: basicInfo.value.city?.trim() || null,
+        region: basicInfo.value.region?.trim() || null,
+        country: basicInfo.value.country?.trim() || null
+      }
+    })
+
+    basicMsg.value = 'Saved!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Save failed'
+  } finally {
+    savingBasic.value = false
+  }
+}
+
 onMounted(async () => {
+  await loadBasicInfo()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
@@ -188,11 +375,6 @@ onMounted(async () => {
     const existing = (store.sections?.[k] || {}) as Record<string, string>
     // copy existing answers in
     for (const qid in existing) target[qid] = existing[qid]
-  }
-
-  // Set first tab as active by default
-  if (keys.length > 0 && !activeTab.value) {
-    activeTab.value = keys[0]
   }
 })
 

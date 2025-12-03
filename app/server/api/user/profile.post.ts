@@ -1,0 +1,45 @@
+import { verifyBearerHeader } from '~/server/utils/jwt'
+import { prisma } from '~/server/utils/db'
+
+export default defineEventHandler(async (e) => {
+  const auth = getHeader(e, 'authorization')
+  const { sub } = await verifyBearerHeader(auth)
+  const body = await readBody<{
+    first_name?: string | null
+    last_name?: string | null
+    email?: string | null
+    birthday?: string | null
+    timezone?: string | null
+    city?: string | null
+    region?: string | null
+    country?: string | null
+  }>(e)
+
+  // Update user profile
+  const user = await prisma.user.update({
+    where: { id: String(sub) },
+    data: {
+      first_name: body.first_name || null,
+      last_name: body.last_name || null,
+      email: body.email || null,
+      birthday: body.birthday || null,
+      timezone: body.timezone || null,
+      city: body.city || null,
+      region: body.region || null,
+      country: body.country || null,
+    },
+    select: {
+      id: true,
+      email: true,
+      first_name: true,
+      last_name: true,
+      birthday: true,
+      timezone: true,
+      city: true,
+      region: true,
+      country: true,
+    }
+  })
+
+  return { ok: true, user }
+})
