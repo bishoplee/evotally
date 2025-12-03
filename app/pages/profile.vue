@@ -365,11 +365,26 @@ async function saveBasicInfo() {
 }
 
 onMounted(async () => {
-  await loadBasicInfo()
+  //await loadBasicInfo()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
   const keys = Object.keys(store.registry || {})
+  basicInfo.value.first_name = store.user.first_name || ''
+  basicInfo.value.last_name = store.user.last_name || ''
+  basicInfo.value.email = store.user.email || ''
+  basicInfo.value.birthday = store.user.birthday || ''
+  basicInfo.value.timezone = store.user.timezone || detectedTz
+  basicInfo.value.city = store.user.city || ''
+  basicInfo.value.region = store.user.region || ''
+  basicInfo.value.country = store.user.country || ''
+
+      // Load current location (auto-detected)
+  currentLocation.value.city = store.user.currentCity || ''
+  currentLocation.value.region = store.user.currentRegion || ''
+  currentLocation.value.country = store.user.currentCountry || ''
+
+  console.log('keys', keys);
   for (const k of keys) {
     const target = sectionLocal(k)
     const existing = (store.sections?.[k] || {}) as Record<string, string>
