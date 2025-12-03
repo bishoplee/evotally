@@ -16,6 +16,7 @@ model User {
   nickname          String?
   first_name        String?
   last_name         String?
+  birthday          String?   // User's birthday (YYYY-MM-DD or MM-DD format)
   persona_default   String    @default("spouse")
   settings          Json      @default("{}")
   created_at        DateTime  @default(now())

@@ -17,7 +17,9 @@ export default defineEventHandler((event) => {
       id: String(u.id),
       email: (u as any).email ?? undefined,     // include if you have it
       first_name: (u as any).first_name ?? undefined,
-        last_name: (u as any).last_name ?? undefined,
+      last_name: (u as any).last_name ?? undefined,
+      birthday: (u as any).birthday ?? undefined,
+      timezone: (u as any).timezone ?? undefined,
       roles: (u as any).roles ?? [],
       tenantId: (u as any).tenantId ?? null,
       persona: (u as any).persona ?? null,
