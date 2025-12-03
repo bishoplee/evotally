@@ -111,6 +111,24 @@
               </div>
               <p class="text-xs text-gray-500 mt-2">Where you permanently live (different from your current location)</p>
             </div>
+
+            <!-- Current Location (Auto-Detected) -->
+            <div v-if="currentLocation.city || currentLocation.region || currentLocation.country">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Location (Auto-Detected)</h3>
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">📍</span>
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-900">
+                      {{ currentLocation.city }}{{ currentLocation.region ? ', ' + currentLocation.region : '' }}{{ currentLocation.country ? ', ' + currentLocation.country : '' }}
+                    </p>
+                    <p class="text-xs text-gray-600 mt-1">
+                      Automatically detected from your browser's location. This updates when you refresh the page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-6 border-t">
@@ -207,6 +225,11 @@ const basicInfo = ref({
   region: '',
   country: ''
 })
+const currentLocation = ref({
+  city: '',
+  region: '',
+  country: ''
+})
 const savingBasic = ref(false)
 const basicMsg = ref('')
 
@@ -294,6 +317,11 @@ async function loadBasicInfo() {
       basicInfo.value.city = response.user.city || ''
       basicInfo.value.region = response.user.region || ''
       basicInfo.value.country = response.user.country || ''
+
+      // Load current location (auto-detected)
+      currentLocation.value.city = response.user.currentCity || ''
+      currentLocation.value.region = response.user.currentRegion || ''
+      currentLocation.value.country = response.user.currentCountry || ''
     }
   } catch (e) {
     console.error('Failed to load basic info:', e)
