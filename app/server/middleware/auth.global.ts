@@ -46,7 +46,18 @@ export default defineEventHandler(async (event) => {
     if (rec && rec.expires_at > new Date() && rec.user) {
       event.context.user = {
         id: rec.user.id,
-        tenantId: (rec.user as any).tenantId ?? '', // ensure tenant present on User model
+        email: rec.user.email,
+        first_name: rec.user.first_name,
+        last_name: rec.user.last_name,
+        birthday: rec.user.birthday,
+        timezone: rec.user.timezone,
+        city: rec.user.city,
+        region: rec.user.region,
+        country: rec.user.country,
+        currentCity: rec.user.currentCity,
+        currentRegion: rec.user.currentRegion,
+        currentCountry: rec.user.currentCountry,
+        tenantId: (rec.user as any).tenantId ?? '',
         persona: rec.user.persona_default
       }
       return

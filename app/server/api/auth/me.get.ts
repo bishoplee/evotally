@@ -15,7 +15,7 @@ export default defineEventHandler((event) => {
   return {
     user: {
       id: String(u.id),
-      email: (u as any).email ?? undefined,     // include if you have it
+      email: (u as any).email ?? undefined,
       first_name: (u as any).first_name ?? undefined,
       last_name: (u as any).last_name ?? undefined,
       birthday: (u as any).birthday ?? undefined,
@@ -23,6 +23,9 @@ export default defineEventHandler((event) => {
       city: (u as any).city ?? undefined,
       region: (u as any).region ?? undefined,
       country: (u as any).country ?? undefined,
+      currentCity: (u as any).currentCity ?? undefined,
+      currentRegion: (u as any).currentRegion ?? undefined,
+      currentCountry: (u as any).currentCountry ?? undefined,
       roles: (u as any).roles ?? [],
       tenantId: (u as any).tenantId ?? null,
       persona: (u as any).persona ?? null,
