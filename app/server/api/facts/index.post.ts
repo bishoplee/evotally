@@ -24,18 +24,29 @@ export default defineEventHandler(async (e) => {
   if (!token) throw createError({ statusCode: 401, statusMessage: 'missing token' })
   const { sub } = await verifyJWT(token)
 
-  const body = await readBody<{ type?:string, key?:string, value?:string, text:string }>(e)
+  const body = await readBody<{
+    type?:string,
+    key?:string,
+    value?:string,
+    text:string,
+    owner?:string,
+    importance?:number
+  }>(e)
   if (!body?.text?.trim()) throw createError({ statusCode: 400, statusMessage: 'text required' })
   const type = body.type || 'trait'
+  const owner = body.owner || 'user'
+  const importance = body.importance || 5
 
   // canonical save
   const fact = await prisma.fact.create({
     data: {
       userId: String(sub),
+      owner,
       type,
       key: body.key || null,
       value: body.value || null,
       text: body.text.trim(),
+      importance,
     }
   })
 

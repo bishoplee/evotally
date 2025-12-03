@@ -1,102 +1,158 @@
 <template>
-  <div class="facts-wrap">
-    <h1 class="page-title">Your Facts</h1>
-    <p class="subtitle">Facts about you learned through conversations</p>
+  <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Your Facts</h1>
+        <p class="text-gray-600 mt-1">Facts about you learned through conversations</p>
+      </div>
 
-    <p v-if="err" class="err">{{ err }}</p>
+      <!-- Error Display -->
+      <div v-if="err" class="mb-6">
+        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          {{ err }}
+        </div>
+      </div>
 
-    <!-- Facts list -->
-    <section class="facts-section">
-      <div class="facts-header">
-        <h2>All your facts</h2>
-        <p v-if="loading" class="muted">Loading facts…</p>
-        <p v-else-if="!loading && facts.length === 0" class="muted">
-          No facts yet. Your assistant will learn about you through conversations.
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12 text-gray-500">Loading facts…</div>
+
+      <!-- Empty State -->
+      <div v-else-if="!loading && facts.length === 0" class="card text-center py-12">
+        <div class="text-5xl mb-4">📝</div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No facts yet</h3>
+        <p class="text-gray-600">
+          Your assistant will learn about you through conversations and store important facts here.
         </p>
       </div>
 
-      <ul v-if="!loading && pagedFacts.length > 0" class="facts-list">
-        <li v-for="f in pagedFacts" :key="f.id" class="fact-item">
-          <div class="fact-header">
-            <div class="fact-meta">
-              <span class="badge">{{ f.category }}</span>
-              <span class="meta-kv">
-                <strong>{{ f.factKey }}</strong>
-              </span>
-              <span v-if="f.verified" class="verified-badge">✓ Verified</span>
-              <span class="confidence-badge">{{ f.confidence }}</span>
+      <!-- Facts List -->
+      <div v-else class="space-y-4">
+        <div
+          v-for="f in pagedFacts"
+          :key="f.id"
+          class="card hover:shadow-md transition-shadow"
+        >
+          <div class="flex items-start justify-between gap-4 mb-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2 flex-wrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                  {{ f.type }}
+                </span>
+                <span
+                  v-if="f.status !== 'active'"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  :class="{
+                    'bg-gray-100 text-gray-800': f.status === 'past',
+                    'bg-yellow-100 text-yellow-800': f.status === 'outdated',
+                    'bg-red-100 text-red-800': f.status === 'deleted'
+                  }"
+                >
+                  {{ f.status }}
+                </span>
+                <span
+                  v-if="f.importance && f.importance >= 7"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800"
+                >
+                  ⭐ Important ({{ f.importance }}/10)
+                </span>
+              </div>
+
+              <div v-if="f.key && f.value" class="mb-2">
+                <span class="font-semibold text-gray-900">{{ f.key }}:</span>
+                <span class="text-gray-700 ml-2">{{ f.value }}</span>
+              </div>
+
+              <p class="text-gray-800">{{ f.text }}</p>
             </div>
-            <button class="btn-danger" @click="del(f.id)" :disabled="deletingId === f.id">
+
+            <button
+              class="btn-outline text-sm text-red-600 border-red-300 hover:bg-red-50"
+              @click="del(f.id)"
+              :disabled="deletingId === f.id"
+            >
               {{ deletingId === f.id ? 'Deleting…' : 'Delete' }}
             </button>
           </div>
-          <p class="fact-text">
-            {{ f.factValue }}
-          </p>
-          <p v-if="f.rawAnswer" class="fact-raw-answer">
-            <em>Original: "{{ f.rawAnswer }}"</em>
-          </p>
-          <div class="fact-footer">
-            <span v-if="f.createdAt" class="fact-date">
-              Added: {{ new Date(f.createdAt).toLocaleString() }}
+
+          <div class="flex items-center gap-4 text-xs text-gray-500 pt-3 border-t border-gray-100">
+            <span v-if="f.created_at">
+              Added: {{ new Date(f.created_at).toLocaleDateString() }}
             </span>
-            <span v-if="f.source" class="fact-source">
+            <span v-if="f.source">
               Source: {{ f.source }}
             </span>
+            <span v-if="f.validFrom && f.status !== 'active'">
+              Valid: {{ new Date(f.validFrom).toLocaleDateString() }}
+              <template v-if="f.validUntil">
+                - {{ new Date(f.validUntil).toLocaleDateString() }}
+              </template>
+            </span>
           </div>
-        </li>
-      </ul>
+        </div>
 
-      <!-- Pagination controls -->
-      <div v-if="!loading && totalPages > 1" class="pagination">
-        <button
-          class="btn-secondary"
-          :disabled="page === 1"
-          @click="goToPage(page - 1)"
-        >
-          Previous
-        </button>
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex items-center justify-center gap-4 mt-8">
+          <button
+            class="btn-secondary"
+            :disabled="page === 1"
+            @click="goToPage(page - 1)"
+          >
+            Previous
+          </button>
 
-        <span class="page-info">
-          Page {{ page }} of {{ totalPages }}
-        </span>
+          <span class="text-sm text-gray-600">
+            Page {{ page }} of {{ totalPages }}
+          </span>
 
-        <button
-          class="btn-secondary"
-          :disabled="page === totalPages"
-          @click="goToPage(page + 1)"
-        >
-          Next
-        </button>
+          <button
+            class="btn-secondary"
+            :disabled="page === totalPages"
+            @click="goToPage(page + 1)"
+          >
+            Next
+          </button>
+        </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAuth } from '~/stores/auth'
 
-type UserFact = {
+type Fact = {
   id: string
   userId: string
-  category: string
-  factKey: string
-  factValue: string
-  rawAnswer?: string | null
-  source: string
-  verified: boolean
-  confidence: string
-  lastUpdated: string
-  createdAt: string
+  owner: string // "user" or "assistant"
+  type: string // preference, personal, goal, concern, routine
+  text: string
+  key?: string | null
+  value?: string | null
+  qdrant_point_id?: string | null
+  importance: number // 1-10
+  source_turn_id?: string | null
+  last_accessed_at?: string | null
+  created_at: string
+  updated_at: string
+
+  // Temporal tracking
+  status: string // "active", "past", "outdated", "deleted"
+  validFrom: string
+  validUntil?: string | null
+
+  // Metadata
+  source: string // "conversation", "consolidation", "pattern", "explicit"
   metadata?: any
+  tags?: string[] | null
+  embedding?: any
 }
 
 const auth = useAuth()
 
 // Data
-const facts = ref<UserFact[]>([])
-
+const facts = ref<Fact[]>([])
 const err = ref('')
 const loading = ref(false)
 const deletingId = ref<string | null>(null)
@@ -127,7 +183,7 @@ watch(
   () => facts.value.length,
   () => {
     if (page.value > totalPages.value) {
-      page.value = totalPages.value
+      page.value = totalPages.value || 1
     }
   }
 )
@@ -137,8 +193,11 @@ async function load() {
   loading.value = true
   err.value = ''
   try {
-    facts.value = await $fetch<UserFact[]>('/api/user-facts', {
-      credentials: 'include'
+    facts.value = await $fetch<Fact[]>('/api/facts?owner=user', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
     })
     // Reset to page 1 whenever we reload
     page.value = 1
@@ -154,9 +213,12 @@ async function del(id: string) {
   deletingId.value = id
   try {
     await auth.ensure()
-    await $fetch(`/api/user-facts/${id}`, {
+    await $fetch(`/api/facts/${id}`, {
       method: 'DELETE',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
     })
     await load()
   } catch (e: any) {
@@ -168,189 +230,3 @@ async function del(id: string) {
 
 onMounted(load)
 </script>
-
-<style scoped>
-.facts-wrap {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.subtitle {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin-bottom: 1.5rem;
-}
-
-.err {
-  color: #b91c1c;
-  font-size: .85rem;
-  margin-top: 0.5rem;
-}
-
-/* Facts list */
-.facts-section {
-  margin-top: 1rem;
-}
-
-.facts-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: .5rem;
-  margin-bottom: .5rem;
-}
-
-.facts-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.muted {
-  font-size: .85rem;
-  color: #6b7280;
-}
-
-.facts-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.fact-item {
-  border: 1px solid #e5e7eb;
-  border-radius: .75rem;
-  padding: .65rem .8rem;
-  margin-bottom: .5rem;
-  background-color: white;
-}
-
-.fact-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-}
-
-.fact-meta {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  flex-wrap: wrap;
-}
-
-.badge {
-  font-size: .75rem;
-  text-transform: uppercase;
-  padding: 0.1rem .4rem;
-  border-radius: 999px;
-  background: #e5f3f4;
-  color: #075860;
-  letter-spacing: .03em;
-}
-
-.meta-kv {
-  font-size: .85rem;
-  color: #4b5563;
-}
-
-.verified-badge {
-  font-size: .7rem;
-  padding: 0.1rem .4rem;
-  border-radius: 999px;
-  background: #d1fae5;
-  color: #065f46;
-  letter-spacing: .03em;
-}
-
-.confidence-badge {
-  font-size: .7rem;
-  padding: 0.1rem .4rem;
-  border-radius: 999px;
-  background: #dbeafe;
-  color: #1e40af;
-  text-transform: capitalize;
-}
-
-.fact-text {
-  margin-top: .35rem;
-  font-size: .95rem;
-  color: #111827;
-  font-weight: 500;
-}
-
-.fact-raw-answer {
-  margin-top: .25rem;
-  font-size: .8rem;
-  color: #6b7280;
-  font-style: italic;
-}
-
-.fact-footer {
-  margin-top: .35rem;
-  display: flex;
-  gap: .75rem;
-  flex-wrap: wrap;
-}
-
-.fact-date,
-.fact-source {
-  font-size: .75rem;
-  color: #6b7280;
-}
-
-/* Buttons */
-.btn-danger {
-  border-radius: 999px;
-  padding: .2rem .7rem;
-  font-size: .8rem;
-  border: 1px solid #fee2e2;
-  background: #fee2e2;
-  color: #b91c1c;
-  cursor: pointer;
-}
-.btn-danger:disabled {
-  opacity: .6;
-  cursor: default;
-}
-.btn-danger:not(:disabled):hover {
-  background: #fecaca;
-}
-
-.btn-secondary {
-  border-radius: .5rem;
-  padding: .3rem .7rem;
-  font-size: .85rem;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
-  cursor: pointer;
-}
-.btn-secondary:disabled {
-  opacity: .5;
-  cursor: default;
-}
-.btn-secondary:not(:disabled):hover {
-  background: #f3f4f6;
-}
-
-/* Pagination */
-.pagination {
-  margin-top: .75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .75rem;
-}
-
-.page-info {
-  font-size: .85rem;
-  color: #4b5563;
-}
-</style>

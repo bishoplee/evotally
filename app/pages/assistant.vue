@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuth } from '~/stores/auth'
 
 type AssistantProfile = {
@@ -81,6 +81,36 @@ type DefaultVoice = { id: string; name: string; tagline: string }
 
 const auth = useAuth()
 
+// Relationship type to primary role mapping
+const RELATIONSHIP_TO_PRIMARY: Record<string, string> = {
+  wife: 'spouse_partner',
+  husband: 'spouse_partner',
+  spouse: 'spouse_partner',
+  girlfriend: 'romantic_companion',
+  boyfriend: 'romantic_companion',
+  partner: 'romantic_companion',
+  fiancee: 'romantic_companion',
+  fiance: 'romantic_companion',
+
+  best_friend: 'close_friend',
+  buddy: 'close_friend',
+  friend: 'close_friend',
+
+  sister: 'family_style',
+  brother: 'family_style',
+  big_sister: 'family_style',
+  big_brother: 'family_style',
+
+  executive_assistant: 'executive_assistant',
+  assistant: 'executive_assistant',
+
+  coach: 'coach_mentor',
+  mentor: 'coach_mentor',
+
+  // fallback
+  other: 'other'
+}
+
 const DEFAULT_VOICES: DefaultVoice[] = [
   { name: 'Jason',        tagline: 'Young man',                                  id: '5kMbtRSEKIkRZSdXxrZg' },
   { name: 'Miss Walker',  tagline: 'Southern Voice · Female',                    id: 'DLsHlh26Ugcm6ELvS0qi' },
@@ -154,6 +184,19 @@ const profile = ref<AssistantProfile>({
   facts: {},
 })
 
+// Derive primaryRole from relationshipType
+const derivedPrimaryRole = computed(() => {
+  const relType = profile.value.relationshipType || 'other'
+  return RELATIONSHIP_TO_PRIMARY[relType] || 'other'
+})
+
+// Update primaryRole when relationshipType changes
+watch(() => profile.value.relationshipType, (newRelType) => {
+  if (newRelType) {
+    profile.value.primaryRole = RELATIONSHIP_TO_PRIMARY[newRelType] || 'other'
+  }
+})
+
 // Voice selection
 const selectedVoiceId = computed({
   get: () => profile.value.voiceId || '',
@@ -175,9 +218,27 @@ const newEndearment = ref('')
 const newRitual = ref('')
 
 // Facts management
-const newFactKey = ref<string>('')
-const newFactValue = ref<string>('')
-const newFactCategory = ref<string>('general')
+type Fact = {
+  id: string
+  userId: string
+  owner: string // "user" or "assistant"
+  type: string // preference, personal, goal, concern, routine
+  text: string
+  key?: string | null
+  value?: string | null
+  importance: number // 1-10
+  status: string // "active", "past", "outdated", "deleted"
+  validFrom: string
+  validUntil?: string | null
+  source: string
+  created_at: string
+  updated_at: string
+}
+
+const assistantFacts = ref<Fact[]>([])
+const newFactText = ref<string>('')
+const newFactType = ref<string>('personal')
+const newFactImportance = ref<number>(5)
 
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
@@ -209,10 +270,27 @@ async function load() {
 
     const v = await $api<{ items: UserVoice[] }>('/api/voices').catch(() => ({ items: [] }))
     uploads.value = Array.isArray(v?.items) ? v.items : []
+
+    // Load assistant facts
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to load assistant profile'
   } finally {
     loading.value = false
+  }
+}
+
+async function loadAssistantFacts() {
+  try {
+    if (!auth.accessToken) return
+    assistantFacts.value = await $fetch<Fact[]>('/api/facts?owner=assistant', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+  } catch (e: any) {
+    console.error('Failed to load assistant facts:', e)
   }
 }
 
@@ -363,60 +441,57 @@ const sortedUploads = computed(() =>
 )
 
 // Facts
-const factsArray = computed(() => {
-  const facts = profile.value.facts || {}
-  return Object.entries(facts).map(([key, data]) => ({
-    key,
-    value: data.value,
-    category: data.category || 'general',
-    updatedAt: data.updatedAt,
-  }))
-})
-
 async function addFact() {
   msg.value = ''
-  const key = newFactKey.value.trim()
-  const value = newFactValue.value.trim()
+  const text = newFactText.value.trim()
 
-  if (!key || !value) {
-    msg.value = 'Both fact key and value are required'
+  if (!text) {
+    msg.value = 'Fact text is required'
     return
   }
 
   try {
-    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+    if (!auth.accessToken) return
+    await $fetch('/api/facts', {
       method: 'POST',
-      body: {
-        key,
-        value,
-        category: newFactCategory.value || 'general',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
       },
+      body: {
+        owner: 'assistant',
+        type: newFactType.value,
+        text,
+        importance: newFactImportance.value
+      }
     })
 
-    if (result.ok) {
-      profile.value.facts = result.facts
-      newFactKey.value = ''
-      newFactValue.value = ''
-      newFactCategory.value = 'general'
-      msg.value = 'Fact added successfully!'
-    }
+    newFactText.value = ''
+    newFactType.value = 'personal'
+    newFactImportance.value = 5
+    msg.value = 'Fact added successfully!'
+
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to add fact'
   }
 }
 
-async function deleteFact(key: string) {
+async function deleteFact(id: string) {
   msg.value = ''
   try {
-    const result = await $api<{ ok: boolean; facts: any }>('/api/assistant-profile/fact', {
+    if (!auth.accessToken) return
+    await $fetch(`/api/facts/${id}`, {
       method: 'DELETE',
-      body: { key },
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
     })
 
-    if (result.ok) {
-      profile.value.facts = result.facts
-      msg.value = 'Fact deleted successfully!'
-    }
+    msg.value = 'Fact deleted successfully!'
+    await loadAssistantFacts()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to delete fact'
   }
@@ -478,24 +553,48 @@ onMounted(load)
               <input v-model.trim="profile.pronouns" class="input-field" placeholder="she/her" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Primary Role</label>
-              <select v-model="profile.primaryRole" class="input-field">
-                <option value="spouse_partner">Spouse / Partner</option>
-                <option value="romantic_companion">Romantic Companion</option>
-                <option value="close_friend">Close Friend</option>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Type</label>
+              <select v-model="profile.relationshipType" class="input-field">
+                <option value="wife">Wife</option>
+                <option value="husband">Husband</option>
+                <option value="spouse">Spouse</option>
+                <option value="girlfriend">Girlfriend</option>
+                <option value="boyfriend">Boyfriend</option>
+                <option value="partner">Partner</option>
+                <option value="fiancee">Fiancée</option>
+                <option value="fiance">Fiancé</option>
+                <option value="best_friend">Best Friend</option>
+                <option value="buddy">Buddy</option>
+                <option value="friend">Friend</option>
+                <option value="sister">Sister</option>
+                <option value="brother">Brother</option>
+                <option value="big_sister">Big Sister</option>
+                <option value="big_brother">Big Brother</option>
                 <option value="executive_assistant">Executive Assistant</option>
-                <option value="coach_mentor">Coach / Mentor</option>
-                <option value="family_style">Family Style</option>
+                <option value="assistant">Assistant</option>
+                <option value="coach">Coach</option>
+                <option value="mentor">Mentor</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Primary Role (Auto-derived)</label>
+              <input :value="derivedPrimaryRole" class="input-field bg-gray-100" disabled readonly />
+              <p class="text-xs text-gray-500 mt-1">Automatically set based on relationship type</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Address User As</label>
               <input v-model.trim="profile.addressUserAs" class="input-field" placeholder="How should I call you?" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday (MM-DD)</label>
-              <input v-model.trim="profile.birthday" class="input-field" placeholder="03-15" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday</label>
+              <input
+                type="date"
+                v-model="profile.birthday"
+                class="input-field"
+                placeholder="MM-DD-YYYY"
+              />
+              <p class="text-xs text-gray-500 mt-1">Full date (YYYY-MM-DD) or just month-day (MM-DD)</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Fictional Age</label>
@@ -969,67 +1068,81 @@ onMounted(load)
           <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Facts</h2>
           <p class="text-gray-600 mb-6">Add biographical facts about {{ profile.name }} (e.g., hobbies, background, preferences).</p>
 
-          <div class="grid md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+          <div class="grid md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Key</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Text</label>
               <input
-                v-model.trim="newFactKey"
+                v-model.trim="newFactText"
                 class="input-field"
-                placeholder="e.g., hometown, favorite_color"
-                @keyup.enter="addFact"
-              />
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Fact Value</label>
-              <input
-                v-model.trim="newFactValue"
-                class="input-field"
-                placeholder="e.g., Seattle, blue"
+                placeholder="e.g., loves hiking in the Pacific Northwest"
                 @keyup.enter="addFact"
               />
             </div>
             <div class="md:col-span-1">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select v-model="newFactCategory" class="input-field">
-                <option value="general">General</option>
-                <option value="background">Background</option>
-                <option value="preferences">Preferences</option>
-                <option value="personality">Personality</option>
-                <option value="interests">Interests</option>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <select v-model="newFactType" class="input-field">
+                <option value="preference">Preference</option>
+                <option value="personal">Personal</option>
+                <option value="goal">Goal</option>
+                <option value="concern">Concern</option>
+                <option value="routine">Routine</option>
               </select>
             </div>
-            <div class="md:col-span-5">
+            <div class="md:col-span-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Importance (1-10)</label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                v-model.number="newFactImportance"
+                class="input-field"
+              />
+            </div>
+            <div class="md:col-span-4">
               <button type="button" class="btn-primary" @click="addFact">
                 Add Fact
               </button>
             </div>
           </div>
 
-          <div v-if="factsArray.length === 0" class="text-center py-8 text-gray-500">
+          <div v-if="assistantFacts.length === 0" class="text-center py-8 text-gray-500">
             No facts added yet.
           </div>
           <div v-else class="space-y-3">
             <div
-              v-for="fact in factsArray"
-              :key="fact.key"
+              v-for="fact in assistantFacts"
+              :key="fact.id"
               class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="font-semibold text-gray-900">{{ fact.key }}</span>
-                  <span class="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded">
-                    {{ fact.category }}
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-xs px-2 py-0.5 rounded font-medium"
+                    :class="{
+                      'bg-blue-100 text-blue-700': fact.type === 'preference',
+                      'bg-green-100 text-green-700': fact.type === 'personal',
+                      'bg-purple-100 text-purple-700': fact.type === 'goal',
+                      'bg-yellow-100 text-yellow-700': fact.type === 'concern',
+                      'bg-pink-100 text-pink-700': fact.type === 'routine'
+                    }">
+                    {{ fact.type }}
+                  </span>
+                  <span v-if="fact.status !== 'active'" class="text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">
+                    {{ fact.status }}
+                  </span>
+                  <span v-if="fact.importance >= 7" class="text-xs text-yellow-600">
+                    {{ '⭐'.repeat(Math.min(fact.importance - 6, 4)) }}
                   </span>
                 </div>
-                <p class="text-gray-700">{{ fact.value }}</p>
-                <p v-if="fact.updatedAt" class="text-xs text-gray-500 mt-1">
-                  Updated: {{ new Date(fact.updatedAt).toLocaleString() }}
-                </p>
+                <p class="text-gray-900 font-medium">{{ fact.text }}</p>
+                <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                  <span>Added: {{ new Date(fact.created_at).toLocaleDateString() }}</span>
+                  <span v-if="fact.source !== 'conversation'">Source: {{ fact.source }}</span>
+                </div>
               </div>
               <button
                 type="button"
                 class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                @click="deleteFact(fact.key)"
+                @click="deleteFact(fact.id)"
               >
                 Delete
               </button>

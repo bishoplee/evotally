@@ -16,6 +16,7 @@ model User {
   nickname          String?
   first_name        String?
   last_name         String?
+  birthday          String?   // User's birthday (YYYY-MM-DD or MM-DD format)
   persona_default   String    @default("spouse")
   settings          Json      @default("{}")
   created_at        DateTime  @default(now())
@@ -62,6 +63,7 @@ model RefreshToken {
 model Fact {
   id               String    @id @default(uuid())
   userId           String
+  owner            String    @default("user") // "user" or "assistant"
   type             String // preference, personal, goal, concern, routine
   text             String
   key              String?
