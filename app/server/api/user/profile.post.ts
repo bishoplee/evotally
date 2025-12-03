@@ -10,6 +10,9 @@ export default defineEventHandler(async (e) => {
     email?: string | null
     birthday?: string | null
     timezone?: string | null
+    city?: string | null
+    region?: string | null
+    country?: string | null
   }>(e)
 
   // Update user profile
@@ -21,6 +24,9 @@ export default defineEventHandler(async (e) => {
       email: body.email || null,
       birthday: body.birthday || null,
       timezone: body.timezone || null,
+      city: body.city || null,
+      region: body.region || null,
+      country: body.country || null,
     },
     select: {
       id: true,
@@ -29,6 +35,9 @@ export default defineEventHandler(async (e) => {
       last_name: true,
       birthday: true,
       timezone: true,
+      city: true,
+      region: true,
+      country: true,
     }
   })
 

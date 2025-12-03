@@ -26,11 +26,18 @@ model User {
   googleId          String?   @unique
   voices            Voice[]
   tenantId          String?
+
+  // Permanent residence (user-entered)
+  city              String?   // User's city of residence
+  region            String?   // User's state/province
+  country           String?   // User's country
+
+  // Current/temporary location (auto-detected)
   currentLat        Float?
   currentLng        Float?
-  currentCity       String? // "Seattle"
-  currentRegion     String? // "Washington"
-  currentCountry    String? // "United States"
+  currentCity       String?   // Auto-detected city
+  currentRegion     String?   // Auto-detected state/province
+  currentCountry    String?   // Auto-detected country
   locationUpdated   DateTime?
 
   facts  Fact[]

@@ -61,29 +61,55 @@
         <div v-show="activeTab === 'basic'" class="card">
           <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
 
-          <div class="grid md:grid-cols-2 gap-6">
+          <div class="space-y-8">
+            <!-- Personal Information -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-              <input v-model.trim="basicInfo.first_name" class="input-field" placeholder="Your first name" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                  <input v-model.trim="basicInfo.first_name" class="input-field" placeholder="Your first name" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                  <input v-model.trim="basicInfo.last_name" class="input-field" placeholder="Your last name" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input v-model.trim="basicInfo.email" type="email" class="input-field" placeholder="you@example.com" />
+                  <p class="text-xs text-gray-500 mt-1">Used only for context; not sent to third parties.</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Birthday</label>
+                  <input v-model="basicInfo.birthday" type="date" class="input-field" />
+                  <p class="text-xs text-gray-500 mt-1">Your birthday (YYYY-MM-DD)</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                  <input v-model.trim="basicInfo.timezone" class="input-field" placeholder="America/New_York" />
+                  <p class="text-xs text-gray-500 mt-1">Detected: {{ detectedTz }}</p>
+                </div>
+              </div>
             </div>
+
+            <!-- Residence -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-              <input v-model.trim="basicInfo.last_name" class="input-field" placeholder="Your last name" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input v-model.trim="basicInfo.email" type="email" class="input-field" placeholder="you@example.com" />
-              <p class="text-xs text-gray-500 mt-1">Used only for context; not sent to third parties.</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Birthday</label>
-              <input v-model="basicInfo.birthday" type="date" class="input-field" />
-              <p class="text-xs text-gray-500 mt-1">Your birthday (YYYY-MM-DD)</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-              <input v-model.trim="basicInfo.timezone" class="input-field" placeholder="America/New_York" />
-              <p class="text-xs text-gray-500 mt-1">Detected: {{ detectedTz }}</p>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Place of Residence</h3>
+              <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <input v-model.trim="basicInfo.city" class="input-field" placeholder="Seattle" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">State/Province</label>
+                  <input v-model.trim="basicInfo.region" class="input-field" placeholder="Washington" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                  <input v-model.trim="basicInfo.country" class="input-field" placeholder="United States" />
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">Where you permanently live (different from your current location)</p>
             </div>
           </div>
 
@@ -176,7 +202,10 @@ const basicInfo = ref({
   last_name: '',
   email: '',
   birthday: '',
-  timezone: detectedTz
+  timezone: detectedTz,
+  city: '',
+  region: '',
+  country: ''
 })
 const savingBasic = ref(false)
 const basicMsg = ref('')
@@ -262,6 +291,9 @@ async function loadBasicInfo() {
       basicInfo.value.email = response.user.email || ''
       basicInfo.value.birthday = response.user.birthday || ''
       basicInfo.value.timezone = response.user.timezone || detectedTz
+      basicInfo.value.city = response.user.city || ''
+      basicInfo.value.region = response.user.region || ''
+      basicInfo.value.country = response.user.country || ''
     }
   } catch (e) {
     console.error('Failed to load basic info:', e)
@@ -288,7 +320,10 @@ async function saveBasicInfo() {
         last_name: basicInfo.value.last_name?.trim() || null,
         email: basicInfo.value.email?.trim() || null,
         birthday: basicInfo.value.birthday || null,
-        timezone: basicInfo.value.timezone?.trim() || detectedTz
+        timezone: basicInfo.value.timezone?.trim() || detectedTz,
+        city: basicInfo.value.city?.trim() || null,
+        region: basicInfo.value.region?.trim() || null,
+        country: basicInfo.value.country?.trim() || null
       }
     })
 
