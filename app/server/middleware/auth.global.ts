@@ -24,12 +24,30 @@ export default defineEventHandler(async (event) => {
   if (bearer) {
     const payload = await verifyBearer(bearer).catch(() => null) // <-- changed
     if (payload?.sub) {
-      event.context.user = {
-        id: String(payload.sub),
-        tenantId: String(payload.tenantId ?? payload.tid ?? ''), // keep claim name consistent
-        persona: payload.persona as string | undefined,
+      // Load full user from database
+      const user = await prisma.user.findUnique({
+        where: { id: String(payload.sub) }
+      })
+
+      if (user) {
+        event.context.user = {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          birthday: user.birthday,
+          timezone: user.timezone,
+          city: user.city,
+          region: user.region,
+          country: user.country,
+          currentCity: user.currentCity,
+          currentRegion: user.currentRegion,
+          currentCountry: user.currentCountry,
+          tenantId: (user as any).tenantId ?? '',
+          persona: payload.persona as string | undefined,
+        }
+        return
       }
-      return
     }
   }
 
