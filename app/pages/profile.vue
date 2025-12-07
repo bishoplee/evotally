@@ -606,22 +606,35 @@ async function confirmDeleteMemory() {
     memoryStatus.value = null
     showDeleteConfirmation.value = false
 
-    await $fetch('/api/memory/reset', {
+    const response = await $fetch<{
+      ok: boolean
+      deleted?: {
+        turns: number
+        facts: number
+        userSummaries: number
+      }
+      qdrant?: Record<string, any>
+      error?: string
+    }>('https://gw.cimb.us/memory/reset', {
       method: 'POST',
-      credentials: 'include',
       headers: {
-        Authorization: `Bearer ${auth.accessToken}`
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
       }
     })
 
-    memoryStatus.value = {
-      type: 'success',
-      message: 'All conversations and stored memory have been deleted.'
+    if (response.ok) {
+      memoryStatus.value = {
+        type: 'success',
+        message: 'All conversations and stored memory have been deleted.'
+      }
+    } else {
+      throw new Error(response.error || 'Failed to delete memory')
     }
   } catch (e: any) {
     memoryStatus.value = {
       type: 'error',
-      message: e?.data?.message || e?.message || 'Failed to delete memory.'
+      message: e?.data?.error || e?.data?.message || e?.message || 'Failed to delete memory.'
     }
   } finally {
     deletingMemory.value = false
