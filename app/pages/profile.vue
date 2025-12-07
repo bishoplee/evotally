@@ -210,6 +210,68 @@
               {{ basicMsg }}
             </span>
           </div>
+
+          <!-- Danger Zone: Delete Memory -->
+          <div class="mt-8 pt-8 border-t border-red-200">
+            <h3 class="text-lg font-semibold text-red-900 mb-4">⚠️ Danger Zone</h3>
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <h4 class="font-semibold text-red-900 mb-2">Delete All Memory</h4>
+              <p class="text-sm text-red-700 mb-4">
+                This will permanently delete all your conversations, facts, summaries, and stored memory.
+                This action cannot be undone.
+              </p>
+              <button
+                type="button"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                @click="showDeleteConfirmation = true"
+                :disabled="deletingMemory"
+              >
+                {{ deletingMemory ? 'Deleting...' : 'Delete All Memory' }}
+              </button>
+              <p v-if="memoryStatus" class="mt-3 text-sm" :class="memoryStatus.type === 'error' ? 'text-red-700' : 'text-green-700'">
+                {{ memoryStatus.message }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div
+          v-if="showDeleteConfirmation"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          @click.self="showDeleteConfirmation = false"
+        >
+          <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 class="text-xl font-bold text-red-900 mb-4">⚠️ Confirm Memory Deletion</h3>
+            <p class="text-gray-700 mb-2">
+              This will permanently delete:
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+              <li>All conversations and chat history</li>
+              <li>All stored facts about you and your assistant</li>
+              <li>All summaries and memory data</li>
+              <li>All session history</li>
+            </ul>
+            <p class="text-red-700 font-semibold mb-6">
+              ⚠️ This action cannot be undone. All deleted information cannot be retrieved.
+            </p>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                @click="showDeleteConfirmation = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                @click="confirmDeleteMemory"
+              >
+                Yes, Delete Everything
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Section Content -->
@@ -318,6 +380,11 @@ const newEvent = ref({
   description: '',
   isRecurring: false
 })
+
+// Delete memory state
+const showDeleteConfirmation = ref(false)
+const deletingMemory = ref(false)
+const memoryStatus = ref<{ type: 'success' | 'error'; message: string } | null>(null)
 
 // local shadow state for edits
 const local = reactive<Record<string, Record<string, string>>>({})
@@ -529,6 +596,35 @@ async function deleteEvent(id: string) {
     await loadEvents()
   } catch (e: any) {
     basicMsg.value = e?.data?.message || e?.message || 'Failed to delete event'
+  }
+}
+
+// Delete all memory
+async function confirmDeleteMemory() {
+  try {
+    deletingMemory.value = true
+    memoryStatus.value = null
+    showDeleteConfirmation.value = false
+
+    await $fetch('/api/memory/reset', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    memoryStatus.value = {
+      type: 'success',
+      message: 'All conversations and stored memory have been deleted.'
+    }
+  } catch (e: any) {
+    memoryStatus.value = {
+      type: 'error',
+      message: e?.data?.message || e?.message || 'Failed to delete memory.'
+    }
+  } finally {
+    deletingMemory.value = false
   }
 }
 
