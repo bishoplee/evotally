@@ -39,7 +39,22 @@ type ProfileResponse = {
     score: number
     progressPct: number
     updatedAt: string
-  }
+  },
+  user: {
+    id: string,
+    email: string,
+    first_name: string,
+    last_name: string,
+    birthday: string,
+    timezone: string,
+    city: string,
+    region: string,
+    country: string,
+    currentCity: string,
+    currentRegion: string,
+    currentCountry: string,
+    persona: string
+  },
   registry: EvoRegistry
 }
 
@@ -65,7 +80,8 @@ export const useEvoProfile = defineStore('evoProfile', {
     /** User answers by section -> { questionId: answer } */
     sections: {} as Record<string, EvoAnswerMap>,
     /** One-time init guard */
-    initialized: false as boolean
+    initialized: false as boolean,
+    user: {} as Record<string, any>
   }),
 
   getters: {
@@ -109,6 +125,7 @@ export const useEvoProfile = defineStore('evoProfile', {
         // server-provided
         this.registry = res.registry || {}
         this.sections = { ...(res.profile?.sections || {}) }
+        this.user = res.user
 
         // normalize: ensure every section exists to avoid undefined access in templates
         for (const key of Object.keys(this.registry || {})) {
