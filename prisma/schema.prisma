@@ -53,6 +53,7 @@ model User {
   UserLocation          UserLocation[]
   assistantProfile      UserAssistantProfile?
   events                Event[]
+  workHistory           WorkHistory[]
 }
 
 model RefreshToken {
@@ -428,6 +429,27 @@ model Event {
 
   @@index([userId])
   @@index([userId, startDate])
+}
+
+model WorkHistory {
+  id          String   @id @default(uuid())
+  userId      String
+  owner       String   @default("user") // "user" or "assistant"
+  company     String
+  position    String
+  startDate   String   // Flexible format: "YYYY-MM-DD", "MM-DD", "MM", "YYYY"
+  endDate     String?  // Optional, null if current position
+  isCurrent   Boolean  @default(false)
+  description String?  @db.Text
+  location    String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, owner])
+  @@index([userId, isCurrent])
 }
 
 model MemoryDebugTrace {

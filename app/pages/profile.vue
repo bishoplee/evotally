@@ -196,6 +196,83 @@
                 </div>
               </div>
             </div>
+
+            <!-- Work History -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Work History</h3>
+
+              <!-- Add Work History Form -->
+              <div class="p-4 bg-gray-50 rounded-lg mb-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Company / Organization</label>
+                    <input v-model.trim="newWorkHistory.company" class="input-field" placeholder="Company name" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Position / Title</label>
+                    <input v-model.trim="newWorkHistory.position" class="input-field" placeholder="Job title" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                    <input v-model.trim="newWorkHistory.startDate" class="input-field" placeholder="YYYY-MM-DD, MM-YYYY, or YYYY" />
+                    <p class="text-xs text-gray-500 mt-1">e.g., 2020-01-15 or 01-2020 or 2020</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
+                    <input v-model.trim="newWorkHistory.endDate" class="input-field" placeholder="Same format as start date" :disabled="newWorkHistory.isCurrent" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
+                    <input v-model.trim="newWorkHistory.location" class="input-field" placeholder="City, State/Country" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description / Notes (Optional)</label>
+                    <textarea v-model.trim="newWorkHistory.description" rows="3" class="input-field" placeholder="Responsibilities, achievements, notes..."></textarea>
+                  </div>
+                  <div class="md:col-span-2 flex items-center gap-2">
+                    <input type="checkbox" v-model="newWorkHistory.isCurrent" class="rounded" />
+                    <label class="text-sm text-gray-700">This is my current position</label>
+                  </div>
+                  <div class="md:col-span-2">
+                    <button type="button" class="btn-primary" @click="addWorkHistory">Add Work History</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Work History List -->
+              <div v-if="workHistory.length === 0" class="text-center py-8 text-gray-500">
+                No work history added yet.
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="work in workHistory"
+                  :key="work.id"
+                  class="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                >
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="font-semibold text-gray-900">{{ work.position }}</h4>
+                      <span v-if="work.isCurrent" class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                        Current
+                      </span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">{{ work.company }}</p>
+                    <p class="text-sm text-gray-600">
+                      {{ work.startDate }}{{ work.endDate ? ' - ' + work.endDate : work.isCurrent ? ' - Present' : '' }}
+                    </p>
+                    <p v-if="work.location" class="text-sm text-gray-500">📍 {{ work.location }}</p>
+                    <p v-if="work.description" class="text-sm text-gray-600 mt-2">{{ work.description }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                    @click="deleteWorkHistory(work.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-6 border-t">
@@ -379,6 +456,27 @@ const newEvent = ref({
   endDate: '',
   description: '',
   isRecurring: false
+})
+
+// Work History state
+const workHistory = ref<Array<{
+  id: string
+  company: string
+  position: string
+  startDate: string
+  endDate?: string | null
+  isCurrent: boolean
+  description?: string | null
+  location?: string | null
+}>>([])
+const newWorkHistory = ref({
+  company: '',
+  position: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  location: '',
+  isCurrent: false
 })
 
 // Delete memory state
@@ -599,6 +697,98 @@ async function deleteEvent(id: string) {
   }
 }
 
+// Load work history
+async function loadWorkHistory() {
+  try {
+    const response = await $fetch<{ workHistory: any[] }>('/api/work-history?owner=user', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    workHistory.value = response.workHistory || []
+  } catch (e) {
+    console.error('Failed to load work history:', e)
+  }
+}
+
+// Add work history
+async function addWorkHistory() {
+  try {
+    if (!newWorkHistory.value.company?.trim()) {
+      basicMsg.value = 'Company name is required'
+      return
+    }
+
+    if (!newWorkHistory.value.position?.trim()) {
+      basicMsg.value = 'Position/title is required'
+      return
+    }
+
+    if (!newWorkHistory.value.startDate?.trim()) {
+      basicMsg.value = 'Start date is required'
+      return
+    }
+
+    await $fetch('/api/work-history', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'user',
+        company: newWorkHistory.value.company.trim(),
+        position: newWorkHistory.value.position.trim(),
+        startDate: newWorkHistory.value.startDate.trim(),
+        endDate: newWorkHistory.value.endDate?.trim() || null,
+        isCurrent: newWorkHistory.value.isCurrent,
+        description: newWorkHistory.value.description?.trim() || null,
+        location: newWorkHistory.value.location?.trim() || null
+      }
+    })
+
+    // Reset form
+    newWorkHistory.value = {
+      company: '',
+      position: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+      location: '',
+      isCurrent: false
+    }
+
+    basicMsg.value = 'Work history added!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadWorkHistory()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add work history'
+  }
+}
+
+// Delete work history
+async function deleteWorkHistory(id: string) {
+  try {
+    await $fetch(`/api/work-history/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Work history deleted!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadWorkHistory()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete work history'
+  }
+}
+
 // Delete all memory
 async function confirmDeleteMemory() {
   try {
@@ -644,6 +834,7 @@ async function confirmDeleteMemory() {
 onMounted(async () => {
   await loadBasicInfo()
   await loadEvents()
+  await loadWorkHistory()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
