@@ -129,6 +129,73 @@
                 </div>
               </div>
             </div>
+
+            <!-- Events -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Important Events & Dates</h3>
+
+              <!-- Add Event Form -->
+              <div class="p-4 bg-gray-50 rounded-lg mb-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+                    <input v-model.trim="newEvent.title" class="input-field" placeholder="Anniversary, Birthday, etc." />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                    <input v-model.trim="newEvent.startDate" class="input-field" placeholder="YYYY-MM-DD, MM-DD, MM, or DD" />
+                    <p class="text-xs text-gray-500 mt-1">Flexible format: full date, month-day, month only, or day only</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
+                    <input v-model.trim="newEvent.endDate" class="input-field" placeholder="Same format as start date" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                    <textarea v-model.trim="newEvent.description" rows="2" class="input-field" placeholder="Additional details..."></textarea>
+                  </div>
+                  <div class="md:col-span-2 flex items-center gap-2">
+                    <input type="checkbox" v-model="newEvent.isRecurring" class="rounded" />
+                    <label class="text-sm text-gray-700">Recurring event (happens every year)</label>
+                  </div>
+                  <div class="md:col-span-2">
+                    <button type="button" class="btn-primary" @click="addEvent">Add Event</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Events List -->
+              <div v-if="events.length === 0" class="text-center py-8 text-gray-500">
+                No events added yet.
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="event in events"
+                  :key="event.id"
+                  class="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                >
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="font-semibold text-gray-900">{{ event.title }}</h4>
+                      <span v-if="event.isRecurring" class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                        Recurring
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                      {{ event.startDate }}{{ event.endDate ? ' - ' + event.endDate : '' }}
+                    </p>
+                    <p v-if="event.description" class="text-sm text-gray-500 mt-1">{{ event.description }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                    @click="deleteEvent(event.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-6 border-t">
@@ -232,6 +299,25 @@ const currentLocation = ref({
 })
 const savingBasic = ref(false)
 const basicMsg = ref('')
+
+// Events state
+const events = ref<Array<{
+  id: string
+  title: string
+  description?: string | null
+  startDate: string
+  endDate?: string | null
+  isRecurring: boolean
+  created_at: string
+  updated_at: string
+}>>([])
+const newEvent = ref({
+  title: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  isRecurring: false
+})
 
 // local shadow state for edits
 const local = reactive<Record<string, Record<string, string>>>({})
@@ -364,8 +450,91 @@ async function saveBasicInfo() {
   }
 }
 
+// Load events
+async function loadEvents() {
+  try {
+    const response = await $fetch<{ events: any[] }>('/api/events', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    events.value = response.events || []
+  } catch (e) {
+    console.error('Failed to load events:', e)
+  }
+}
+
+// Add event
+async function addEvent() {
+  try {
+    if (!newEvent.value.title?.trim()) {
+      basicMsg.value = 'Event title is required'
+      return
+    }
+
+    if (!newEvent.value.startDate?.trim()) {
+      basicMsg.value = 'Start date is required'
+      return
+    }
+
+    await $fetch('/api/events', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        title: newEvent.value.title.trim(),
+        description: newEvent.value.description?.trim() || null,
+        startDate: newEvent.value.startDate.trim(),
+        endDate: newEvent.value.endDate?.trim() || null,
+        isRecurring: newEvent.value.isRecurring
+      }
+    })
+
+    // Reset form
+    newEvent.value = {
+      title: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+      isRecurring: false
+    }
+
+    basicMsg.value = 'Event added!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadEvents()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add event'
+  }
+}
+
+// Delete event
+async function deleteEvent(id: string) {
+  try {
+    await $fetch(`/api/events/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Event deleted!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadEvents()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete event'
+  }
+}
+
 onMounted(async () => {
   await loadBasicInfo()
+  await loadEvents()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
