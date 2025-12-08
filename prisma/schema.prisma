@@ -54,6 +54,7 @@ model User {
   assistantProfile      UserAssistantProfile?
   events                Event[]
   workHistory           WorkHistory[]
+  workOrSchool          WorkOrSchool[]
 }
 
 model RefreshToken {
@@ -449,6 +450,30 @@ model WorkHistory {
 
   @@index([userId])
   @@index([userId, owner])
+  @@index([userId, isCurrent])
+}
+
+model WorkOrSchool {
+  id           String   @id @default(uuid())
+  userId       String
+  owner        String   @default("user") // "user" or "assistant"
+  type         String   // "work" or "school"
+  organization String   // Company name for work, School name for education
+  title        String   // Position for work, Degree/Program for education
+  startDate    String   // Flexible format: "YYYY-MM-DD", "MM-YYYY", "YYYY"
+  endDate      String?  // Optional, null if current
+  isCurrent    Boolean  @default(false)
+  description  String?  @db.Text
+  location     String?
+  notes        String?  @db.Text
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, owner])
+  @@index([userId, type])
   @@index([userId, isCurrent])
 }
 

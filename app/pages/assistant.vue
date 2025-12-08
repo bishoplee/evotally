@@ -240,24 +240,28 @@ const newFactText = ref<string>('')
 const newFactType = ref<string>('personal')
 const newFactImportance = ref<number>(5)
 
-// Work History state
-const assistantWorkHistory = ref<Array<{
+// Work & School History state
+const assistantWorkOrSchool = ref<Array<{
   id: string
-  company: string
-  position: string
+  type: string
+  organization: string
+  title: string
   startDate: string
   endDate?: string | null
   isCurrent: boolean
   description?: string | null
   location?: string | null
+  notes?: string | null
 }>>([])
-const newAssistantWork = ref({
-  company: '',
-  position: '',
+const newAssistantWorkOrSchool = ref({
+  type: 'work',
+  organization: '',
+  title: '',
   startDate: '',
   endDate: '',
   description: '',
   location: '',
+  notes: '',
   isCurrent: false
 })
 
@@ -295,8 +299,8 @@ async function load() {
     // Load assistant facts
     await loadAssistantFacts()
 
-    // Load assistant work history
-    await loadAssistantWorkHistory()
+    // Load assistant work or school history
+    await loadAssistantWorkOrSchool()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to load assistant profile'
   } finally {
@@ -521,42 +525,44 @@ async function deleteFact(id: string) {
   }
 }
 
-// Load assistant work history
-async function loadAssistantWorkHistory() {
+// Load assistant work or school history
+async function loadAssistantWorkOrSchool() {
   try {
     if (!auth.accessToken) return
-    const response = await $fetch<{ workHistory: any[] }>('/api/work-history?owner=assistant', {
+    const response = await $fetch<{ workOrSchool: any[] }>('/api/work-or-school?owner=assistant', {
       credentials: 'include',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`
       }
     })
-    assistantWorkHistory.value = response.workHistory || []
+    assistantWorkOrSchool.value = response.workOrSchool || []
   } catch (e) {
-    console.error('Failed to load assistant work history:', e)
+    console.error('Failed to load assistant work/school history:', e)
   }
 }
 
-// Add assistant work history
-async function addAssistantWork() {
+// Add assistant work or school
+async function addAssistantWorkOrSchool() {
   msg.value = ''
   try {
-    if (!newAssistantWork.value.company?.trim()) {
-      msg.value = 'Company name is required'
+    const isSchool = newAssistantWorkOrSchool.value.type === 'school'
+
+    if (!newAssistantWorkOrSchool.value.organization?.trim()) {
+      msg.value = isSchool ? 'School name is required' : 'Company name is required'
       return
     }
 
-    if (!newAssistantWork.value.position?.trim()) {
-      msg.value = 'Position/title is required'
+    if (!newAssistantWorkOrSchool.value.title?.trim()) {
+      msg.value = isSchool ? 'Degree/program is required' : 'Position is required'
       return
     }
 
-    if (!newAssistantWork.value.startDate?.trim()) {
+    if (!newAssistantWorkOrSchool.value.startDate?.trim()) {
       msg.value = 'Start date is required'
       return
     }
 
-    await $fetch('/api/work-history', {
+    await $fetch('/api/work-or-school', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -565,40 +571,44 @@ async function addAssistantWork() {
       },
       body: {
         owner: 'assistant',
-        company: newAssistantWork.value.company.trim(),
-        position: newAssistantWork.value.position.trim(),
-        startDate: newAssistantWork.value.startDate.trim(),
-        endDate: newAssistantWork.value.endDate?.trim() || null,
-        isCurrent: newAssistantWork.value.isCurrent,
-        description: newAssistantWork.value.description?.trim() || null,
-        location: newAssistantWork.value.location?.trim() || null
+        type: newAssistantWorkOrSchool.value.type,
+        organization: newAssistantWorkOrSchool.value.organization.trim(),
+        title: newAssistantWorkOrSchool.value.title.trim(),
+        startDate: newAssistantWorkOrSchool.value.startDate.trim(),
+        endDate: newAssistantWorkOrSchool.value.endDate?.trim() || null,
+        isCurrent: newAssistantWorkOrSchool.value.isCurrent,
+        description: newAssistantWorkOrSchool.value.description?.trim() || null,
+        location: newAssistantWorkOrSchool.value.location?.trim() || null,
+        notes: newAssistantWorkOrSchool.value.notes?.trim() || null
       }
     })
 
     // Reset form
-    newAssistantWork.value = {
-      company: '',
-      position: '',
+    newAssistantWorkOrSchool.value = {
+      type: 'work',
+      organization: '',
+      title: '',
       startDate: '',
       endDate: '',
       description: '',
       location: '',
+      notes: '',
       isCurrent: false
     }
 
-    msg.value = 'Work history added successfully!'
-    await loadAssistantWorkHistory()
+    msg.value = isSchool ? 'Education added successfully!' : 'Work experience added successfully!'
+    await loadAssistantWorkOrSchool()
   } catch (e: any) {
-    msg.value = e?.data?.message || e?.message || 'Failed to add work history'
+    msg.value = e?.data?.message || e?.message || 'Failed to add entry'
   }
 }
 
-// Delete assistant work history
-async function deleteAssistantWork(id: string) {
+// Delete assistant work or school
+async function deleteAssistantWorkOrSchool(id: string) {
   msg.value = ''
   try {
     if (!auth.accessToken) return
-    await $fetch(`/api/work-history/${id}`, {
+    await $fetch(`/api/work-or-school/${id}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: {
@@ -606,10 +616,10 @@ async function deleteAssistantWork(id: string) {
       }
     })
 
-    msg.value = 'Work history deleted successfully!'
-    await loadAssistantWorkHistory()
+    msg.value = 'Entry deleted successfully!'
+    await loadAssistantWorkOrSchool()
   } catch (e: any) {
-    msg.value = e?.data?.message || e?.message || 'Failed to delete work history'
+    msg.value = e?.data?.message || e?.message || 'Failed to delete entry'
   }
 }
 
@@ -1266,77 +1276,110 @@ onMounted(load)
           </div>
         </div>
 
-        <!-- Work History Tab -->
+        <!-- Work & School History Tab -->
         <div v-show="activeTab === 'work-history'" class="card">
-          <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Work History</h2>
-          <p class="text-gray-600 mb-6">Add {{ profile.name }}'s professional background and work experience.</p>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ profile.name }}'s Work & School History</h2>
+          <p class="text-gray-600 mb-6">Add {{ profile.name }}'s professional background and education history.</p>
 
-          <!-- Add Work History Form -->
+          <!-- Add Work/School Form -->
           <div class="p-4 bg-gray-50 rounded-lg mb-4">
             <div class="grid md:grid-cols-2 gap-4">
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Company / Organization</label>
-                <input v-model.trim="newAssistantWork.company" class="input-field" placeholder="Company name" />
+                <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <div class="flex gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="newAssistantWorkOrSchool.type" value="work" class="rounded" />
+                    <span class="text-sm text-gray-700">Work Experience</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="newAssistantWorkOrSchool.type" value="school" class="rounded" />
+                    <span class="text-sm text-gray-700">Education</span>
+                  </label>
+                </div>
               </div>
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Position / Title</label>
-                <input v-model.trim="newAssistantWork.position" class="input-field" placeholder="Job title" />
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ newAssistantWorkOrSchool.type === 'school' ? 'School / University' : 'Company / Organization' }}
+                </label>
+                <input v-model.trim="newAssistantWorkOrSchool.organization" class="input-field"
+                  :placeholder="newAssistantWorkOrSchool.type === 'school' ? 'School name' : 'Company name'" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ newAssistantWorkOrSchool.type === 'school' ? 'Degree / Program' : 'Position / Title' }}
+                </label>
+                <input v-model.trim="newAssistantWorkOrSchool.title" class="input-field"
+                  :placeholder="newAssistantWorkOrSchool.type === 'school' ? 'e.g., Bachelor of Science in Computer Science' : 'Job title'" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                <input v-model.trim="newAssistantWork.startDate" class="input-field" placeholder="YYYY-MM-DD, MM-YYYY, or YYYY" />
+                <input v-model.trim="newAssistantWorkOrSchool.startDate" class="input-field" placeholder="YYYY-MM-DD, MM-YYYY, or YYYY" />
                 <p class="text-xs text-gray-500 mt-1">e.g., 2020-01-15 or 01-2020 or 2020</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
-                <input v-model.trim="newAssistantWork.endDate" class="input-field" placeholder="Same format as start date" :disabled="newAssistantWork.isCurrent" />
+                <input v-model.trim="newAssistantWorkOrSchool.endDate" class="input-field" placeholder="Same format as start date" :disabled="newAssistantWorkOrSchool.isCurrent" />
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
-                <input v-model.trim="newAssistantWork.location" class="input-field" placeholder="City, State/Country" />
+                <input v-model.trim="newAssistantWorkOrSchool.location" class="input-field" placeholder="City, State/Country" />
               </div>
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description / Notes (Optional)</label>
-                <textarea v-model.trim="newAssistantWork.description" rows="3" class="input-field" placeholder="Responsibilities, achievements, notes..."></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                <textarea v-model.trim="newAssistantWorkOrSchool.description" rows="2" class="input-field"
+                  :placeholder="newAssistantWorkOrSchool.type === 'school' ? 'Major, activities, honors...' : 'Responsibilities, achievements...'"></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                <textarea v-model.trim="newAssistantWorkOrSchool.notes" rows="2" class="input-field" placeholder="Additional notes..."></textarea>
               </div>
               <div class="md:col-span-2 flex items-center gap-2">
-                <input type="checkbox" v-model="newAssistantWork.isCurrent" class="rounded" />
-                <label class="text-sm text-gray-700">This is {{ profile.name }}'s current position</label>
+                <input type="checkbox" v-model="newAssistantWorkOrSchool.isCurrent" class="rounded" />
+                <label class="text-sm text-gray-700">
+                  {{ newAssistantWorkOrSchool.type === 'school' ? 'Currently enrolled' : 'This is ' + profile.name + '\'s current position' }}
+                </label>
               </div>
               <div class="md:col-span-2">
-                <button type="button" class="btn-primary" @click="addAssistantWork">Add Work History</button>
+                <button type="button" class="btn-primary" @click="addAssistantWorkOrSchool">
+                  {{ newAssistantWorkOrSchool.type === 'school' ? 'Add Education' : 'Add Work Experience' }}
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Work History List -->
-          <div v-if="assistantWorkHistory.length === 0" class="text-center py-8 text-gray-500">
-            No work history added yet.
+          <!-- Work/School List -->
+          <div v-if="assistantWorkOrSchool.length === 0" class="text-center py-8 text-gray-500">
+            No work or school history added yet.
           </div>
           <div v-else class="space-y-3">
             <div
-              v-for="work in assistantWorkHistory"
-              :key="work.id"
+              v-for="item in assistantWorkOrSchool"
+              :key="item.id"
               class="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
             >
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
-                  <h4 class="font-semibold text-gray-900">{{ work.position }}</h4>
-                  <span v-if="work.isCurrent" class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                  <span class="text-xs px-2 py-0.5 rounded font-medium"
+                    :class="item.type === 'work' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'">
+                    {{ item.type === 'work' ? '💼 Work' : '🎓 Education' }}
+                  </span>
+                  <h4 class="font-semibold text-gray-900">{{ item.title }}</h4>
+                  <span v-if="item.isCurrent" class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
                     Current
                   </span>
                 </div>
-                <p class="text-sm font-medium text-gray-700">{{ work.company }}</p>
+                <p class="text-sm font-medium text-gray-700">{{ item.organization }}</p>
                 <p class="text-sm text-gray-600">
-                  {{ work.startDate }}{{ work.endDate ? ' - ' + work.endDate : work.isCurrent ? ' - Present' : '' }}
+                  {{ item.startDate }}{{ item.endDate ? ' - ' + item.endDate : item.isCurrent ? ' - Present' : '' }}
                 </p>
-                <p v-if="work.location" class="text-sm text-gray-500">📍 {{ work.location }}</p>
-                <p v-if="work.description" class="text-sm text-gray-600 mt-2">{{ work.description }}</p>
+                <p v-if="item.location" class="text-sm text-gray-500">📍 {{ item.location }}</p>
+                <p v-if="item.description" class="text-sm text-gray-600 mt-2">{{ item.description }}</p>
+                <p v-if="item.notes" class="text-sm text-gray-500 mt-1 italic">{{ item.notes }}</p>
               </div>
               <button
                 type="button"
                 class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                @click="deleteAssistantWork(work.id)"
+                @click="deleteAssistantWorkOrSchool(item.id)"
               >
                 Delete
               </button>
