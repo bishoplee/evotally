@@ -1,12 +1,9 @@
-import { verifyJWT } from '~/server/utils/jwt'
+import { verifyBearerHeader } from '~/server/utils/jwt'
 import { prisma } from '~/server/utils/db'
 
 export default defineEventHandler(async (e) => {
-  const auth = getHeader(e, 'authorization') || ''
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  if (!token) throw createError({ statusCode: 401, statusMessage: 'missing token' })
-
-  const { sub } = await verifyJWT(token)
+  const auth = getHeader(e, 'authorization')
+  const { sub } = await verifyBearerHeader(auth)
   const body = await readBody<{
     owner?: string
     from_type: string
