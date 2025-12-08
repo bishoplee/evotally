@@ -1,42 +1,22 @@
-import { defineEventHandler, getRouterParam } from 'h3'
-import { verifyBearerHeader } from '~/server/utils/jwt'
+import { verifyJWT } from '~/server/utils/jwt'
 import { prisma } from '~/server/utils/db'
 
-export default defineEventHandler(async (event) => {
-  const auth = event.node.req.headers.authorization || ''
-  const { sub } = await verifyBearerHeader(auth)
-  const userId = String(sub)
+export default defineEventHandler(async (e) => {
+  const auth = getHeader(e, 'authorization') || ''
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+  if (!token) throw createError({ statusCode: 401, statusMessage: 'missing token' })
 
-  const id = getRouterParam(event, 'id')
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Goal ID is required'
-    })
+  const { sub } = await verifyJWT(token)
+  const id = getRouterParam(e, 'id')
+  if (!id) throw createError({ statusCode: 400, statusMessage: 'id required' })
+
+  // Verify ownership
+  const existing = await prisma.goal.findUnique({ where: { id } })
+  if (!existing || existing.userId !== String(sub)) {
+    throw createError({ statusCode: 404, statusMessage: 'goal not found' })
   }
 
-  // Check ownership
-  const existing = await prisma.goal.findUnique({
-    where: { id }
-  })
-
-  if (!existing) {
-    throw createError({
-      statusCode: 404,
-      message: 'Goal not found'
-    })
-  }
-
-  if (existing.userId !== userId) {
-    throw createError({
-      statusCode: 403,
-      message: 'Forbidden'
-    })
-  }
-
-  await prisma.goal.delete({
-    where: { id }
-  })
+  await prisma.goal.delete({ where: { id } })
 
   return { ok: true }
 })

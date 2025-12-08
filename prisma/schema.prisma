@@ -481,15 +481,20 @@ model WorkOrSchool {
 model Goal {
   id          String   @id @default(uuid())
   userId      String
-  owner       String   @default("user") // "user" or "assistant"
+  owner       String   @default("user") // "user" or "assistant" (for "help me keep you on track" style goals)
   title       String
   description String?  @db.Text
-  category    String?  // personal, career, health, financial, relationship, etc.
-  status      String   @default("active") // active, completed, abandoned, on_hold
-  priority    String?  // high, medium, low
-  targetDate  String?  // Flexible format: "YYYY-MM-DD", "MM-YYYY", "YYYY"
-  progress    Int      @default(0) // 0-100 percentage
-  notes       String?  @db.Text
+
+  // High-level categorization
+  category    String?  // "health" | "career" | "finance" | "relationship" | "personal_growth" | "habit" | "other"
+
+  // Status + priority
+  status      String   @default("active") // "active" | "in_progress" | "completed" | "paused" | "abandoned"
+  priority    Int      @default(5) // 1–10
+
+  // Time info (text + normalized)
+  timeframe   String?  // "short_term" | "medium_term" | "long_term" | free text like "this year"
+  targetDate  String?  // ISO-ish string: "2026-03-01" etc, normalized by the extractor
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
