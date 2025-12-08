@@ -196,6 +196,116 @@
                 </div>
               </div>
             </div>
+
+            <!-- Work & School History -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Work & School History</h3>
+
+              <!-- Add Work/School Form -->
+              <div class="p-4 bg-gray-50 rounded-lg mb-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                    <div class="flex gap-4">
+                      <label class="flex items-center gap-2">
+                        <input type="radio" v-model="newWorkOrSchool.type" value="work" class="rounded" />
+                        <span class="text-sm text-gray-700">Work Experience</span>
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input type="radio" v-model="newWorkOrSchool.type" value="school" class="rounded" />
+                        <span class="text-sm text-gray-700">Education</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      {{ newWorkOrSchool.type === 'school' ? 'School / University' : 'Company / Organization' }}
+                    </label>
+                    <input v-model.trim="newWorkOrSchool.organization" class="input-field"
+                      :placeholder="newWorkOrSchool.type === 'school' ? 'School name' : 'Company name'" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      {{ newWorkOrSchool.type === 'school' ? 'Degree / Program' : 'Position / Title' }}
+                    </label>
+                    <input v-model.trim="newWorkOrSchool.title" class="input-field"
+                      :placeholder="newWorkOrSchool.type === 'school' ? 'e.g., Bachelor of Science in Computer Science' : 'Job title'" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                    <input v-model.trim="newWorkOrSchool.startDate" class="input-field" placeholder="YYYY-MM-DD, MM-YYYY, or YYYY" />
+                    <p class="text-xs text-gray-500 mt-1">e.g., 2020-01-15 or 01-2020 or 2020</p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">End Date (Optional)</label>
+                    <input v-model.trim="newWorkOrSchool.endDate" class="input-field" placeholder="Same format as start date" :disabled="newWorkOrSchool.isCurrent" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
+                    <input v-model.trim="newWorkOrSchool.location" class="input-field" placeholder="City, State/Country" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                    <textarea v-model.trim="newWorkOrSchool.description" rows="2" class="input-field"
+                      :placeholder="newWorkOrSchool.type === 'school' ? 'Major, activities, honors...' : 'Responsibilities, achievements...'"></textarea>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                    <textarea v-model.trim="newWorkOrSchool.notes" rows="2" class="input-field" placeholder="Additional notes..."></textarea>
+                  </div>
+                  <div class="md:col-span-2 flex items-center gap-2">
+                    <input type="checkbox" v-model="newWorkOrSchool.isCurrent" class="rounded" />
+                    <label class="text-sm text-gray-700">
+                      {{ newWorkOrSchool.type === 'school' ? 'Currently enrolled' : 'This is my current position' }}
+                    </label>
+                  </div>
+                  <div class="md:col-span-2">
+                    <button type="button" class="btn-primary" @click="addWorkOrSchool">
+                      {{ newWorkOrSchool.type === 'school' ? 'Add Education' : 'Add Work Experience' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Work/School List -->
+              <div v-if="workOrSchool.length === 0" class="text-center py-8 text-gray-500">
+                No work or school history added yet.
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="item in workOrSchool"
+                  :key="item.id"
+                  class="flex items-start justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                >
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs px-2 py-0.5 rounded font-medium"
+                        :class="item.type === 'work' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'">
+                        {{ item.type === 'work' ? '💼 Work' : '🎓 Education' }}
+                      </span>
+                      <h4 class="font-semibold text-gray-900">{{ item.title }}</h4>
+                      <span v-if="item.isCurrent" class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                        Current
+                      </span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">{{ item.organization }}</p>
+                    <p class="text-sm text-gray-600">
+                      {{ item.startDate }}{{ item.endDate ? ' - ' + item.endDate : item.isCurrent ? ' - Present' : '' }}
+                    </p>
+                    <p v-if="item.location" class="text-sm text-gray-500">📍 {{ item.location }}</p>
+                    <p v-if="item.description" class="text-sm text-gray-600 mt-2">{{ item.description }}</p>
+                    <p v-if="item.notes" class="text-sm text-gray-500 mt-1 italic">{{ item.notes }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                    @click="deleteWorkOrSchool(item.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-6 border-t">
@@ -379,6 +489,31 @@ const newEvent = ref({
   endDate: '',
   description: '',
   isRecurring: false
+})
+
+// Work & School History state
+const workOrSchool = ref<Array<{
+  id: string
+  type: string
+  organization: string
+  title: string
+  startDate: string
+  endDate?: string | null
+  isCurrent: boolean
+  description?: string | null
+  location?: string | null
+  notes?: string | null
+}>>([])
+const newWorkOrSchool = ref({
+  type: 'work',
+  organization: '',
+  title: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  location: '',
+  notes: '',
+  isCurrent: false
 })
 
 // Delete memory state
@@ -599,6 +734,104 @@ async function deleteEvent(id: string) {
   }
 }
 
+// Load work or school history
+async function loadWorkOrSchool() {
+  try {
+    const response = await $fetch<{ workOrSchool: any[] }>('/api/work-or-school?owner=user', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    workOrSchool.value = response.workOrSchool || []
+  } catch (e) {
+    console.error('Failed to load work/school history:', e)
+  }
+}
+
+// Add work or school
+async function addWorkOrSchool() {
+  try {
+    const isSchool = newWorkOrSchool.value.type === 'school'
+
+    if (!newWorkOrSchool.value.organization?.trim()) {
+      basicMsg.value = isSchool ? 'School name is required' : 'Company name is required'
+      return
+    }
+
+    if (!newWorkOrSchool.value.title?.trim()) {
+      basicMsg.value = isSchool ? 'Degree/program is required' : 'Position is required'
+      return
+    }
+
+    if (!newWorkOrSchool.value.startDate?.trim()) {
+      basicMsg.value = 'Start date is required'
+      return
+    }
+
+    await $fetch('/api/work-or-school', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'user',
+        type: newWorkOrSchool.value.type,
+        organization: newWorkOrSchool.value.organization.trim(),
+        title: newWorkOrSchool.value.title.trim(),
+        startDate: newWorkOrSchool.value.startDate.trim(),
+        endDate: newWorkOrSchool.value.endDate?.trim() || null,
+        isCurrent: newWorkOrSchool.value.isCurrent,
+        description: newWorkOrSchool.value.description?.trim() || null,
+        location: newWorkOrSchool.value.location?.trim() || null,
+        notes: newWorkOrSchool.value.notes?.trim() || null
+      }
+    })
+
+    // Reset form
+    newWorkOrSchool.value = {
+      type: 'work',
+      organization: '',
+      title: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+      location: '',
+      notes: '',
+      isCurrent: false
+    }
+
+    basicMsg.value = isSchool ? 'Education added!' : 'Work experience added!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadWorkOrSchool()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add entry'
+  }
+}
+
+// Delete work or school
+async function deleteWorkOrSchool(id: string) {
+  try {
+    await $fetch(`/api/work-or-school/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Entry deleted!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadWorkOrSchool()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete entry'
+  }
+}
+
 // Delete all memory
 async function confirmDeleteMemory() {
   try {
@@ -643,6 +876,8 @@ async function confirmDeleteMemory() {
 
 onMounted(async () => {
   //await loadBasicInfo()
+  await loadEvents()
+  await loadWorkOrSchool()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
