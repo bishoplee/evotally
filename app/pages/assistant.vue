@@ -266,26 +266,28 @@ const newAssistantWorkOrSchool = ref({
 })
 
 // Goals state
-const assistantGoals = ref<Array<{
+// Goals type (same as Facts)
+type Goal = {
   id: string
-  title: string
-  description?: string | null
-  category?: string | null
+  userId: string
+  owner: string
+  type: string
+  text: string
+  importance: number
   status: string
-  priority?: string | null
-  targetDate?: string | null
-  progress: number
-  notes?: string | null
-}>>([])
+  validFrom: string
+  validUntil?: string | null
+  source: string
+  created_at: string
+  updated_at: string
+}
+
+const assistantGoals = ref<Goal[]>([])
 const newAssistantGoal = ref({
-  title: '',
-  description: '',
-  category: '',
-  priority: '',
-  targetDate: '',
-  progress: 0,
-  notes: ''
+  text: '',
+  importance: 5
 })
+const editingAssistantGoal = ref<Goal | null>(null)
 
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
@@ -652,13 +654,17 @@ async function deleteAssistantWorkOrSchool(id: string) {
 async function loadAssistantGoals() {
   try {
     if (!auth.accessToken) return
-    const response = await $fetch<{ goals: any[] }>('/api/goals?owner=assistant', {
+    const response = await $fetch<Goal[]>('/api/facts', {
       credentials: 'include',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`
+      },
+      params: {
+        type: 'goal',
+        owner: 'assistant'
       }
     })
-    assistantGoals.value = response.goals || []
+    assistantGoals.value = response || []
   } catch (e) {
     console.error('Failed to load assistant goals:', e)
   }
@@ -668,12 +674,12 @@ async function loadAssistantGoals() {
 async function addAssistantGoal() {
   msg.value = ''
   try {
-    if (!newAssistantGoal.value.title?.trim()) {
-      msg.value = 'Goal title is required'
+    if (!newAssistantGoal.value.text?.trim()) {
+      msg.value = 'Goal description is required'
       return
     }
 
-    await $fetch('/api/goals', {
+    await $fetch('/api/facts', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -682,25 +688,16 @@ async function addAssistantGoal() {
       },
       body: {
         owner: 'assistant',
-        title: newAssistantGoal.value.title.trim(),
-        description: newAssistantGoal.value.description?.trim() || null,
-        category: newAssistantGoal.value.category || null,
-        priority: newAssistantGoal.value.priority || null,
-        targetDate: newAssistantGoal.value.targetDate?.trim() || null,
-        progress: newAssistantGoal.value.progress || 0,
-        notes: newAssistantGoal.value.notes?.trim() || null
+        type: 'goal',
+        text: newAssistantGoal.value.text.trim(),
+        importance: newAssistantGoal.value.importance
       }
     })
 
     // Reset form
     newAssistantGoal.value = {
-      title: '',
-      description: '',
-      category: '',
-      priority: '',
-      targetDate: '',
-      progress: 0,
-      notes: ''
+      text: '',
+      importance: 5
     }
 
     msg.value = 'Goal added successfully!'
@@ -710,12 +707,47 @@ async function addAssistantGoal() {
   }
 }
 
+function startEditAssistantGoal(goal: Goal) {
+  editingAssistantGoal.value = { ...goal }
+}
+
+function cancelEditAssistantGoal() {
+  editingAssistantGoal.value = null
+}
+
+async function saveEditAssistantGoal() {
+  if (!editingAssistantGoal.value) return
+
+  try {
+    await $fetch(`/api/facts/${editingAssistantGoal.value.id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: editingAssistantGoal.value.text,
+        importance: editingAssistantGoal.value.importance,
+        status: editingAssistantGoal.value.status
+      }
+    })
+
+    msg.value = 'Goal updated successfully!'
+    editingAssistantGoal.value = null
+    await loadAssistantGoals()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to update goal'
+  }
+}
+
 // Delete assistant goal
 async function deleteAssistantGoal(id: string) {
+  if (!confirm('Are you sure you want to delete this goal?')) return
   msg.value = ''
   try {
     if (!auth.accessToken) return
-    await $fetch(`/api/goals/${id}`, {
+    await $fetch(`/api/facts/${id}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: {
@@ -1496,55 +1528,32 @@ onMounted(load)
 
         <!-- Goals Tab -->
         <div v-show="activeTab === 'goals'" class="card">
-          <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ profile.name }}'s Goals</h2>
-          <p class="text-gray-600 mb-6">Track {{ profile.name }}'s aspirations and goals.</p>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Goals</h2>
+          <p class="text-gray-600 mb-6">Define goals and aspirations for {{ profile.name }} to help guide their behavior and support.</p>
 
           <!-- Add Goal Form -->
-          <div class="p-4 bg-gray-50 rounded-lg mb-4">
-            <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-4 bg-gray-50 rounded-lg mb-6">
+            <div class="grid md:grid-cols-3 gap-4">
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Title</label>
-                <input v-model.trim="newAssistantGoal.title" class="input-field" placeholder="e.g., Master Italian cooking" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
-                <textarea v-model.trim="newAssistantGoal.description" rows="2" class="input-field" placeholder="What does this goal entail?"></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Description</label>
+                <input
+                  v-model.trim="newAssistantGoal.text"
+                  class="input-field"
+                  placeholder="e.g., Help you achieve work-life balance, Support your fitness journey"
+                  @keyup.enter="addAssistantGoal"
+                />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Category (Optional)</label>
-                <select v-model="newAssistantGoal.category" class="input-field">
-                  <option value="">Select category</option>
-                  <option value="personal">Personal</option>
-                  <option value="career">Career</option>
-                  <option value="health">Health & Fitness</option>
-                  <option value="financial">Financial</option>
-                  <option value="relationship">Relationship</option>
-                  <option value="education">Education</option>
-                  <option value="other">Other</option>
-                </select>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Importance (1-10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  v-model.number="newAssistantGoal.importance"
+                  class="input-field"
+                />
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Priority (Optional)</label>
-                <select v-model="newAssistantGoal.priority" class="input-field">
-                  <option value="">Select priority</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Target Date (Optional)</label>
-                <input v-model.trim="newAssistantGoal.targetDate" class="input-field" placeholder="YYYY-MM-DD or MM-YYYY" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Progress (%)</label>
-                <input type="number" min="0" max="100" v-model.number="newAssistantGoal.progress" class="input-field" placeholder="0-100" />
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                <textarea v-model.trim="newAssistantGoal.notes" rows="2" class="input-field" placeholder="Additional notes..."></textarea>
-              </div>
-              <div class="md:col-span-2">
+              <div class="md:col-span-3">
                 <button type="button" class="btn-primary" @click="addAssistantGoal">Add Goal</button>
               </div>
             </div>
@@ -1552,61 +1561,85 @@ onMounted(load)
 
           <!-- Goals List -->
           <div v-if="assistantGoals.length === 0" class="text-center py-8 text-gray-500">
-            No goals added yet.
+            <p class="text-lg mb-2">No assistant goals yet</p>
+            <p class="text-sm">Add goals to guide {{ profile.name }}'s behavior!</p>
           </div>
           <div v-else class="space-y-3">
             <div
               v-for="goal in assistantGoals"
               :key="goal.id"
-              class="p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+              class="p-4 rounded-lg border transition-all"
+              :class="{
+                'bg-purple-50 border-purple-200': goal.status === 'active',
+                'bg-gray-50 border-gray-200': goal.status === 'past',
+                'bg-yellow-50 border-yellow-200': goal.status === 'outdated'
+              }"
             >
-              <div class="flex items-start justify-between mb-2">
+              <div class="flex items-start justify-between gap-4">
                 <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-1">
-                    <h4 class="font-semibold text-gray-900">{{ goal.title }}</h4>
-                    <span v-if="goal.priority" class="text-xs px-2 py-0.5 rounded font-medium"
-                      :class="{
-                        'bg-red-100 text-red-700': goal.priority === 'high',
-                        'bg-yellow-100 text-yellow-700': goal.priority === 'medium',
-                        'bg-green-100 text-green-700': goal.priority === 'low'
-                      }">
-                      {{ goal.priority }}
-                    </span>
-                    <span v-if="goal.category" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
-                      {{ goal.category }}
-                    </span>
-                    <span class="text-xs px-2 py-0.5 rounded font-medium"
-                      :class="{
-                        'bg-green-100 text-green-700': goal.status === 'active',
-                        'bg-gray-100 text-gray-700': goal.status === 'completed',
-                        'bg-red-100 text-red-700': goal.status === 'abandoned',
-                        'bg-yellow-100 text-yellow-700': goal.status === 'on_hold'
-                      }">
-                      {{ goal.status }}
-                    </span>
-                  </div>
-                  <p v-if="goal.description" class="text-sm text-gray-600 mb-2">{{ goal.description }}</p>
-                  <p v-if="goal.targetDate" class="text-sm text-gray-500">🎯 Target: {{ goal.targetDate }}</p>
-                  <p v-if="goal.notes" class="text-sm text-gray-500 mt-1 italic">{{ goal.notes }}</p>
-
-                  <!-- Progress Bar -->
-                  <div class="mt-3">
-                    <div class="flex items-center justify-between text-sm mb-1">
-                      <span class="text-gray-700">Progress</span>
-                      <span class="font-medium text-gray-900">{{ goal.progress }}%</span>
+                  <div v-if="editingAssistantGoal?.id === goal.id" class="space-y-3">
+                    <input
+                      v-model="editingAssistantGoal.text"
+                      class="input-field"
+                      placeholder="Goal description"
+                    />
+                    <div class="flex gap-3">
+                      <select v-model="editingAssistantGoal.status" class="input-field">
+                        <option value="active">Active</option>
+                        <option value="past">Completed</option>
+                        <option value="outdated">Outdated</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        v-model.number="editingAssistantGoal.importance"
+                        class="input-field"
+                        placeholder="Importance"
+                      />
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                      <div class="bg-primary-600 h-2 rounded-full transition-all" :style="{ width: goal.progress + '%' }"></div>
+                    <div class="flex gap-2">
+                      <button class="btn-primary text-sm" @click="saveEditAssistantGoal">Save</button>
+                      <button class="btn-secondary text-sm" @click="cancelEditAssistantGoal">Cancel</button>
+                    </div>
+                  </div>
+
+                  <div v-else>
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-xs px-2 py-0.5 rounded font-medium"
+                        :class="{
+                          'bg-purple-100 text-purple-700': goal.status === 'active',
+                          'bg-gray-200 text-gray-600': goal.status === 'past',
+                          'bg-yellow-100 text-yellow-700': goal.status === 'outdated'
+                        }">
+                        {{ goal.status }}
+                      </span>
+                      <span v-if="goal.importance >= 7" class="text-xs text-yellow-600">
+                        {{ '⭐'.repeat(Math.min(goal.importance - 6, 4)) }}
+                      </span>
+                    </div>
+                    <p class="text-gray-900 font-medium text-lg">{{ goal.text }}</p>
+                    <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                      <span>Created: {{ new Date(goal.created_at).toLocaleDateString() }}</span>
                     </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
-                  @click="deleteAssistantGoal(goal.id)"
-                >
-                  Delete
-                </button>
+
+                <div v-if="editingAssistantGoal?.id !== goal.id" class="flex gap-2 shrink-0">
+                  <button
+                    class="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    @click="startEditAssistantGoal(goal)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                    @click="deleteAssistantGoal(goal.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -39,6 +39,13 @@
               Basic Info
             </button>
             <button
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'goals' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = 'goals'"
+            >
+              Goals ({{ userGoals.length }})
+            </button>
+            <button
               v-for="(section, key) in (store.registry || {})"
               :key="key"
               class="px-4 py-2 rounded-lg font-medium transition-colors relative"
@@ -501,6 +508,129 @@
           </div>
         </div>
 
+        <!-- Goals Tab -->
+        <div v-show="activeTab === 'goals'" class="space-y-6">
+          <!-- Add New Goal -->
+          <div class="card">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Add New Goal</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Description</label>
+                <input
+                  v-model.trim="newGoal.text"
+                  class="input-field"
+                  placeholder="e.g., Learn to play guitar, Run a marathon, Start a business"
+                  @keyup.enter="addGoal"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Importance (1-10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  v-model.number="newGoal.importance"
+                  class="input-field"
+                />
+              </div>
+              <div class="md:col-span-3">
+                <button class="btn-primary" @click="addGoal" :disabled="savingGoal">
+                  {{ savingGoal ? 'Adding…' : 'Add Goal' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goals List -->
+          <div class="card">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Goals</h2>
+
+            <div v-if="userGoals.length === 0" class="text-center py-12 text-gray-500">
+              <p class="text-lg mb-2">No goals yet</p>
+              <p class="text-sm">Add your first goal above to get started!</p>
+            </div>
+
+            <div v-else class="space-y-3">
+              <div
+                v-for="goal in sortedUserGoals"
+                :key="goal.id"
+                class="p-4 rounded-lg border transition-all"
+                :class="{
+                  'bg-green-50 border-green-200': goal.status === 'active',
+                  'bg-gray-50 border-gray-200': goal.status === 'past',
+                  'bg-yellow-50 border-yellow-200': goal.status === 'outdated'
+                }"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1">
+                    <div v-if="editingGoal?.id === goal.id" class="space-y-3">
+                      <input
+                        v-model="editingGoal.text"
+                        class="input-field"
+                        placeholder="Goal description"
+                      />
+                      <div class="flex gap-3">
+                        <select v-model="editingGoal.status" class="input-field">
+                          <option value="active">Active</option>
+                          <option value="past">Completed</option>
+                          <option value="outdated">Outdated</option>
+                        </select>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          v-model.number="editingGoal.importance"
+                          class="input-field"
+                          placeholder="Importance"
+                        />
+                      </div>
+                      <div class="flex gap-2">
+                        <button class="btn-primary text-sm" @click="saveEditGoal">Save</button>
+                        <button class="btn-secondary text-sm" @click="cancelEditGoal">Cancel</button>
+                      </div>
+                    </div>
+
+                    <div v-else>
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-0.5 rounded font-medium"
+                          :class="{
+                            'bg-green-100 text-green-700': goal.status === 'active',
+                            'bg-gray-200 text-gray-600': goal.status === 'past',
+                            'bg-yellow-100 text-yellow-700': goal.status === 'outdated'
+                          }">
+                          {{ goal.status }}
+                        </span>
+                        <span v-if="goal.importance >= 7" class="text-xs text-yellow-600">
+                          {{ '⭐'.repeat(Math.min(goal.importance - 6, 4)) }}
+                        </span>
+                      </div>
+                      <p class="text-gray-900 font-medium text-lg">{{ goal.text }}</p>
+                      <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                        <span>Created: {{ new Date(goal.created_at).toLocaleDateString() }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="editingGoal?.id !== goal.id" class="flex gap-2 shrink-0">
+                    <button
+                      class="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      @click="startEditGoal(goal)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                      @click="deleteGoal(goal.id)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Section Content -->
         <div
           v-for="(section, key) in (store.registry || {})"
@@ -606,6 +736,39 @@ const newEvent = ref({
   endDate: '',
   description: '',
   isRecurring: false
+})
+
+// Goals state
+type Goal = {
+  id: string
+  userId: string
+  owner: string
+  type: string
+  text: string
+  importance: number
+  status: string
+  validFrom: string
+  validUntil?: string | null
+  source: string
+  created_at: string
+  updated_at: string
+}
+
+const userGoals = ref<Goal[]>([])
+const newGoal = ref({
+  text: '',
+  importance: 5
+})
+const editingGoal = ref<Goal | null>(null)
+const savingGoal = ref(false)
+
+const sortedUserGoals = computed(() => {
+  return [...userGoals.value].sort((a, b) => {
+    if (a.status === 'active' && b.status !== 'active') return -1
+    if (a.status !== 'active' && b.status === 'active') return 1
+    if (a.importance !== b.importance) return b.importance - a.importance
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
 })
 
 // Work & School History state
@@ -1092,6 +1255,122 @@ async function confirmDeleteMemory() {
     }
   } finally {
     deletingMemory.value = false
+  }
+}
+
+// Goals functions
+async function loadGoals() {
+  try {
+    await auth.ensure()
+    const response = await $fetch<Goal[]>('/api/facts', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      },
+      params: {
+        type: 'goal',
+        owner: 'user'
+      }
+    })
+    userGoals.value = response || []
+  } catch (e: any) {
+    console.error('Failed to load goals:', e)
+  }
+}
+
+async function addGoal() {
+  if (!newGoal.value.text.trim()) {
+    basicMsg.value = 'Please enter a goal description'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
+    return
+  }
+
+  try {
+    savingGoal.value = true
+    await $fetch('/api/facts', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'user',
+        type: 'goal',
+        text: newGoal.value.text.trim(),
+        importance: newGoal.value.importance
+      }
+    })
+
+    newGoal.value = { text: '', importance: 5 }
+    basicMsg.value = 'Goal added successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    await loadGoals()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add goal'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
+  } finally {
+    savingGoal.value = false
+  }
+}
+
+function startEditGoal(goal: Goal) {
+  editingGoal.value = { ...goal }
+}
+
+function cancelEditGoal() {
+  editingGoal.value = null
+}
+
+async function saveEditGoal() {
+  if (!editingGoal.value) return
+
+  try {
+    savingGoal.value = true
+    await $fetch(`/api/facts/${editingGoal.value.id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        text: editingGoal.value.text,
+        importance: editingGoal.value.importance,
+        status: editingGoal.value.status
+      }
+    })
+
+    basicMsg.value = 'Goal updated successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    editingGoal.value = null
+    await loadGoals()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to update goal'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
+  } finally {
+    savingGoal.value = false
+  }
+}
+
+async function deleteGoal(id: string) {
+  if (!confirm('Are you sure you want to delete this goal?')) return
+
+  try {
+    await $fetch(`/api/facts/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Goal deleted successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    await loadGoals()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete goal'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
   }
 }
 
