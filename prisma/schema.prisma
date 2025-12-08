@@ -55,6 +55,7 @@ model User {
   events                Event[]
   workHistory           WorkHistory[]
   workOrSchool          WorkOrSchool[]
+  goals                 Goal[]
 }
 
 model RefreshToken {
@@ -475,6 +476,28 @@ model WorkOrSchool {
   @@index([userId, owner])
   @@index([userId, type])
   @@index([userId, isCurrent])
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  userId      String
+  owner       String   @default("user") // "user" or "assistant"
+  title       String
+  description String?  @db.Text
+  category    String?  // personal, career, health, financial, relationship, etc.
+  status      String   @default("active") // active, completed, abandoned, on_hold
+  priority    String?  // high, medium, low
+  targetDate  String?  // Flexible format: "YYYY-MM-DD", "MM-YYYY", "YYYY"
+  progress    Int      @default(0) // 0-100 percentage
+  notes       String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, owner])
+  @@index([userId, status])
 }
 
 model MemoryDebugTrace {

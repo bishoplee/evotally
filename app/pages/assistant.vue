@@ -265,6 +265,28 @@ const newAssistantWorkOrSchool = ref({
   isCurrent: false
 })
 
+// Goals state
+const assistantGoals = ref<Array<{
+  id: string
+  title: string
+  description?: string | null
+  category?: string | null
+  status: string
+  priority?: string | null
+  targetDate?: string | null
+  progress: number
+  notes?: string | null
+}>>([])
+const newAssistantGoal = ref({
+  title: '',
+  description: '',
+  category: '',
+  priority: '',
+  targetDate: '',
+  progress: 0,
+  notes: ''
+})
+
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
 
@@ -301,6 +323,9 @@ async function load() {
 
     // Load assistant work or school history
     await loadAssistantWorkOrSchool()
+
+    // Load assistant goals
+    await loadAssistantGoals()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to load assistant profile'
   } finally {
@@ -623,6 +648,88 @@ async function deleteAssistantWorkOrSchool(id: string) {
   }
 }
 
+// Load assistant goals
+async function loadAssistantGoals() {
+  try {
+    if (!auth.accessToken) return
+    const response = await $fetch<{ goals: any[] }>('/api/goals?owner=assistant', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    assistantGoals.value = response.goals || []
+  } catch (e) {
+    console.error('Failed to load assistant goals:', e)
+  }
+}
+
+// Add assistant goal
+async function addAssistantGoal() {
+  msg.value = ''
+  try {
+    if (!newAssistantGoal.value.title?.trim()) {
+      msg.value = 'Goal title is required'
+      return
+    }
+
+    await $fetch('/api/goals', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'assistant',
+        title: newAssistantGoal.value.title.trim(),
+        description: newAssistantGoal.value.description?.trim() || null,
+        category: newAssistantGoal.value.category || null,
+        priority: newAssistantGoal.value.priority || null,
+        targetDate: newAssistantGoal.value.targetDate?.trim() || null,
+        progress: newAssistantGoal.value.progress || 0,
+        notes: newAssistantGoal.value.notes?.trim() || null
+      }
+    })
+
+    // Reset form
+    newAssistantGoal.value = {
+      title: '',
+      description: '',
+      category: '',
+      priority: '',
+      targetDate: '',
+      progress: 0,
+      notes: ''
+    }
+
+    msg.value = 'Goal added successfully!'
+    await loadAssistantGoals()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to add goal'
+  }
+}
+
+// Delete assistant goal
+async function deleteAssistantGoal(id: string) {
+  msg.value = ''
+  try {
+    if (!auth.accessToken) return
+    await $fetch(`/api/goals/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    msg.value = 'Goal deleted successfully!'
+    await loadAssistantGoals()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to delete goal'
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -655,7 +762,7 @@ onMounted(load)
         <div class="card">
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="tab in ['identity', 'personality', 'relationship', 'communication', 'autonomy', 'rituals', 'guardrails', 'voice', 'facts', 'work-history']"
+              v-for="tab in ['identity', 'personality', 'relationship', 'communication', 'autonomy', 'rituals', 'guardrails', 'voice', 'facts', 'work-history', 'goals']"
               :key="tab"
               class="px-4 py-2 rounded-lg font-medium transition-colors"
               :class="activeTab === tab ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
@@ -1383,6 +1490,124 @@ onMounted(load)
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goals Tab -->
+        <div v-show="activeTab === 'goals'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ profile.name }}'s Goals</h2>
+          <p class="text-gray-600 mb-6">Track {{ profile.name }}'s aspirations and goals.</p>
+
+          <!-- Add Goal Form -->
+          <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Goal Title</label>
+                <input v-model.trim="newAssistantGoal.title" class="input-field" placeholder="e.g., Master Italian cooking" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                <textarea v-model.trim="newAssistantGoal.description" rows="2" class="input-field" placeholder="What does this goal entail?"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category (Optional)</label>
+                <select v-model="newAssistantGoal.category" class="input-field">
+                  <option value="">Select category</option>
+                  <option value="personal">Personal</option>
+                  <option value="career">Career</option>
+                  <option value="health">Health & Fitness</option>
+                  <option value="financial">Financial</option>
+                  <option value="relationship">Relationship</option>
+                  <option value="education">Education</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Priority (Optional)</label>
+                <select v-model="newAssistantGoal.priority" class="input-field">
+                  <option value="">Select priority</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Target Date (Optional)</label>
+                <input v-model.trim="newAssistantGoal.targetDate" class="input-field" placeholder="YYYY-MM-DD or MM-YYYY" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Progress (%)</label>
+                <input type="number" min="0" max="100" v-model.number="newAssistantGoal.progress" class="input-field" placeholder="0-100" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                <textarea v-model.trim="newAssistantGoal.notes" rows="2" class="input-field" placeholder="Additional notes..."></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <button type="button" class="btn-primary" @click="addAssistantGoal">Add Goal</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goals List -->
+          <div v-if="assistantGoals.length === 0" class="text-center py-8 text-gray-500">
+            No goals added yet.
+          </div>
+          <div v-else class="space-y-3">
+            <div
+              v-for="goal in assistantGoals"
+              :key="goal.id"
+              class="p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h4 class="font-semibold text-gray-900">{{ goal.title }}</h4>
+                    <span v-if="goal.priority" class="text-xs px-2 py-0.5 rounded font-medium"
+                      :class="{
+                        'bg-red-100 text-red-700': goal.priority === 'high',
+                        'bg-yellow-100 text-yellow-700': goal.priority === 'medium',
+                        'bg-green-100 text-green-700': goal.priority === 'low'
+                      }">
+                      {{ goal.priority }}
+                    </span>
+                    <span v-if="goal.category" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                      {{ goal.category }}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 rounded font-medium"
+                      :class="{
+                        'bg-green-100 text-green-700': goal.status === 'active',
+                        'bg-gray-100 text-gray-700': goal.status === 'completed',
+                        'bg-red-100 text-red-700': goal.status === 'abandoned',
+                        'bg-yellow-100 text-yellow-700': goal.status === 'on_hold'
+                      }">
+                      {{ goal.status }}
+                    </span>
+                  </div>
+                  <p v-if="goal.description" class="text-sm text-gray-600 mb-2">{{ goal.description }}</p>
+                  <p v-if="goal.targetDate" class="text-sm text-gray-500">🎯 Target: {{ goal.targetDate }}</p>
+                  <p v-if="goal.notes" class="text-sm text-gray-500 mt-1 italic">{{ goal.notes }}</p>
+
+                  <!-- Progress Bar -->
+                  <div class="mt-3">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                      <span class="text-gray-700">Progress</span>
+                      <span class="font-medium text-gray-900">{{ goal.progress }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-primary-600 h-2 rounded-full transition-all" :style="{ width: goal.progress + '%' }"></div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                  @click="deleteAssistantGoal(goal.id)"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -306,6 +306,123 @@
                 </div>
               </div>
             </div>
+
+            <!-- Goals -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Goals</h3>
+
+              <!-- Add Goal Form -->
+              <div class="p-4 bg-gray-50 rounded-lg mb-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Goal Title</label>
+                    <input v-model.trim="newGoal.title" class="input-field" placeholder="e.g., Learn Spanish" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                    <textarea v-model.trim="newGoal.description" rows="2" class="input-field" placeholder="What does this goal entail?"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category (Optional)</label>
+                    <select v-model="newGoal.category" class="input-field">
+                      <option value="">Select category</option>
+                      <option value="personal">Personal</option>
+                      <option value="career">Career</option>
+                      <option value="health">Health & Fitness</option>
+                      <option value="financial">Financial</option>
+                      <option value="relationship">Relationship</option>
+                      <option value="education">Education</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Priority (Optional)</label>
+                    <select v-model="newGoal.priority" class="input-field">
+                      <option value="">Select priority</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Target Date (Optional)</label>
+                    <input v-model.trim="newGoal.targetDate" class="input-field" placeholder="YYYY-MM-DD or MM-YYYY" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Progress (%)</label>
+                    <input type="number" min="0" max="100" v-model.number="newGoal.progress" class="input-field" placeholder="0-100" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                    <textarea v-model.trim="newGoal.notes" rows="2" class="input-field" placeholder="Additional notes..."></textarea>
+                  </div>
+                  <div class="md:col-span-2">
+                    <button type="button" class="btn-primary" @click="addGoal">Add Goal</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Goals List -->
+              <div v-if="goals.length === 0" class="text-center py-8 text-gray-500">
+                No goals added yet.
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="goal in goals"
+                  :key="goal.id"
+                  class="p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                >
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900">{{ goal.title }}</h4>
+                        <span v-if="goal.priority" class="text-xs px-2 py-0.5 rounded font-medium"
+                          :class="{
+                            'bg-red-100 text-red-700': goal.priority === 'high',
+                            'bg-yellow-100 text-yellow-700': goal.priority === 'medium',
+                            'bg-green-100 text-green-700': goal.priority === 'low'
+                          }">
+                          {{ goal.priority }}
+                        </span>
+                        <span v-if="goal.category" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                          {{ goal.category }}
+                        </span>
+                        <span class="text-xs px-2 py-0.5 rounded font-medium"
+                          :class="{
+                            'bg-green-100 text-green-700': goal.status === 'active',
+                            'bg-gray-100 text-gray-700': goal.status === 'completed',
+                            'bg-red-100 text-red-700': goal.status === 'abandoned',
+                            'bg-yellow-100 text-yellow-700': goal.status === 'on_hold'
+                          }">
+                          {{ goal.status }}
+                        </span>
+                      </div>
+                      <p v-if="goal.description" class="text-sm text-gray-600 mb-2">{{ goal.description }}</p>
+                      <p v-if="goal.targetDate" class="text-sm text-gray-500">🎯 Target: {{ goal.targetDate }}</p>
+                      <p v-if="goal.notes" class="text-sm text-gray-500 mt-1 italic">{{ goal.notes }}</p>
+
+                      <!-- Progress Bar -->
+                      <div class="mt-3">
+                        <div class="flex items-center justify-between text-sm mb-1">
+                          <span class="text-gray-700">Progress</span>
+                          <span class="font-medium text-gray-900">{{ goal.progress }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div class="bg-primary-600 h-2 rounded-full transition-all" :style="{ width: goal.progress + '%' }"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="ml-4 px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                      @click="deleteGoal(goal.id)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-6 border-t">
@@ -514,6 +631,28 @@ const newWorkOrSchool = ref({
   location: '',
   notes: '',
   isCurrent: false
+})
+
+// Goals state
+const goals = ref<Array<{
+  id: string
+  title: string
+  description?: string | null
+  category?: string | null
+  status: string
+  priority?: string | null
+  targetDate?: string | null
+  progress: number
+  notes?: string | null
+}>>([])
+const newGoal = ref({
+  title: '',
+  description: '',
+  category: '',
+  priority: '',
+  targetDate: '',
+  progress: 0,
+  notes: ''
 })
 
 // Delete memory state
@@ -832,6 +971,88 @@ async function deleteWorkOrSchool(id: string) {
   }
 }
 
+// Load goals
+async function loadGoals() {
+  try {
+    const response = await $fetch<{ goals: any[] }>('/api/goals?owner=user', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+    goals.value = response.goals || []
+  } catch (e) {
+    console.error('Failed to load goals:', e)
+  }
+}
+
+// Add goal
+async function addGoal() {
+  try {
+    if (!newGoal.value.title?.trim()) {
+      basicMsg.value = 'Goal title is required'
+      return
+    }
+
+    await $fetch('/api/goals', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'user',
+        title: newGoal.value.title.trim(),
+        description: newGoal.value.description?.trim() || null,
+        category: newGoal.value.category || null,
+        priority: newGoal.value.priority || null,
+        targetDate: newGoal.value.targetDate?.trim() || null,
+        progress: newGoal.value.progress || 0,
+        notes: newGoal.value.notes?.trim() || null
+      }
+    })
+
+    // Reset form
+    newGoal.value = {
+      title: '',
+      description: '',
+      category: '',
+      priority: '',
+      targetDate: '',
+      progress: 0,
+      notes: ''
+    }
+
+    basicMsg.value = 'Goal added!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadGoals()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add goal'
+  }
+}
+
+// Delete goal
+async function deleteGoal(id: string) {
+  try {
+    await $fetch(`/api/goals/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Goal deleted!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+
+    await loadGoals()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete goal'
+  }
+}
+
 // Delete all memory
 async function confirmDeleteMemory() {
   try {
@@ -878,6 +1099,7 @@ onMounted(async () => {
   //await loadBasicInfo()
   await loadEvents()
   await loadWorkOrSchool()
+  await loadGoals()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
