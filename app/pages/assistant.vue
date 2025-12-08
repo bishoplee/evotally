@@ -292,6 +292,51 @@ const newAssistantGoal = ref({
 })
 const editingAssistantGoal = ref<Goal | null>(null)
 
+// Relationships state
+type Relationship = {
+  id: string
+  userId: string
+  owner: string
+  from_type: string
+  from_owner: string
+  from_name?: string | null
+  from_relation?: string | null
+  to_type: string
+  to_owner: string
+  to_name?: string | null
+  to_relation?: string | null
+  relation_type: string
+  direction: string
+  relationship_status: string
+  strength: number
+  tags: string[]
+  description?: string | null
+  confidence: number
+  created_at: string
+  updated_at: string
+}
+
+const assistantRelationships = ref<Relationship[]>([])
+const editingAssistantRelationship = ref<Relationship | null>(null)
+const savingAssistantRelationship = ref(false)
+const newAssistantRelationship = ref({
+  from_type: 'assistant',
+  from_owner: 'assistant',
+  from_name: '',
+  from_relation: '',
+  to_type: 'person',
+  to_owner: 'user',
+  to_name: '',
+  to_relation: '',
+  relation_type: '',
+  direction: 'bidirectional',
+  relationship_status: 'current',
+  strength: 5,
+  tags: [] as string[],
+  description: '',
+  confidence: 1.0
+})
+
 const $api = <T>(url: string, opts: any = {}) =>
   $fetch<T>(url, { credentials: 'include', ...opts })
 
@@ -331,6 +376,9 @@ async function load() {
 
     // Load assistant goals
     await loadAssistantGoals()
+
+    // Load assistant relationships
+    await loadAssistantRelationships()
   } catch (e: any) {
     msg.value = e?.data?.message || e?.message || 'Failed to load assistant profile'
   } finally {
@@ -775,6 +823,151 @@ async function deleteAssistantGoal(id: string) {
   }
 }
 
+// Assistant Relationships functions
+async function loadAssistantRelationships() {
+  try {
+    if (!auth.accessToken) return
+    const response = await $fetch<{ relationships: Relationship[] }>('/api/relationships', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      },
+      params: {
+        owner: 'assistant'
+      }
+    })
+    assistantRelationships.value = response?.relationships || []
+  } catch (e) {
+    console.error('Failed to load assistant relationships:', e)
+  }
+}
+
+async function addAssistantRelationship() {
+  msg.value = ''
+  try {
+    if (!newAssistantRelationship.value.to_name?.trim() && !newAssistantRelationship.value.relation_type?.trim()) {
+      msg.value = 'Please provide a name or relation type'
+      return
+    }
+
+    await $fetch('/api/relationships', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'assistant',
+        from_type: newAssistantRelationship.value.from_type,
+        from_owner: newAssistantRelationship.value.from_owner,
+        from_name: newAssistantRelationship.value.from_name || null,
+        from_relation: newAssistantRelationship.value.from_relation || null,
+        to_type: newAssistantRelationship.value.to_type,
+        to_owner: newAssistantRelationship.value.to_owner,
+        to_name: newAssistantRelationship.value.to_name,
+        to_relation: newAssistantRelationship.value.to_relation || null,
+        relation_type: newAssistantRelationship.value.relation_type,
+        direction: newAssistantRelationship.value.direction,
+        relationship_status: newAssistantRelationship.value.relationship_status,
+        strength: newAssistantRelationship.value.strength,
+        tags: newAssistantRelationship.value.tags,
+        description: newAssistantRelationship.value.description || null,
+        confidence: newAssistantRelationship.value.confidence
+      }
+    })
+
+    newAssistantRelationship.value = {
+      from_type: 'assistant',
+      from_owner: 'assistant',
+      from_name: '',
+      from_relation: '',
+      to_type: 'person',
+      to_owner: 'user',
+      to_name: '',
+      to_relation: '',
+      relation_type: '',
+      direction: 'bidirectional',
+      relationship_status: 'current',
+      strength: 5,
+      tags: [],
+      description: '',
+      confidence: 1.0
+    }
+
+    msg.value = 'Relationship added successfully!'
+    await loadAssistantRelationships()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to add relationship'
+  }
+}
+
+function startEditAssistantRelationship(relationship: Relationship) {
+  editingAssistantRelationship.value = { ...relationship }
+}
+
+function cancelEditAssistantRelationship() {
+  editingAssistantRelationship.value = null
+}
+
+async function saveEditAssistantRelationship() {
+  if (!editingAssistantRelationship.value) return
+
+  try {
+    await $fetch(`/api/relationships/${editingAssistantRelationship.value.id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        from_type: editingAssistantRelationship.value.from_type,
+        from_owner: editingAssistantRelationship.value.from_owner,
+        from_name: editingAssistantRelationship.value.from_name,
+        from_relation: editingAssistantRelationship.value.from_relation,
+        to_type: editingAssistantRelationship.value.to_type,
+        to_owner: editingAssistantRelationship.value.to_owner,
+        to_name: editingAssistantRelationship.value.to_name,
+        to_relation: editingAssistantRelationship.value.to_relation,
+        relation_type: editingAssistantRelationship.value.relation_type,
+        direction: editingAssistantRelationship.value.direction,
+        relationship_status: editingAssistantRelationship.value.relationship_status,
+        strength: editingAssistantRelationship.value.strength,
+        tags: editingAssistantRelationship.value.tags,
+        description: editingAssistantRelationship.value.description,
+        confidence: editingAssistantRelationship.value.confidence
+      }
+    })
+
+    msg.value = 'Relationship updated successfully!'
+    editingAssistantRelationship.value = null
+    await loadAssistantRelationships()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to update relationship'
+  }
+}
+
+async function deleteAssistantRelationship(id: string) {
+  if (!confirm('Are you sure you want to delete this relationship?')) return
+  msg.value = ''
+  try {
+    if (!auth.accessToken) return
+    await $fetch(`/api/relationships/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    msg.value = 'Relationship deleted successfully!'
+    await loadAssistantRelationships()
+  } catch (e: any) {
+    msg.value = e?.data?.message || e?.message || 'Failed to delete relationship'
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -807,7 +1000,7 @@ onMounted(load)
         <div class="card">
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="tab in ['identity', 'personality', 'relationship', 'communication', 'autonomy', 'rituals', 'guardrails', 'voice', 'facts', 'work-history', 'goals']"
+              v-for="tab in ['identity', 'personality', 'relationship', 'communication', 'autonomy', 'rituals', 'guardrails', 'voice', 'facts', 'work-history', 'goals', 'relationships']"
               :key="tab"
               class="px-4 py-2 rounded-lg font-medium transition-colors"
               :class="activeTab === tab ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
@@ -1728,6 +1921,211 @@ onMounted(load)
                     type="button"
                     class="px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
                     @click="deleteAssistantGoal(goal.id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Relationships Tab -->
+        <div v-show="activeTab === 'relationships'" class="card">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Assistant Relationships</h2>
+          <p class="text-gray-600 mb-6">Define relationships for {{ profile.name }} to understand their connections.</p>
+
+          <!-- Add Relationship Form -->
+          <div class="p-4 bg-gray-50 rounded-lg mb-6">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Person's Name</label>
+                <input
+                  v-model.trim="newAssistantRelationship.to_name"
+                  class="input-field"
+                  placeholder="e.g., User's name, pet name"
+                  @keyup.enter="addAssistantRelationship"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Type</label>
+                <select v-model="newAssistantRelationship.relation_type" class="input-field">
+                  <option value="">-- Select --</option>
+                  <option value="assistant_to">Assistant To</option>
+                  <option value="companion_of">Companion Of</option>
+                  <option value="friend_of">Friend Of</option>
+                  <option value="helper_of">Helper Of</option>
+                  <option value="mentor_to">Mentor To</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Their Relation to Assistant</label>
+                <input
+                  v-model.trim="newAssistantRelationship.to_relation"
+                  class="input-field"
+                  placeholder="e.g., owner, user, friend"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Person Type</label>
+                <select v-model="newAssistantRelationship.to_type" class="input-field">
+                  <option value="person">Person</option>
+                  <option value="user">User</option>
+                  <option value="pet">Pet</option>
+                  <option value="assistant">Assistant</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select v-model="newAssistantRelationship.relationship_status" class="input-field">
+                  <option value="current">Current</option>
+                  <option value="ex">Ex/Past</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Strength (1-10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  v-model.number="newAssistantRelationship.strength"
+                  class="input-field"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Direction</label>
+                <select v-model="newAssistantRelationship.direction" class="input-field">
+                  <option value="bidirectional">Bidirectional</option>
+                  <option value="from_to">One-way</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description (optional)</label>
+                <textarea
+                  v-model.trim="newAssistantRelationship.description"
+                  class="input-field"
+                  rows="2"
+                  placeholder="Add notes about this relationship"
+                ></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <button type="button" class="btn-primary" @click="addAssistantRelationship">Add Relationship</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Relationships List -->
+          <div v-if="assistantRelationships.length === 0" class="text-center py-8 text-gray-500">
+            <p class="text-lg mb-2">No relationships yet</p>
+            <p class="text-sm">Add relationships to help {{ profile.name }} understand their connections!</p>
+          </div>
+          <div v-else class="space-y-3">
+            <div
+              v-for="relationship in assistantRelationships"
+              :key="relationship.id"
+              class="p-4 rounded-lg border transition-all"
+              :class="{
+                'bg-purple-50 border-purple-200': relationship.relationship_status === 'current',
+                'bg-gray-50 border-gray-200': relationship.relationship_status === 'ex'
+              }"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                  <div v-if="editingAssistantRelationship?.id === relationship.id" class="space-y-3">
+                    <input
+                      v-model="editingAssistantRelationship.to_name"
+                      class="input-field"
+                      placeholder="Person's name"
+                    />
+                    <div class="grid grid-cols-2 gap-3">
+                      <select v-model="editingAssistantRelationship.relation_type" class="input-field">
+                        <option value="">-- Type --</option>
+                        <option value="assistant_to">Assistant To</option>
+                        <option value="companion_of">Companion Of</option>
+                        <option value="friend_of">Friend Of</option>
+                        <option value="helper_of">Helper Of</option>
+                        <option value="mentor_to">Mentor To</option>
+                        <option value="other">Other</option>
+                      </select>
+                      <input
+                        v-model="editingAssistantRelationship.to_relation"
+                        class="input-field"
+                        placeholder="Their relation"
+                      />
+                      <select v-model="editingAssistantRelationship.to_type" class="input-field">
+                        <option value="person">Person</option>
+                        <option value="user">User</option>
+                        <option value="pet">Pet</option>
+                        <option value="assistant">Assistant</option>
+                      </select>
+                      <select v-model="editingAssistantRelationship.relationship_status" class="input-field">
+                        <option value="current">Current</option>
+                        <option value="ex">Ex/Past</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        v-model.number="editingAssistantRelationship.strength"
+                        class="input-field"
+                        placeholder="Strength (1-10)"
+                      />
+                      <select v-model="editingAssistantRelationship.direction" class="input-field">
+                        <option value="bidirectional">Bidirectional</option>
+                        <option value="from_to">One-way</option>
+                      </select>
+                    </div>
+                    <textarea
+                      v-model="editingAssistantRelationship.description"
+                      class="input-field"
+                      rows="2"
+                      placeholder="Description"
+                    ></textarea>
+                    <div class="flex gap-2">
+                      <button class="btn-primary text-sm" @click="saveEditAssistantRelationship">Save</button>
+                      <button class="btn-secondary text-sm" @click="cancelEditAssistantRelationship">Cancel</button>
+                    </div>
+                  </div>
+
+                  <div v-else>
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-xs px-2 py-0.5 rounded font-medium"
+                        :class="{
+                          'bg-purple-100 text-purple-700': relationship.relationship_status === 'current',
+                          'bg-gray-200 text-gray-600': relationship.relationship_status === 'ex'
+                        }">
+                        {{ relationship.relationship_status }}
+                      </span>
+                      <span v-if="relationship.relation_type" class="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">
+                        {{ relationship.relation_type.replace('_', ' ') }}
+                      </span>
+                      <span v-if="relationship.strength >= 7" class="text-xs text-yellow-600">
+                        {{ '⭐'.repeat(Math.min(relationship.strength - 6, 4)) }}
+                      </span>
+                    </div>
+                    <p class="text-gray-900 font-medium text-lg">{{ relationship.to_name || 'Unnamed' }}</p>
+                    <p v-if="relationship.to_relation" class="text-gray-600 text-sm">{{ relationship.to_relation }}</p>
+                    <p v-if="relationship.description" class="text-gray-600 text-sm mt-1">{{ relationship.description }}</p>
+                    <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                      <span>Type: {{ relationship.to_type }}</span>
+                      <span v-if="relationship.direction">{{ relationship.direction === 'bidirectional' ? '↔️' : '→' }}</span>
+                      <span>Created: {{ new Date(relationship.created_at).toLocaleDateString() }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="editingAssistantRelationship?.id !== relationship.id" class="flex gap-2 shrink-0">
+                  <button
+                    class="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    @click="startEditAssistantRelationship(relationship)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                    @click="deleteAssistantRelationship(relationship.id)"
                   >
                     Delete
                   </button>

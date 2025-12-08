@@ -56,6 +56,7 @@ model User {
   workHistory           WorkHistory[]
   workOrSchool          WorkOrSchool[]
   goals                 Goal[]
+  RelationshipEdge      RelationshipEdge[]
 }
 
 model RefreshToken {
@@ -506,43 +507,42 @@ model WorkOrSchool {
 }
 
 model RelationshipEdge {
-  id          String   @id @default(uuid())
-  userId      String
-  owner       String   @default("user") // "user" or "assistant"
+  id     String @id @default(uuid())
+  userId String
+  owner  String @default("user") // "user" or "assistant"
 
   // FROM node
-  from_type    String   // "user" | "assistant" | "relative" | "friend" | "pet" | "person"
-  from_owner   String   // "user" | "assistant"
-  from_name    String?
+  from_type     String // "user" | "assistant" | "relative" | "friend" | "pet" | "person"
+  from_owner    String // "user" | "assistant"
+  from_name     String?
   from_relation String? // e.g. "self", "daughter", "wife", "ex_wife", "friend"
 
   // TO node
-  to_type      String
-  to_owner     String
-  to_name      String?
-  to_relation  String?
+  to_type     String
+  to_owner    String
+  to_name     String?
+  to_relation String?
 
-  relation_type     String   // "partner_of", "spouse_of", "ex_partner_of", "ex_spouse_of", "parent_of", etc.
-  direction         String   // "bidirectional" | "from_to"
-  relationship_status String  @default("current")
+  relation_type       String // "partner_of", "spouse_of", "ex_partner_of", "ex_spouse_of", "parent_of", etc.
+  direction           String // "bidirectional" | "from_to"
+  relationship_status String @default("current")
   // "current" | "ex" | "past_other" (you can keep it simple: "current" or "ex")
 
-  strength      Int       @default(5)
-  tags          String[]  // e.g. ["family"], ["ai_relationship"], ["ex"], ["romantic"]
+  strength Int      @default(5)
+  tags     String[] // e.g. ["family"], ["ai_relationship"], ["ex"], ["romantic"]
 
-  description   String?   @db.Text
-  confidence    Float     @default(1.0)
+  description String? @db.Text
+  confidence  Float   @default(1.0)
 
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, relation_type])
   @@index([userId, relationship_status])
 }
-
 
 model MemoryDebugTrace {
   id String @id @default(cuid())

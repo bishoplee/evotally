@@ -46,6 +46,13 @@
               Goals ({{ userGoals.length }})
             </button>
             <button
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'relationships' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = 'relationships'"
+            >
+              Relationships ({{ userRelationships.length }})
+            </button>
+            <button
               v-for="(section, key) in (store.registry || {})"
               :key="key"
               class="px-4 py-2 rounded-lg font-medium transition-colors relative"
@@ -710,6 +717,225 @@
           </div>
         </div>
 
+        <!-- Relationships Tab -->
+        <div v-show="activeTab === 'relationships'" class="space-y-6">
+          <!-- Add New Relationship -->
+          <div class="card">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Add New Relationship</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Person's Name</label>
+                <input
+                  v-model.trim="newRelationship.to_name"
+                  class="input-field"
+                  placeholder="e.g., John Doe"
+                  @keyup.enter="addRelationship"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Relationship Type</label>
+                <select v-model="newRelationship.relation_type" class="input-field">
+                  <option value="">-- Select --</option>
+                  <option value="spouse_of">Spouse</option>
+                  <option value="partner_of">Partner</option>
+                  <option value="parent_of">Parent</option>
+                  <option value="child_of">Child</option>
+                  <option value="sibling_of">Sibling</option>
+                  <option value="friend_of">Friend</option>
+                  <option value="colleague_of">Colleague</option>
+                  <option value="mentor_of">Mentor</option>
+                  <option value="pet_owner_of">Pet Owner</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Their Relation to You</label>
+                <input
+                  v-model.trim="newRelationship.to_relation"
+                  class="input-field"
+                  placeholder="e.g., wife, father, friend"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Person Type</label>
+                <select v-model="newRelationship.to_type" class="input-field">
+                  <option value="person">Person</option>
+                  <option value="relative">Relative</option>
+                  <option value="friend">Friend</option>
+                  <option value="pet">Pet</option>
+                  <option value="assistant">Assistant</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select v-model="newRelationship.relationship_status" class="input-field">
+                  <option value="current">Current</option>
+                  <option value="ex">Ex/Past</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Strength (1-10)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  v-model.number="newRelationship.strength"
+                  class="input-field"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Direction</label>
+                <select v-model="newRelationship.direction" class="input-field">
+                  <option value="bidirectional">Bidirectional</option>
+                  <option value="from_to">One-way</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description (optional)</label>
+                <textarea
+                  v-model.trim="newRelationship.description"
+                  class="input-field"
+                  rows="2"
+                  placeholder="Add notes about this relationship"
+                ></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <button class="btn-primary" @click="addRelationship" :disabled="savingRelationship">
+                  {{ savingRelationship ? 'Adding…' : 'Add Relationship' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Relationships List -->
+          <div class="card">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Relationships</h2>
+
+            <div v-if="userRelationships.length === 0" class="text-center py-12 text-gray-500">
+              <p class="text-lg mb-2">No relationships yet</p>
+              <p class="text-sm">Add your first relationship above to get started!</p>
+            </div>
+
+            <div v-else class="space-y-3">
+              <div
+                v-for="relationship in userRelationships"
+                :key="relationship.id"
+                class="p-4 rounded-lg border transition-all"
+                :class="{
+                  'bg-blue-50 border-blue-200': relationship.relationship_status === 'current',
+                  'bg-gray-50 border-gray-200': relationship.relationship_status === 'ex'
+                }"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1">
+                    <div v-if="editingRelationship?.id === relationship.id" class="space-y-3">
+                      <input
+                        v-model="editingRelationship.to_name"
+                        class="input-field"
+                        placeholder="Person's name"
+                      />
+                      <div class="grid grid-cols-2 gap-3">
+                        <select v-model="editingRelationship.relation_type" class="input-field">
+                          <option value="">-- Type --</option>
+                          <option value="spouse_of">Spouse</option>
+                          <option value="partner_of">Partner</option>
+                          <option value="parent_of">Parent</option>
+                          <option value="child_of">Child</option>
+                          <option value="sibling_of">Sibling</option>
+                          <option value="friend_of">Friend</option>
+                          <option value="colleague_of">Colleague</option>
+                          <option value="mentor_of">Mentor</option>
+                          <option value="pet_owner_of">Pet Owner</option>
+                          <option value="other">Other</option>
+                        </select>
+                        <input
+                          v-model="editingRelationship.to_relation"
+                          class="input-field"
+                          placeholder="Their relation to you"
+                        />
+                        <select v-model="editingRelationship.to_type" class="input-field">
+                          <option value="person">Person</option>
+                          <option value="relative">Relative</option>
+                          <option value="friend">Friend</option>
+                          <option value="pet">Pet</option>
+                          <option value="assistant">Assistant</option>
+                        </select>
+                        <select v-model="editingRelationship.relationship_status" class="input-field">
+                          <option value="current">Current</option>
+                          <option value="ex">Ex/Past</option>
+                        </select>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          v-model.number="editingRelationship.strength"
+                          class="input-field"
+                          placeholder="Strength (1-10)"
+                        />
+                        <select v-model="editingRelationship.direction" class="input-field">
+                          <option value="bidirectional">Bidirectional</option>
+                          <option value="from_to">One-way</option>
+                        </select>
+                      </div>
+                      <textarea
+                        v-model="editingRelationship.description"
+                        class="input-field"
+                        rows="2"
+                        placeholder="Description"
+                      ></textarea>
+                      <div class="flex gap-2">
+                        <button class="btn-primary text-sm" @click="saveEditRelationship">Save</button>
+                        <button class="btn-secondary text-sm" @click="cancelEditRelationship">Cancel</button>
+                      </div>
+                    </div>
+
+                    <div v-else>
+                      <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-0.5 rounded font-medium"
+                          :class="{
+                            'bg-blue-100 text-blue-700': relationship.relationship_status === 'current',
+                            'bg-gray-200 text-gray-600': relationship.relationship_status === 'ex'
+                          }">
+                          {{ relationship.relationship_status }}
+                        </span>
+                        <span v-if="relationship.relation_type" class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                          {{ relationship.relation_type.replace('_', ' ') }}
+                        </span>
+                        <span v-if="relationship.strength >= 7" class="text-xs text-yellow-600">
+                          {{ '⭐'.repeat(Math.min(relationship.strength - 6, 4)) }}
+                        </span>
+                      </div>
+                      <p class="text-gray-900 font-medium text-lg">{{ relationship.to_name || 'Unnamed' }}</p>
+                      <p v-if="relationship.to_relation" class="text-gray-600 text-sm">{{ relationship.to_relation }}</p>
+                      <p v-if="relationship.description" class="text-gray-600 text-sm mt-1">{{ relationship.description }}</p>
+                      <div class="flex gap-3 mt-2 text-xs text-gray-500">
+                        <span>Type: {{ relationship.to_type }}</span>
+                        <span v-if="relationship.direction">{{ relationship.direction === 'bidirectional' ? '↔️' : '→' }}</span>
+                        <span>Created: {{ new Date(relationship.created_at).toLocaleDateString() }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="editingRelationship?.id !== relationship.id" class="flex gap-2 shrink-0">
+                    <button
+                      class="px-3 py-1 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      @click="startEditRelationship(relationship)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="px-3 py-1 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50"
+                      @click="deleteRelationship(relationship.id)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Section Content -->
         <div
           v-for="(section, key) in (store.registry || {})"
@@ -844,6 +1070,51 @@ const sortedUserGoals = computed(() => {
     if (a.priority !== b.priority) return b.priority - a.priority
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
+})
+
+// Relationships state
+type Relationship = {
+  id: string
+  userId: string
+  owner: string
+  from_type: string
+  from_owner: string
+  from_name?: string | null
+  from_relation?: string | null
+  to_type: string
+  to_owner: string
+  to_name?: string | null
+  to_relation?: string | null
+  relation_type: string
+  direction: string
+  relationship_status: string
+  strength: number
+  tags: string[]
+  description?: string | null
+  confidence: number
+  created_at: string
+  updated_at: string
+}
+
+const userRelationships = ref<Relationship[]>([])
+const editingRelationship = ref<Relationship | null>(null)
+const savingRelationship = ref(false)
+const newRelationship = ref({
+  from_type: 'person',
+  from_owner: 'user',
+  from_name: '',
+  from_relation: '',
+  to_type: 'person',
+  to_owner: 'user',
+  to_name: '',
+  to_relation: '',
+  relation_type: '',
+  direction: 'bidirectional',
+  relationship_status: 'current',
+  strength: 5,
+  tags: [] as string[],
+  description: '',
+  confidence: 1.0
 })
 
 // Work & School History state
@@ -1374,11 +1645,166 @@ async function deleteGoal(id: string) {
   }
 }
 
+// Relationships functions
+async function loadRelationships() {
+  try {
+    const response = await $fetch<{ relationships: Relationship[] }>('/api/relationships', {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      },
+      params: {
+        owner: 'user'
+      }
+    })
+    userRelationships.value = response?.relationships || []
+  } catch (e) {
+    console.error('Failed to load relationships:', e)
+  }
+}
+
+async function addRelationship() {
+  try {
+    savingRelationship.value = true
+
+    if (!newRelationship.value.to_name?.trim() && !newRelationship.value.relation_type?.trim()) {
+      basicMsg.value = 'Please provide a name or relation type'
+      return
+    }
+
+    await $fetch('/api/relationships', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        owner: 'user',
+        from_type: newRelationship.value.from_type,
+        from_owner: newRelationship.value.from_owner,
+        from_name: newRelationship.value.from_name || null,
+        from_relation: newRelationship.value.from_relation || null,
+        to_type: newRelationship.value.to_type,
+        to_owner: newRelationship.value.to_owner,
+        to_name: newRelationship.value.to_name,
+        to_relation: newRelationship.value.to_relation || null,
+        relation_type: newRelationship.value.relation_type,
+        direction: newRelationship.value.direction,
+        relationship_status: newRelationship.value.relationship_status,
+        strength: newRelationship.value.strength,
+        tags: newRelationship.value.tags,
+        description: newRelationship.value.description || null,
+        confidence: newRelationship.value.confidence
+      }
+    })
+
+    newRelationship.value = {
+      from_type: 'person',
+      from_owner: 'user',
+      from_name: '',
+      from_relation: '',
+      to_type: 'person',
+      to_owner: 'user',
+      to_name: '',
+      to_relation: '',
+      relation_type: '',
+      direction: 'bidirectional',
+      relationship_status: 'current',
+      strength: 5,
+      tags: [],
+      description: '',
+      confidence: 1.0
+    }
+
+    basicMsg.value = 'Relationship added successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    await loadRelationships()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to add relationship'
+  } finally {
+    savingRelationship.value = false
+  }
+}
+
+function startEditRelationship(relationship: Relationship) {
+  editingRelationship.value = { ...relationship }
+}
+
+function cancelEditRelationship() {
+  editingRelationship.value = null
+}
+
+async function saveEditRelationship() {
+  if (!editingRelationship.value) return
+
+  try {
+    savingRelationship.value = true
+    await $fetch(`/api/relationships/${editingRelationship.value.id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        from_type: editingRelationship.value.from_type,
+        from_owner: editingRelationship.value.from_owner,
+        from_name: editingRelationship.value.from_name,
+        from_relation: editingRelationship.value.from_relation,
+        to_type: editingRelationship.value.to_type,
+        to_owner: editingRelationship.value.to_owner,
+        to_name: editingRelationship.value.to_name,
+        to_relation: editingRelationship.value.to_relation,
+        relation_type: editingRelationship.value.relation_type,
+        direction: editingRelationship.value.direction,
+        relationship_status: editingRelationship.value.relationship_status,
+        strength: editingRelationship.value.strength,
+        tags: editingRelationship.value.tags,
+        description: editingRelationship.value.description,
+        confidence: editingRelationship.value.confidence
+      }
+    })
+
+    basicMsg.value = 'Relationship updated successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    editingRelationship.value = null
+    await loadRelationships()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to update relationship'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
+  } finally {
+    savingRelationship.value = false
+  }
+}
+
+async function deleteRelationship(id: string) {
+  if (!confirm('Are you sure you want to delete this relationship?')) return
+
+  try {
+    await $fetch(`/api/relationships/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`
+      }
+    })
+
+    basicMsg.value = 'Relationship deleted successfully!'
+    setTimeout(() => { basicMsg.value = '' }, 2000)
+    await loadRelationships()
+  } catch (e: any) {
+    basicMsg.value = e?.data?.message || e?.message || 'Failed to delete relationship'
+    setTimeout(() => { basicMsg.value = '' }, 3000)
+  }
+}
+
 onMounted(async () => {
   //await loadBasicInfo()
   await loadEvents()
   await loadWorkOrSchool()
   await loadGoals()
+  await loadRelationships()
   await store.fetchProfile()
 
   // Ensure each section exists BEFORE template binds
