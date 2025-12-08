@@ -1,6 +1,6 @@
 import { defineEventHandler, getQuery } from 'h3'
 import { verifyBearerHeader } from '~/server/utils/jwt'
-import { prisma } from '~/server/utils/prisma'
+import { prisma } from '~/server/utils/db'
 
 export default defineEventHandler(async (event) => {
   const auth = event.node.req.headers.authorization || ''
