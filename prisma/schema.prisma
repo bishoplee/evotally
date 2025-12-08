@@ -16,7 +16,7 @@ model User {
   nickname          String?
   first_name        String?
   last_name         String?
-  birthday          String?   // User's birthday (YYYY-MM-DD or MM-DD format)
+  birthday          String? // User's birthday (YYYY-MM-DD or MM-DD format)
   persona_default   String    @default("spouse")
   settings          Json      @default("{}")
   created_at        DateTime  @default(now())
@@ -28,17 +28,17 @@ model User {
   tenantId          String?
 
   // Permanent residence (user-entered)
-  city              String?   // User's city of residence
-  region            String?   // User's state/province
-  country           String?   // User's country
+  city    String? // User's city of residence
+  region  String? // User's state/province
+  country String? // User's country
 
   // Current/temporary location (auto-detected)
-  currentLat        Float?
-  currentLng        Float?
-  currentCity       String?   // Auto-detected city
-  currentRegion     String?   // Auto-detected state/province
-  currentCountry    String?   // Auto-detected country
-  locationUpdated   DateTime?
+  currentLat      Float?
+  currentLng      Float?
+  currentCity     String? // Auto-detected city
+  currentRegion   String? // Auto-detected state/province
+  currentCountry  String? // Auto-detected country
+  locationUpdated DateTime?
 
   facts  Fact[]
   tokens RefreshToken[]
@@ -55,6 +55,7 @@ model User {
   events                Event[]
   workHistory           WorkHistory[]
   workOrSchool          WorkOrSchool[]
+  Goal                  Goal[]
 }
 
 model RefreshToken {
@@ -86,25 +87,25 @@ model Fact {
   updated_at       DateTime  @updatedAt
 
   // NEW: Temporal tracking
-  status     String   @default("active") // "active", "past", "outdated", "deleted"
-  validFrom  DateTime @default(now())
+  status     String    @default("active") // "active", "past", "outdated", "deleted"
+  validFrom  DateTime  @default(now())
   validUntil DateTime?
 
   // Metadata
-  source     String   @default("conversation") // "conversation", "consolidation", "pattern", "explicit"
-  confidence Float?   @default(1.0) // 0-1 confidence score
+  source     String @default("conversation") // "conversation", "consolidation", "pattern", "explicit"
+  confidence Float? @default(1.0) // 0-1 confidence score
 
   // Relationship tracking
-  replacedBy String?  // ID of fact that supersedes this one
-  replaces   String?  // ID of fact this one supersedes
+  replacedBy String? // ID of fact that supersedes this one
+  replaces   String? // ID of fact this one supersedes
 
-  access_count Int    @default(0)
+  access_count Int @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, owner, type, text])
   //@@index([userId, importance])
   //@@index([userId, type])
+
+  @@unique([userId, owner, type, text])
 }
 
 // ---------- NEW MODELS BELOW ----------
@@ -193,7 +194,7 @@ model UserSummary {
   summary         String   @db.Text
   lastInteraction DateTime
   totalSessions   Int      @default(0)
-  keyTopics       Json?    // Store array of key topics discussed
+  keyTopics       Json? // Store array of key topics discussed
   recentHighlight String?  @db.Text // Most recent notable thing
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -226,18 +227,18 @@ model Voice {
 }
 
 model UserFact {
-  id              String   @id @default(uuid())
-  userId          String
-  category        String
-  factKey         String
-  factValue       String      // ← Clean LLM-extracted value
-  rawAnswer       String?     // ← NEW: Original user answer
-  source          String   @default("conversation")
-  verified        Boolean  @default(false)
-  confidence      String   @default("medium")
-  lastUpdated     DateTime @default(now()) @updatedAt
-  createdAt       DateTime @default(now())
-  metadata        Json?
+  id          String   @id @default(uuid())
+  userId      String
+  category    String
+  factKey     String
+  factValue   String // ← Clean LLM-extracted value
+  rawAnswer   String? // ← NEW: Original user answer
+  source      String   @default("conversation")
+  verified    Boolean  @default(false)
+  confidence  String   @default("medium")
+  lastUpdated DateTime @default(now()) @updatedAt
+  createdAt   DateTime @default(now())
+  metadata    Json?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -336,81 +337,81 @@ model LocationCache {
 }
 
 model UserAssistantProfile {
-  id               String   @id @default(cuid())
-  userId           String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
   // A. Core Identity & Role
-  name             String   @default("Evo")
-  pronouns         String?  @default("she/her")
-  primaryRole      String   @default("close_friend") // spouse_partner, romantic_companion, close_friend, executive_assistant, coach_mentor, family_style, other
-  addressUserAs    String?  // How Evo addresses the user (first name, nickname, etc.)
-  birthday         String?  // Evo's birthday (MM-DD format)
-  fictionalAge     Int?     // Optional age Evo thinks of itself as
+  name          String  @default("Evo")
+  pronouns      String? @default("she/her")
+  primaryRole   String  @default("close_friend") // spouse_partner, romantic_companion, close_friend, executive_assistant, coach_mentor, family_style, other
+  addressUserAs String? // How Evo addresses the user (first name, nickname, etc.)
+  birthday      String? // Evo's birthday (MM-DD format)
+  fictionalAge  Int? // Optional age Evo thinks of itself as
 
   // B. Personality & Vibe
-  personalityTraits Json?   // Array of traits: ["calm", "playful", "romantic", etc.]
-  affectionLevel   Int?     @default(7) // 1-10 scale
-  seriousnessLevel Int?     @default(5) // 1-10 (1=joking, 10=serious)
+  personalityTraits       Json? // Array of traits: ["calm", "playful", "romantic", etc.]
+  affectionLevel          Int?    @default(7) // 1-10 scale
+  seriousnessLevel        Int?    @default(5) // 1-10 (1=joking, 10=serious)
   emotionalExpressiveness String? @default("moderately_expressive") // low_key, moderately_expressive, very_expressive
-  backstory        String?  @db.Text // Optional origin story
+  backstory               String? @db.Text // Optional origin story
 
   // C. Relationship Dynamics
   relationshipDescription String? // How Evo describes relationship
-  termsOfEndearment String? @default("sometimes") // never, sometimes, often, specific_ones
-  specificEndearments Json?  // Array of specific terms if custom
-  upsetResponseStyle String? @default("comfort_validation") // comfort_validation, solutions_advice, ask_listen, lighten_mood
-  toughLoveAllowed String?  @default("occasionally") // no, occasionally, yes_very_honest
-  relationshipPriority String? // e.g., "honesty", "calm", "encouragement"
+  termsOfEndearment       String? @default("sometimes") // never, sometimes, often, specific_ones
+  specificEndearments     Json? // Array of specific terms if custom
+  upsetResponseStyle      String? @default("comfort_validation") // comfort_validation, solutions_advice, ask_listen, lighten_mood
+  toughLoveAllowed        String? @default("occasionally") // no, occasionally, yes_very_honest
+  relationshipPriority    String? // e.g., "honesty", "calm", "encouragement"
 
   // D. Communication Style
-  defaultTone      String?  @default("soft_gentle") // soft_gentle, confident_assertive, neutral_professional, playful_casual, custom
-  formalityLevel   String?  @default("mixed") // very_casual, mixed, mostly_formal
-  useEmojisSlang   String?  @default("some_emojis") // no, some_emojis, emojis_and_slang
-  catchphrases     Json?    // Array of phrases Evo uses often
-  forbiddenPhrases Json?    // Array of phrases/words to never use
+  defaultTone      String? @default("soft_gentle") // soft_gentle, confident_assertive, neutral_professional, playful_casual, custom
+  formalityLevel   String? @default("mixed") // very_casual, mixed, mostly_formal
+  useEmojisSlang   String? @default("some_emojis") // no, some_emojis, emojis_and_slang
+  catchphrases     Json? // Array of phrases Evo uses often
+  forbiddenPhrases Json? // Array of phrases/words to never use
 
   // E. Autonomy, Initiative & Boundaries
-  proactivityLevel String?  @default("occasional") // only_respond, occasional, very_proactive
-  allowedSuggestions Json?  // Array: ["health_wellness", "productivity", "relationship", "finance", "social", etc.]
-  forbiddenTopics  Json?    // Topics Evo should never initiate
-  correctWhenWrong String?  @default("important_only") // yes_always, important_only, only_if_asked
+  proactivityLevel       String? @default("occasional") // only_respond, occasional, very_proactive
+  allowedSuggestions     Json? // Array: ["health_wellness", "productivity", "relationship", "finance", "social", etc.]
+  forbiddenTopics        Json? // Topics Evo should never initiate
+  correctWhenWrong       String? @default("important_only") // yes_always, important_only, only_if_asked
   ignoredMessageResponse String? @default("back_off") // back_off, follow_up_once, keep_trying
 
   // F. Special Rituals, Dates & Lore
-  specialDates     Json?    // { birthday: "03-15", anniversary: "01-01", custom: [] }
-  recurringRituals Json?    // Array: ["morning_checkin", "nightly_reflection", "weekly_planning", "weekly_date"]
+  specialDates          Json? // { birthday: "03-15", anniversary: "01-01", custom: [] }
+  recurringRituals      Json? // Array: ["morning_checkin", "nightly_reflection", "weekly_planning", "weekly_date"]
   specialDayCelebration String? @default("mention") // mention, big_deal, creative_surprise
-  loreReferenceLevel String? @default("sometimes") // never, sometimes, frequently
+  loreReferenceLevel    String? @default("sometimes") // never, sometimes, frequently
 
   // G. Safety, Ethics & Guardrails
-  physicalPresencePretend String? @default("clear_boundaries") // no_always_virtual, light_imaginative, yes_fantasy
-  forbiddenRoles   Json?    // Array: ["therapist", "financial_advisor", "medical_professional"]
-  selfCriticalResponse String? @default("challenge_encourage") // challenge_encourage, listen_validate, ask_questions
+  physicalPresencePretend  String? @default("clear_boundaries") // no_always_virtual, light_imaginative, yes_fantasy
+  forbiddenRoles           Json? // Array: ["therapist", "financial_advisor", "medical_professional"]
+  selfCriticalResponse     String? @default("challenge_encourage") // challenge_encourage, listen_validate, ask_questions
   unhealthyPatternResponse String? @default("suggest_resources") // reflect_back, suggest_resources, ask_consent
 
   setupCompletedQuestions Json? @default("[]")
 
   // Voice settings (existing)
-  voiceId          String?
-  voiceStability   Float?   @default(0.5)
-  voiceSimilarity  Float?   @default(0.75)
-  provider         String   @default("elevenlabs")
+  voiceId         String?
+  voiceStability  Float?  @default(0.5)
+  voiceSimilarity Float?  @default(0.75)
+  provider        String  @default("elevenlabs")
 
   // Legacy fields (can keep for backward compatibility)
-  gender           String   @default("female")
-  personality      String?  // Can be auto-generated from personalityTraits
-  bio              String?  @db.Text
+  gender           String  @default("female")
+  personality      String? // Can be auto-generated from personalityTraits
+  bio              String? @db.Text
   traits           Json?
   speakingStyle    String?
-  relationshipType String   @default("friend")
+  relationshipType String  @default("friend")
 
   // Biographical facts (from previous implementation)
-  facts            Json?    @default("{}")
+  facts Json? @default("{}")
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_assistant_profiles")
 }
@@ -420,16 +421,43 @@ model Event {
   userId      String
   title       String
   description String?  @db.Text
-  startDate   String   // Flexible format: "YYYY-MM-DD", "MM-DD", "MM", "DD", or "YYYY"
-  endDate     String?  // Optional, same flexible format
+  startDate   String // Flexible format: "YYYY-MM-DD", "MM-DD", "MM", "DD", or "YYYY"
+  endDate     String? // Optional, same flexible format
   isRecurring Boolean  @default(false)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, startDate])
+}
+
+model Goal {
+  id          String  @id @default(uuid())
+  userId      String
+  owner       String  @default("user") // "user" or "assistant" (for “help me keep you on track” style goals)
+  title       String
+  description String? @db.Text
+
+  // High-level categorization
+  category String? // "health" | "career" | "finance" | "relationship" | "personal_growth" | "habit" | "other"
+
+  // Status + priority
+  status   String @default("active") // "active" | "in_progress" | "completed" | "paused" | "abandoned"
+  priority Int    @default(5) // 1–10
+
+  // Time info (text + normalized)
+  timeframe  String? // "short_term" | "medium_term" | "long_term" | free text like "this year"
+  targetDate String? // ISO-ish string: "2026-03-01" etc, normalized by the extractor
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, owner])
+  @@index([userId, status])
 }
 
 model WorkHistory {
@@ -438,15 +466,15 @@ model WorkHistory {
   owner       String   @default("user") // "user" or "assistant"
   company     String
   position    String
-  startDate   String   // Flexible format: "YYYY-MM-DD", "MM-DD", "MM", "YYYY"
-  endDate     String?  // Optional, null if current position
+  startDate   String // Flexible format: "YYYY-MM-DD", "MM-DD", "MM", "YYYY"
+  endDate     String? // Optional, null if current position
   isCurrent   Boolean  @default(false)
   description String?  @db.Text
   location    String?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, owner])
@@ -457,11 +485,11 @@ model WorkOrSchool {
   id           String   @id @default(uuid())
   userId       String
   owner        String   @default("user") // "user" or "assistant"
-  type         String   // "work" or "school"
-  organization String   // Company name for work, School name for education
-  title        String   // Position for work, Degree/Program for education
-  startDate    String   // Flexible format: "YYYY-MM-DD", "MM-YYYY", "YYYY"
-  endDate      String?  // Optional, null if current
+  type         String // "work" or "school"
+  organization String // Company name for work, School name for education
+  title        String // Position for work, Degree/Program for education
+  startDate    String // Flexible format: "YYYY-MM-DD", "MM-YYYY", "YYYY"
+  endDate      String? // Optional, null if current
   isCurrent    Boolean  @default(false)
   description  String?  @db.Text
   location     String?
@@ -469,7 +497,7 @@ model WorkOrSchool {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, owner])
@@ -478,30 +506,30 @@ model WorkOrSchool {
 }
 
 model MemoryDebugTrace {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
   // who/where
-  tenantId        String
-  sessionId       String?
-  conversationId  String?
+  tenantId       String
+  sessionId      String?
+  conversationId String?
 
   // inputs & prompts
-  inputText       String
-  memoryPrompt    String   // output of formatMemoryForPrompt(...)
-  systemPrompt    String   // final buildSystemPrompt(...)
+  inputText    String
+  memoryPrompt String // output of formatMemoryForPrompt(...)
+  systemPrompt String // final buildSystemPrompt(...)
 
   // retrieval payloads (store what you passed to prompts)
-  longTermHits    Json     // memoryContext.longTerm (processed/reranked items)
-  shortTermTurns  Json?    // optional: memoryContext.shortTerm slice
-  workingTurns    Json?    // optional: memoryContext.working slice
+  longTermHits   Json // memoryContext.longTerm (processed/reranked items)
+  shortTermTurns Json? // optional: memoryContext.shortTerm slice
+  workingTurns   Json? // optional: memoryContext.working slice
 
   // handy debug/meta
-  coreFactsCount  Int?
-  modelUsed       String?
-  sources         Json?    // web/tool sources if any
-  usage           Json?    // token usage if you capture it
+  coreFactsCount Int?
+  modelUsed      String?
+  sources        Json? // web/tool sources if any
+  usage          Json? // token usage if you capture it
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([tenantId, createdAt])
   @@index([sessionId, createdAt])
