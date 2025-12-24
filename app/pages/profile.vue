@@ -53,6 +53,13 @@
               Relationships ({{ userRelationships.length }})
             </button>
             <button
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'integrations' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+              @click="activeTab = 'integrations'"
+            >
+              Integrations
+            </button>
+            <button
               v-for="(section, key) in (store.registry || {})"
               :key="key"
               class="px-4 py-2 rounded-lg font-medium transition-colors relative"
@@ -930,6 +937,62 @@
                       Delete
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integrations Tab -->
+        <div v-show="activeTab === 'integrations'" class="space-y-6">
+          <div class="card">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Integrations</h2>
+            <p class="text-gray-600 mb-6">Connect your account with third-party services and devices</p>
+
+            <!-- Alexa Integration -->
+            <div class="border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors">
+              <div class="flex items-start justify-between">
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+                      A
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Amazon Alexa</h3>
+                    <p class="text-gray-600 mb-4">
+                      Control your account with voice commands through your Alexa devices
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                      <span class="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full">Voice Control</span>
+                      <span class="px-3 py-1 bg-green-50 text-green-700 text-sm rounded-full">Hands-Free</span>
+                      <span class="px-3 py-1 bg-purple-50 text-purple-700 text-sm rounded-full">Smart Home</span>
+                    </div>
+                    <NuxtLink
+                      to="/integrations/alexa"
+                      class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                      Manage Alexa Integration
+                      <span>→</span>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coming Soon -->
+            <div class="border border-gray-200 rounded-lg p-6 opacity-60">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                  <div class="w-16 h-16 bg-gray-300 rounded-xl flex items-center justify-center text-gray-500 text-xl">
+                    ?
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-gray-600 mb-2">More Integrations Coming Soon</h3>
+                  <p class="text-gray-500">
+                    We're working on additional integrations to make your experience even better
+                  </p>
                 </div>
               </div>
             </div>
