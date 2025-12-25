@@ -12,6 +12,7 @@ model User {
   id                String    @id @default(uuid())
   email             String    @unique
   password_hash     String?
+  is_guest          Boolean   @default(false) // Guest users have limited access
   display_name      String?
   nickname          String?
   first_name        String?
@@ -59,6 +60,7 @@ model User {
   RelationshipEdge      RelationshipEdge[]
   alexaAuthCodes        AlexaAuthCode[]
   alexaRefreshTokens    AlexaRefreshToken[]
+  externalIdentities    ExternalIdentity[]
 }
 
 model RefreshToken {
@@ -608,4 +610,22 @@ model AlexaRefreshToken {
   @@index([token])
   @@index([userId])
   @@index([expiresAt])
+}
+
+model ExternalIdentity {
+  id              String   @id @default(cuid())
+
+  provider        String   // "alexa" | "google" | "apple" | etc
+  providerUserId  String   // e.g. Alexa userId: amzn1.account.ABC...
+  deviceId        String?  // optional: System.device.deviceId
+  lastSeenAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId], name: "provider_providerUserId_unique")
+  @@index([userId])
+  @@index([provider])
 }

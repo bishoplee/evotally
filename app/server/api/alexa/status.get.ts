@@ -31,6 +31,24 @@ export default defineEventHandler(async (e) => {
     }
   })
 
+  // Get linked Alexa identities (from actual skill usage)
+  const alexaIdentities = await prisma.externalIdentity.findMany({
+    where: {
+      userId,
+      provider: 'alexa'
+    },
+    orderBy: {
+      lastSeenAt: 'desc'
+    },
+    select: {
+      id: true,
+      providerUserId: true,
+      deviceId: true,
+      lastSeenAt: true,
+      createdAt: true
+    }
+  })
+
   const isLinked = activeTokens.length > 0
   const mostRecent = activeTokens[0]
 
@@ -44,6 +62,14 @@ export default defineEventHandler(async (e) => {
       linkedAt: t.createdAt,
       expiresAt: t.expiresAt,
       clientId: t.clientId
+    })),
+    // Alexa accounts that have actually used the skill
+    alexaAccounts: alexaIdentities.map(a => ({
+      id: a.id,
+      alexaUserId: a.providerUserId,
+      deviceId: a.deviceId,
+      lastUsed: a.lastSeenAt,
+      linkedAt: a.createdAt
     }))
   }
 })

@@ -225,10 +225,42 @@ await prisma.alexaAuthCode.deleteMany({
 - [ ] Test account linking with real Alexa devices
 - [ ] Document skill invocation name and intents
 
+## ExternalIdentity Integration
+
+When users interact with your Alexa skill, their Alexa user ID is automatically stored in the `ExternalIdentity` table. This allows you to:
+- Track which Alexa accounts are linked to each user
+- See when users last used the skill
+- Associate device IDs with users
+
+### Skill Handler Implementation
+
+When building your Alexa skill handler, use the helper function to link identities:
+
+```typescript
+import { linkAlexaIdentity } from '~/server/utils/alexa'
+
+// In your skill handler endpoint
+const alexaUserId = request.session.user.userId
+const deviceId = request.context.System.device.deviceId
+
+await linkAlexaIdentity(userId, alexaUserId, deviceId)
+```
+
+See `/app/server/api/alexa/skill.post.ts` for a complete example.
+
+### Helper Functions
+
+The following utility functions are available in `/app/server/utils/alexa.ts`:
+
+- `linkAlexaIdentity(userId, alexaUserId, deviceId?)` - Create or update Alexa identity link
+- `getUserAlexaIdentities(userId)` - Get all Alexa accounts for a user
+- `findUserByAlexaId(alexaUserId)` - Find user by their Alexa ID
+
 ## Next Steps
 
 After account linking is set up:
-1. Implement Alexa skill handler to receive and process user requests
+1. Implement Alexa skill handler to receive and process user requests (see `/app/server/api/alexa/skill.post.ts`)
 2. Use the access token to authenticate API calls from Alexa
-3. Build out skill intents and responses
-4. Test with various Alexa devices and scenarios
+3. Alexa user IDs will be automatically stored in `ExternalIdentity` table
+4. Build out skill intents and responses
+5. Test with various Alexa devices and scenarios
