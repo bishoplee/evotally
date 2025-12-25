@@ -10,7 +10,9 @@ const PUBLIC_PATHS = new Set([
   '/api/auth/logout',
   '/api/auth/register',
   '/health',
-  '/api/auth/me'
+  '/api/auth/me',
+  '/api/alexa/authorize',
+  '/api/alexa/token'
 ])
 
 export default defineEventHandler(async (event) => {
