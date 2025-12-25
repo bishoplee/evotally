@@ -27,55 +27,42 @@ async function authorize() {
     // Ensure user is authenticated
     await auth.ensure()
 
-    // Build the full authorization URL
-    const authUrl = new URL('/api/alexa/authorize', window.location.origin)
-    authUrl.searchParams.set('client_id', client_id)
-    authUrl.searchParams.set('redirect_uri', redirect_uri)
-    authUrl.searchParams.set('state', state)
-    authUrl.searchParams.set('response_type', response_type)
-    if (scope) authUrl.searchParams.set('scope', scope)
-
     // Make request to authorization endpoint
-    const response = await fetch(authUrl.toString(), {
+    const response = await $fetch('/api/alexa/authorize', {
       method: 'GET',
       credentials: 'include',
       headers: {
-        'Authorization': `Bearer ${auth.accessToken}`
+        Authorization: `Bearer ${auth.accessToken}`
       },
-      redirect: 'manual' // Don't follow redirects automatically
+      params: {
+        client_id,
+        redirect_uri,
+        state,
+        response_type,
+        scope
+      }
     })
 
-    // Check if it's a redirect response
-    if (response.status === 302 || response.status === 301) {
-      const redirectTo = response.headers.get('location')
-      if (redirectTo) {
-        // Redirect the user to Alexa
-        window.location.href = redirectTo
+    // Check if we need to redirect back to Alexa
+    if (response && typeof response === 'object') {
+      if ('redirectUrl' in response && response.redirectUrl) {
+        // Show success message briefly before redirecting
         success.value = true
+        // Redirect the user back to Alexa with the authorization code
+        setTimeout(() => {
+          window.location.href = response.redirectUrl
+        }, 1000)
         return
       }
-    }
 
-    // Check if it's a JSON response
-    const contentType = response.headers.get('content-type')
-    if (contentType?.includes('application/json')) {
-      const data = await response.json()
-
-      if (data.requiresAuth) {
+      if ('requiresAuth' in response) {
         error.value = 'Please log in to continue'
         return
       }
-
-      if (data.redirectUrl) {
-        // Redirect the user to Alexa
-        window.location.href = data.redirectUrl
-        success.value = true
-        return
-      }
     }
 
-    // Authorization successful
-    success.value = true
+    // If no redirect URL, something went wrong
+    error.value = 'Authorization failed - no redirect URL received'
   } catch (e: any) {
     error.value = e?.data?.message || e?.message || 'Failed to authorize Alexa connection'
   } finally {

@@ -50,7 +50,7 @@ export default defineEventHandler(async (e) => {
     // User not authenticated, will need to login
   }
 
-  // If user is authenticated, generate authorization code and redirect
+  // If user is authenticated, generate authorization code and return redirect URL
   if (userId) {
     // Generate a one-time authorization code
     const authCode = crypto.randomUUID()
@@ -69,12 +69,16 @@ export default defineEventHandler(async (e) => {
       }
     })
 
-    // Redirect back to Alexa with the authorization code
+    // Build redirect URL back to Alexa with the authorization code
     const redirectUrl = new URL(redirect_uri)
     redirectUrl.searchParams.set('code', authCode)
     redirectUrl.searchParams.set('state', state)
 
-    return sendRedirect(e, redirectUrl.toString(), 302)
+    // Return the redirect URL for the frontend to handle
+    return {
+      success: true,
+      redirectUrl: redirectUrl.toString()
+    }
   }
 
   // User not authenticated - return parameters for frontend to handle
