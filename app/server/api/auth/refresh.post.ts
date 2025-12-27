@@ -4,23 +4,24 @@ import { createHash, randomBytes } from 'node:crypto'
 import { mintAccessToken, jwtCfg, setRefreshCookie } from '~/server/utils/jwt' // from your updated jwt.ts
 
 export default defineEventHandler(async (event) => {
-  // 1) Read refresh token from either cookie (web) or body (mobile)
-  let incoming: string | undefined
-  let platform = 'web'
-
-  // Try to read from request body first (for mobile apps)
+  // 1) Read request body once (can only be read once in h3)
+  let body: { refresh_token?: string; persona?: string; platform?: string } | null = null
   try {
-    const body = await readBody<{ refresh_token?: string; persona?: string; platform?: string }>(event)
-    if (body?.refresh_token) {
-      incoming = body.refresh_token
-      platform = body.platform || 'mobile'
-    }
+    body = await readBody(event)
   } catch {
-    // Body parsing failed, try cookie instead
+    // Body parsing failed, will try cookie instead
   }
 
-  // Fallback to cookie (for web apps)
-  if (!incoming) {
+  // 2) Get refresh token from either body (mobile) or cookie (web)
+  let incoming: string | undefined
+  let platform = 'web'
+  let persona: string | undefined
+
+  if (body?.refresh_token) {
+    incoming = body.refresh_token
+    platform = body.platform || 'mobile'
+    persona = body.persona
+  } else {
     incoming = getCookie(event, 'refresh_token')
     platform = 'web'
   }
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'No refresh token provided' })
   }
 
-  // 2) Validate token by hash lookup (not revoked, not expired)
+  // 3) Validate token by hash lookup (not revoked, not expired)
   const token_hash = createHash('sha256').update(incoming).digest('hex')
   const rec = await prisma.refreshToken.findFirst({
     where: {
@@ -52,13 +53,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get persona from body or use default
-  let persona = rec.user.persona_default || 'spouse'
-  try {
-    const body = await readBody<{ persona?: string }>(event)
-    if (body?.persona) persona = body.persona
-  } catch {
-    // ignore body parse errors
+  // Use persona from body or user's default
+  if (!persona) {
+    persona = rec.user.persona_default || 'spouse'
   }
 
   // 3) Rotate refresh token (security best practice)
