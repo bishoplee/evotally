@@ -4,10 +4,29 @@ import { createHash, randomBytes } from 'node:crypto'
 import { mintAccessToken, jwtCfg, setRefreshCookie } from '~/server/utils/jwt' // from your updated jwt.ts
 
 export default defineEventHandler(async (event) => {
-  // 1) Read refresh cookie
-  const incoming = getCookie(event, 'refresh_token')
+  // 1) Read refresh token from either cookie (web) or body (mobile)
+  let incoming: string | undefined
+  let platform = 'web'
+
+  // Try to read from request body first (for mobile apps)
+  try {
+    const body = await readBody<{ refresh_token?: string; persona?: string; platform?: string }>(event)
+    if (body?.refresh_token) {
+      incoming = body.refresh_token
+      platform = body.platform || 'mobile'
+    }
+  } catch {
+    // Body parsing failed, try cookie instead
+  }
+
+  // Fallback to cookie (for web apps)
   if (!incoming) {
-    throw createError({ statusCode: 401, statusMessage: 'no refresh' })
+    incoming = getCookie(event, 'refresh_token')
+    platform = 'web'
+  }
+
+  if (!incoming) {
+    throw createError({ statusCode: 401, statusMessage: 'No refresh token provided' })
   }
 
   // 2) Validate token by hash lookup (not revoked, not expired)
@@ -20,11 +39,20 @@ export default defineEventHandler(async (event) => {
     },
     include: { user: true },
   })
+
   if (!rec?.user) {
-    throw createError({ statusCode: 401, statusMessage: 'invalid refresh' })
+    throw createError({ statusCode: 401, statusMessage: 'Invalid or expired refresh token' })
   }
 
-  // (Optional) persona override via body; default to user's persona_default
+  // Check if guest user
+  if (rec.user.is_guest) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Guest accounts cannot refresh tokens'
+    })
+  }
+
+  // Get persona from body or use default
   let persona = rec.user.persona_default || 'spouse'
   try {
     const body = await readBody<{ persona?: string }>(event)
@@ -33,7 +61,7 @@ export default defineEventHandler(async (event) => {
     // ignore body parse errors
   }
 
-  // 3) Rotate refresh token (best practice)
+  // 3) Rotate refresh token (security best practice)
   const nextPlain = randomBytes(48).toString('base64url')
   const next_hash = createHash('sha256').update(nextPlain).digest('hex')
   const { refreshTtl } = jwtCfg()
@@ -46,18 +74,33 @@ export default defineEventHandler(async (event) => {
     }),
     prisma.refreshToken.create({
       data: {
-        userId: rec.userId,         // <-- matches your model
+        userId: rec.userId,
         token_hash: next_hash,
-        expires_at: nextExpiresAt,  // created_at defaults to now
+        expires_at: nextExpiresAt,
       },
     }),
   ])
 
-  // 4) Set rotated cookie (secure=false on localhost handled in setRefreshCookie)
-  setRefreshCookie(event, nextPlain, nextExpiresAt)
+  // 4) Set cookie for web clients only
+  if (platform === 'web') {
+    setRefreshCookie(event, nextPlain, nextExpiresAt)
+  }
 
   // 5) Mint new access token
   const { access_token, expires_in } = await mintAccessToken(String(rec.user.id), persona)
 
-  return { access_token, expires_in }
+  // Return tokens (include refresh_token for mobile apps)
+  return {
+    access_token,
+    expires_in,
+    refresh_token: nextPlain, // Mobile apps need this
+    user: {
+      id: rec.user.id,
+      email: rec.user.email,
+      first_name: rec.user.first_name,
+      last_name: rec.user.last_name,
+      display_name: rec.user.display_name,
+      is_guest: rec.user.is_guest
+    }
+  }
 })
