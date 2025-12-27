@@ -213,8 +213,8 @@ model Voice {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  provider String // e.g., "elevenlabs", "azure_tts"
-  voiceId  String // provider's voice identifier
+  provider String // e.g., "elevenlabs", "azure_tts", "custom"
+  voiceId  String // provider's voice identifier or custom voice URL
 
   stability       Float?  @default(0.4)
   similarityBoost Float?  @default(0.85)
@@ -229,6 +229,34 @@ model Voice {
   @@unique([userId, provider])
   @@index([userId])
   @@index([provider])
+}
+
+// Catalog of system/provider voices available to all users
+model ProviderVoice {
+  id String @id @default(cuid())
+
+  provider    String // e.g., "elevenlabs", "openai", "deepgram"
+  providerId  String // The voice ID from the provider
+  name        String // Display name (e.g., "Rachel", "Alloy")
+  description String? // Description of the voice
+  language    String? // e.g., "en-US", "es-ES"
+  gender      String? // "male", "female", "neutral"
+  accent      String? // e.g., "american", "british"
+  ageRange    String? // e.g., "young", "middle-aged", "old"
+  useCase     String? // e.g., "narration", "conversational", "news"
+  previewUrl  String? // URL to audio sample
+  isActive    Boolean @default(true) // Can be disabled without deletion
+
+  // Provider-specific settings
+  settings Json? @default("{}")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([provider, providerId])
+  @@index([provider])
+  @@index([isActive])
+  @@index([language])
 }
 
 model UserFact {
