@@ -1,12 +1,29 @@
 <script setup lang="ts">
-definePageMeta({ public: true })
+definePageMeta({ 
+  public: true,
+  layout: false // Remove default layout (no header/footer)
+})
 
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuth()
+
+// Get the page user came from (either from query param or document.referrer)
+const backUrl = computed(() => {
+  const from = route.query.from as string
+  if (from && from !== '/login' && from !== '/register') {
+    return from
+  }
+  return '/'
+})
+
+function goBack() {
+  router.push(backUrl.value)
+}
 
 const email = ref('')
 const password = ref('')
@@ -98,13 +115,22 @@ function loginWithGoogle() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <!-- Back Button -->
+    <button
+      @click="goBack"
+      class="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span class="text-sm font-medium">Back</span>
+    </button>
+
     <div class="max-w-md w-full">
       <!-- Header -->
       <div class="text-center mb-8">
         <div class="flex justify-center mb-4">
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center text-white font-bold text-3xl shadow-lg">
-            E
-          </div>
+          <img src="/logo.svg" alt="Evotally" class="h-16 w-auto" />
         </div>
         <h2 class="text-3xl font-bold text-gray-900">Welcome back</h2>
         <p class="mt-2 text-sm text-gray-600">

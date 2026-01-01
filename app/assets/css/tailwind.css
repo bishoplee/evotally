@@ -1,61 +1,325 @@
+@import './evotally-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@theme inline {
-    /* Primary #016d77 */
-    --color-primary-50:  #f0f6f7;
-    --color-primary-100: #cfe7e9;
-    --color-primary-200: #a4d4d7;
-    --color-primary-300: #6fbbc1;
-    --color-primary-400: #3aa1aa;
-    --color-primary-500: #1b8790;
-    --color-primary-600: #016d77; /* base */
-    --color-primary-700: #075860;
-    --color-primary-800: #0a454c;
-    --color-primary-900: #09363b;
-
-    /* Secondary #fb8d68 */
-    --color-secondary-50:  #fff5f1;
-    --color-secondary-100: #ffe5db;
-    --color-secondary-200: #ffcab9;
-    --color-secondary-300: #ffac92;
-    --color-secondary-400: #ff946f;
-    --color-secondary-500: #ff845a;
-    --color-secondary-600: #fb8d68; /* base */
-    --color-secondary-700: #e56a3d;
-    --color-secondary-800: #b94f2a;
-    --color-secondary-900: #7a331b;
-}
-
 @layer base {
   html {
     @apply antialiased;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-gray-50 text-gray-900;
+    font-family: var(--ev-font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--ev-font-heading);
   }
 }
 
 @layer components {
+  /* ========================================
+     EVOTALLY BUTTONS
+     ======================================== */
+  
+  /* Primary CTA (Coral) */
   .btn-primary {
-    @apply px-4 py-2 rounded-lg font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center;
+    @apply font-heading font-semibold text-white;
+    @apply bg-coral-500 hover:bg-coral-400 active:bg-[#E86C4D];
+    @apply rounded-pill;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 24px;
+    font-size: var(--ev-text-button-desktop);
   }
 
+  @media (max-width: 1023px) {
+    .btn-primary {
+      font-size: var(--ev-text-button-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .btn-primary {
+      font-size: var(--ev-text-button-mobile);
+    }
+  }
+
+  /* Secondary CTA (Teal) */
   .btn-secondary {
-    @apply px-4 py-2 rounded-lg font-medium text-primary-700 bg-white border border-primary-300 hover:bg-primary-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center;
+    @apply font-heading font-semibold text-white;
+    @apply bg-teal-600 hover:bg-teal-500 active:bg-[#00959F];
+    @apply rounded-pill;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 24px;
+    font-size: var(--ev-text-button-desktop);
   }
 
-  .btn-outline {
-    @apply px-4 py-2 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  @media (max-width: 1023px) {
+    .btn-secondary {
+      font-size: var(--ev-text-button-tablet);
+    }
   }
 
-  .input-field {
-    @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 outline-none;
+  @media (max-width: 767px) {
+    .btn-secondary {
+      font-size: var(--ev-text-button-mobile);
+    }
   }
 
+  /* Ghost / Outline Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center;
+    @apply font-heading font-semibold;
+    @apply border-2 border-teal-600 text-teal-800;
+    @apply bg-gray-50 hover:bg-gray-150 active:bg-gray-150;
+    @apply rounded-pill;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 24px;
+    font-size: var(--ev-text-button-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .btn-ghost {
+      font-size: var(--ev-text-button-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .btn-ghost {
+      font-size: var(--ev-text-button-mobile);
+    }
+  }
+
+  /* Gradient Button (Evo Orb style) */
+  .btn-gradient {
+    @apply inline-flex items-center justify-center;
+    @apply font-heading font-semibold text-white;
+    @apply rounded-pill;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--ev-gradient-orb);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 24px;
+    font-size: var(--ev-text-button-desktop);
+  }
+
+  .btn-gradient:hover {
+    filter: saturate(1.1) brightness(1.05);
+  }
+
+  .btn-gradient:active {
+    filter: saturate(1.2) brightness(0.95);
+  }
+
+  @media (max-width: 1023px) {
+    .btn-gradient {
+      font-size: var(--ev-text-button-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .btn-gradient {
+      font-size: var(--ev-text-button-mobile);
+    }
+  }
+
+  /* Focus Ring for Buttons */
+  .btn-primary:focus-visible,
+  .btn-secondary:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-gradient:focus-visible {
+    @apply outline-none ring-2 ring-teal-400 ring-offset-2;
+  }
+
+  /* ========================================
+     EVOTALLY CARDS
+     ======================================== */
+  
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white;
+    border-radius: var(--ev-radius-card);
+    box-shadow: var(--ev-shadow-card);
+    padding: var(--ev-spacing-card-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .card {
+      padding: var(--ev-spacing-card-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .card {
+      padding: var(--ev-spacing-card-mobile);
+    }
+  }
+
+  .card-hover {
+    @apply card transition-all duration-300;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 32px rgba(17, 24, 39, 0.15);
+  }
+
+  /* ========================================
+     EVOTALLY FORMS
+     ======================================== */
+  
+  .input-field {
+    @apply w-full bg-white;
+    @apply border border-gray-150;
+    @apply text-gray-900 placeholder:text-gray-300;
+    @apply transition-all duration-200 outline-none;
+    border-radius: var(--ev-radius-input);
+    height: var(--ev-input-height-desktop);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-family: var(--ev-font-body);
+    font-size: var(--ev-text-body-desktop);
+  }
+
+  .input-field:focus {
+    @apply border-teal-600 ring-2 ring-teal-400/20;
+  }
+
+  .input-field:disabled {
+    @apply bg-gray-50 cursor-not-allowed opacity-60;
+  }
+
+  @media (max-width: 1023px) {
+    .input-field {
+      height: var(--ev-input-height-tablet);
+      font-size: var(--ev-text-body-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .input-field {
+      height: var(--ev-input-height-mobile);
+      font-size: var(--ev-text-body-mobile);
+    }
+  }
+
+  .label-field {
+    @apply block mb-2 font-medium text-gray-900;
+    font-family: var(--ev-font-body);
+    font-size: var(--ev-text-small-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .label-field {
+      font-size: var(--ev-text-small-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .label-field {
+      font-size: var(--ev-text-small-mobile);
+    }
+  }
+
+  /* ========================================
+     EVOTALLY TYPOGRAPHY UTILITIES
+     ======================================== */
+  
+  .heading-hero {
+    font-family: var(--ev-font-heading);
+    font-weight: 700;
+    line-height: var(--ev-leading-hero);
+    font-size: var(--ev-text-hero-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .heading-hero {
+      font-size: var(--ev-text-hero-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .heading-hero {
+      font-size: var(--ev-text-hero-mobile);
+    }
+  }
+
+  .heading-section {
+    font-family: var(--ev-font-heading);
+    font-weight: 700;
+    line-height: var(--ev-leading-h2);
+    font-size: var(--ev-text-h2-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .heading-section {
+      font-size: var(--ev-text-h2-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .heading-section {
+      font-size: var(--ev-text-h2-mobile);
+    }
+  }
+
+  .heading-card {
+    font-family: var(--ev-font-heading);
+    font-weight: 600;
+    line-height: var(--ev-leading-h3);
+    font-size: var(--ev-text-h3-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .heading-card {
+      font-size: var(--ev-text-h3-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .heading-card {
+      font-size: var(--ev-text-h3-mobile);
+    }
+  }
+
+  /* ========================================
+     EVOTALLY CONTAINER
+     ======================================== */
+  
+  .container-evotally {
+    @apply mx-auto w-full;
+    max-width: var(--ev-container-desktop);
+    padding-left: var(--ev-padding-desktop);
+    padding-right: var(--ev-padding-desktop);
+  }
+
+  @media (max-width: 1023px) {
+    .container-evotally {
+      max-width: var(--ev-container-tablet);
+      padding-left: var(--ev-padding-tablet);
+      padding-right: var(--ev-padding-tablet);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .container-evotally {
+      max-width: 100%;
+      padding-left: var(--ev-padding-mobile);
+      padding-right: var(--ev-padding-mobile);
+    }
+  }
+
+  /* ========================================
+     LEGACY SUPPORT (for existing components)
+     ======================================== */
+  
+  .btn-outline {
+    @apply btn-ghost;
   }
 }

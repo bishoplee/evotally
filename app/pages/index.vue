@@ -1,6 +1,13 @@
 <script setup lang="ts">
 definePageMeta({ public: true })
 
+useHead({
+  title: 'Your AI that grows with you - Evotally',
+  meta: [
+    { name: 'description', content: 'Experience conversations that feel real. Evotally learns from every interaction, remembers what matters to you, and adapts to your needs.' }
+  ]
+})
+
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '~/stores/auth'
 
@@ -44,44 +51,44 @@ const stats = [
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="lg:grid lg:grid-cols-12 lg:gap-x-8 lg:gap-y-20">
           <!-- Hero Content -->
-          <div class="relative z-10 mx-auto max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-6">
-            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              Your AI Companion
-              <span class="block text-primary-600 mt-2">That Actually Knows You</span>
+          <div class="relative z-10 mx-auto max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-7">
+            <h1 class="tracking-tight text-gray-900 mt-12">
+              <span class="block hero-title-main">
+                Your AI Companion
+              </span>
+              <span class="block text-primary-600 mt-2 hero-title-sub">
+                That Actually Knows You
+              </span>
             </h1>
-            <p class="mt-6 text-lg leading-8 text-gray-600">
+            <p class="mt-8 leading-relaxed text-gray-600 hero-text">
               Experience conversations that feel real. Evotally learns from every interaction,
-              remembers what matters to you, and adapts to your needs—whether you need a friend,
+              remembers what matters to you, and adapts to your needs — whether you need a friend,
               coach, or partner.
             </p>
-            <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <div class="mt-10">
               <NuxtLink
                 v-if="!isAuthed"
                 to="/register"
-                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3"
               >
-                Get Started Free
+                Try Evotally
+                <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
+                  <svg class="w-4 h-4 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </span>
               </NuxtLink>
               <NuxtLink
                 v-else
                 to="/voice"
-                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3"
               >
                 Start Talking
-              </NuxtLink>
-              <NuxtLink
-                v-if="!isAuthed"
-                to="/login"
-                class="btn-secondary text-lg px-8 py-4"
-              >
-                Sign In
-              </NuxtLink>
-              <NuxtLink
-                v-else
-                to="/assistant"
-                class="btn-secondary text-lg px-8 py-4"
-              >
-                Customize Assistant
+                <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
+                  <svg class="w-4 h-4 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </span>
               </NuxtLink>
             </div>
 
@@ -95,21 +102,33 @@ const stats = [
           </div>
 
           <!-- Hero Visual -->
-          <div class="relative mt-10 sm:mt-20 lg:col-span-5 lg:row-span-2 lg:mt-0 xl:col-span-6">
+          <div class="relative mt-10 sm:mt-20 lg:col-span-5 lg:row-span-2 lg:mt-0 xl:col-span-5">
             <div class="relative mx-auto aspect-square max-w-lg lg:max-w-none">
               <!-- Animated Orb Preview -->
               <div class="absolute inset-0 flex items-center justify-center">
                 <div class="relative">
-                  <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 opacity-20 blur-3xl animate-pulse"></div>
-                  <div class="relative h-64 w-64 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 shadow-2xl flex items-center justify-center">
-                    <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <!-- Outer glow layers with official gradient -->
+                  <div class="absolute inset-0 rounded-full blur-[100px] animate-pulse hero-orb-glow-1"></div>
+                  <div class="absolute inset-0 rounded-full blur-[80px] animate-pulse hero-orb-glow-2" style="animation-delay: 0.5s;"></div>
+                  <div class="absolute inset-0 rounded-full blur-[60px] animate-pulse hero-orb-glow-3" style="animation-delay: 1s;"></div>
+                  
+                  <!-- Main orb with official Evotally gradient -->
+                  <div class="relative h-64 w-64 rounded-full shadow-2xl flex items-center justify-center animate-float hero-orb">
+                    <!-- Inner glow for depth --
+                    <div class="absolute inset-8 rounded-full opacity-40" style="background: linear-gradient(315deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);"></div>
+                    -->
+                    
+                    <!-- Microphone icon -->
+                    <svg class="relative z-10 w-32 h-32 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"/>
                     </svg>
                   </div>
-                  <!-- Floating particles -->
-                  <div class="absolute top-0 left-0 w-4 h-4 rounded-full bg-secondary-400 opacity-60 animate-bounce" style="animation-delay: 0s;"></div>
-                  <div class="absolute top-1/4 right-0 w-3 h-3 rounded-full bg-primary-400 opacity-60 animate-bounce" style="animation-delay: 0.5s;"></div>
-                  <div class="absolute bottom-1/4 left-0 w-3 h-3 rounded-full bg-secondary-500 opacity-60 animate-bounce" style="animation-delay: 1s;"></div>
+                  
+                  <!-- Floating particles with brand colors -->
+                  <div class="absolute top-0 left-0 w-6 h-6 rounded-full opacity-70 animate-bounce particle-pink" style="animation-delay: 0s;"></div>
+                  <div class="absolute top-1/4 right-0 w-5 h-5 rounded-full opacity-70 animate-bounce particle-cyan" style="animation-delay: 0.5s;"></div>
+                  <div class="absolute bottom-1/4 left-0 w-5 h-5 rounded-full opacity-70 animate-bounce particle-teal" style="animation-delay: 1s;"></div>
+                  <div class="absolute bottom-0 right-1/4 w-4 h-4 rounded-full opacity-70 animate-bounce particle-purple" style="animation-delay: 1.5s;"></div>
                 </div>
               </div>
             </div>

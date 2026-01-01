@@ -3,10 +3,38 @@ export default defineNuxtConfig({
   srcDir: 'app',
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
   serverDir: 'app/server',
-  css: ['~/assets/css/tailwind.css'],        // <-- load Tailwind CSS
+  css: ['~/assets/css/tailwind.css'],
   tailwindcss: {
     viewer: false,                            // optional
     exposeConfig: false
+  },
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/favicon.svg'
+        },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.googleapis.com'
+        },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.gstatic.com',
+          crossorigin: 'anonymous'
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;700&family=Roboto:wght@400;500&display=swap'
+        }
+      ],
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ]
+    }
   },
   runtimeConfig: {
     authJwtSecret: process.env.AUTH_JWT_SECRET || 'changeme',

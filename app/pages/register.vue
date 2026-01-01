@@ -1,12 +1,29 @@
 <script setup lang="ts">
-definePageMeta({ public: true })
+definePageMeta({ 
+  public: true,
+  layout: false // Remove default layout (no header/footer)
+})
 
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '~/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuth()
+
+// Get the page user came from (either from query param or document.referrer)
+const backUrl = computed(() => {
+  const from = route.query.from as string
+  if (from && from !== '/login' && from !== '/register') {
+    return from
+  }
+  return '/'
+})
+
+function goBack() {
+  router.push(backUrl.value)
+}
 
 const email = ref('')
 const password = ref('')
@@ -81,12 +98,32 @@ async function onSubmit() {
 <!--</template>-->
 
 <template>
-    <div class="max-w-md mx-auto mt-16 p-6 bg-white rounded-xl shadow border border-gray-100">
-        <Breadcrumbs :items="[{ label: 'Home', to: '/' }, { label: 'Register' }]" />
-        <h2 class="text-2xl font-semibold mb-1">Create your account</h2>
-        <p class="text-sm text-gray-600 mb-4">Register and set up your profile so the assistant can use your context.
-        </p>
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <!-- Back Button -->
+    <button
+      @click="goBack"
+      class="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span class="text-sm font-medium">Back</span>
+    </button>
 
+    <div class="max-w-md w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="flex justify-center mb-4">
+          <img src="/logo.svg" alt="Evotally" class="h-16 w-auto" />
+        </div>
+        <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
+        <p class="mt-2 text-sm text-gray-600">
+          Register and set up your profile so the assistant can use your context.
+        </p>
+      </div>
+
+      <!-- Register Card -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
         <form @submit.prevent="onSubmit" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
@@ -132,15 +169,25 @@ async function onSubmit() {
                 <p class="text-xs text-gray-500 mt-1">Detected: {{ detectedTz }}</p>
             </div>
 
-            <div class="flex items-center justify-between">
-                <button type="submit" :disabled="loading"
-                    class="px-4 py-2 rounded-md text-white bg-green-600 hover:bg-brand-700 disabled:opacity-50">
-                    {{ loading ? 'Creating...' : 'Create account' }}
-                </button>
-                <NuxtLink to="/login" class="text-sm text-brand-600 hover:text-brand-700">Have an account? Sign in</NuxtLink>
-            </div>
-            <p v-if="msg" :class="['text-sm', ok ? 'text-green-600' : 'text-red-600']">{{ msg }}</p>
+            <button 
+              type="submit" 
+              :disabled="loading"
+              class="btn-primary w-full"
+            >
+              {{ loading ? 'Creating account...' : 'Create account' }}
+            </button>
+            <p v-if="msg" :class="['text-sm text-center', ok ? 'text-green-600' : 'text-red-600']">{{ msg }}</p>
         </form>
+      </div>
+
+      <!-- Sign In Link -->
+      <p class="mt-6 text-center text-sm text-gray-600">
+        Already have an account?
+        <NuxtLink to="/login" class="font-medium text-primary-600 hover:text-primary-500">
+          Sign in
+        </NuxtLink>
+      </p>
     </div>
+  </div>
 </template>
 
