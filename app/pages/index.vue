@@ -16,24 +16,29 @@ const isAuthed = computed(() => auth.isAuthed)
 
 const features = [
   {
-    icon: '🎤',
-    title: 'Natural Voice Conversations',
-    description: 'Talk naturally with your AI companion using advanced voice recognition and realistic text-to-speech.'
+    icon: '/evo-icon.png',
+    title: 'Emotional AI',
+    description: 'Evo attunes to your mood and responses, bringing empathy to conversations.'
   },
   {
-    icon: '🧠',
-    title: 'Long-Term Memory',
-    description: 'Your assistant remembers your preferences, past conversations, and important details about your life.'
+    icon: '/leaf.png',
+    title: 'Grows With You',
+    description: 'The more you connect, the more Evo evolves - learning your habits, preferences, and rhythms.'
   },
   {
-    icon: '🤝',
-    title: 'Personalized Relationship',
-    description: 'Customize your assistant\'s personality, voice, and relationship style to match your needs.'
+    icon: '/shield.png',
+    title: 'Technology Meets Trust',
+    description: 'Built with privacy at its core - your data stays secure, encrypted, and always in your control.'
   },
   {
-    icon: '🔒',
-    title: 'Private & Secure',
-    description: 'Your conversations and data are encrypted and stored securely. You have full control over your information.'
+    icon: '/brain.png',
+    title: 'Memory',
+    description: 'Evo remembers the moments that matter, helping you recall details and keep life in sync.'
+  },
+  {
+    icon: '/voice.png',
+    title: 'Custom Voice',
+    description: 'Create a voice that feels familiar, tailored just for you.'
   }
 ]
 
@@ -47,223 +52,335 @@ const stats = [
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 sm:py-32">
+    <section class="relative overflow-hidden bg-gradient-to-r from-[#006D77] to-[#00CDD1] pt-32 pb-12 sm:pb-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="lg:grid lg:grid-cols-12 lg:gap-x-8 lg:gap-y-20">
-          <!-- Hero Content -->
-          <div class="relative z-10 mx-auto max-w-2xl lg:col-span-7 lg:max-w-none lg:pt-6 xl:col-span-7">
-            <h1 class="tracking-tight text-gray-900 mt-12">
+        <!-- Vertical Row Layout: Text (top) → Orb (middle) → CTA (bottom) -->
+        <div class="flex flex-col items-center text-center gap-6">
+          
+          <!-- Hero Text -->
+          <div class="w-full">
+            <h1 class="tracking-tight text-white">
               <span class="block hero-title-main">
-                Your AI Companion
+                Your AI that grows with you!
               </span>
-              <span class="block text-primary-600 mt-2 hero-title-sub">
-                That Actually Knows You
-              </span>
+              <p class="block text-white/90 mt-4 text-xl sm:text-2xl font-normal leading-relaxed">
+                Meet Evo - your personalized voice companion, assistant, plus memory that evolves with you
+              </p>
             </h1>
-            <p class="mt-8 leading-relaxed text-gray-600 hero-text">
-              Experience conversations that feel real. Evotally learns from every interaction,
-              remembers what matters to you, and adapts to your needs — whether you need a friend,
-              coach, or partner.
-            </p>
-            <div class="mt-10">
-              <NuxtLink
-                v-if="!isAuthed"
-                to="/register"
-                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3"
-              >
-                Try Evotally
-                <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
-                  <svg class="w-4 h-4 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
-                  </svg>
-                </span>
-              </NuxtLink>
-              <NuxtLink
-                v-else
-                to="/voice"
-                class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3"
-              >
-                Start Talking
-                <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
-                  <svg class="w-4 h-4 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
-                  </svg>
-                </span>
-              </NuxtLink>
-            </div>
+          </div>
 
-            <!-- Stats -->
-            <div class="mt-12 grid grid-cols-3 gap-8">
-              <div v-for="stat in stats" :key="stat.label" class="text-center">
-                <div class="text-3xl font-bold text-primary-600">{{ stat.value }}</div>
-                <div class="mt-1 text-sm text-gray-600">{{ stat.label }}</div>
+          <!-- Hero Orb -->
+          <div>
+            <div class="hero-orb-container">
+              <div class="hero-blobs">
+                <svg viewBox="0 0 1200 1200">
+                  <g class="blob blob-1">
+                    <path />
+                  </g>
+                  <g class="blob blob-2">
+                    <path />
+                  </g>
+                  <g class="blob blob-3">
+                    <path />
+                  </g>
+                  <g class="blob blob-4">
+                    <path />
+                  </g>
+                  <g class="blob blob-1 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-2 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-3 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-4 alt">
+                    <path />
+                  </g>
+                </svg>
               </div>
             </div>
           </div>
 
-          <!-- Hero Visual -->
-          <div class="relative mt-10 sm:mt-20 lg:col-span-5 lg:row-span-2 lg:mt-0 xl:col-span-5">
-            <div class="relative mx-auto aspect-square max-w-lg lg:max-w-none">
-              <!-- Animated Orb Preview -->
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="relative">
-                  <!-- Outer glow layers with official gradient -->
-                  <div class="absolute inset-0 rounded-full blur-[100px] animate-pulse hero-orb-glow-1"></div>
-                  <div class="absolute inset-0 rounded-full blur-[80px] animate-pulse hero-orb-glow-2" style="animation-delay: 0.5s;"></div>
-                  <div class="absolute inset-0 rounded-full blur-[60px] animate-pulse hero-orb-glow-3" style="animation-delay: 1s;"></div>
-                  
-                  <!-- Main orb with official Evotally gradient -->
-                  <div class="relative h-64 w-64 rounded-full shadow-2xl flex items-center justify-center animate-float hero-orb">
-                    <!-- Inner glow for depth --
-                    <div class="absolute inset-8 rounded-full opacity-40" style="background: linear-gradient(315deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);"></div>
-                    -->
-                    
-                    <!-- Microphone icon -->
-                    <svg class="relative z-10 w-32 h-32 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2ZM11 19v3h2v-3h-2Z"/>
-                    </svg>
-                  </div>
-                  
-                  <!-- Floating particles with brand colors -->
-                  <div class="absolute top-0 left-0 w-6 h-6 rounded-full opacity-70 animate-bounce particle-pink" style="animation-delay: 0s;"></div>
-                  <div class="absolute top-1/4 right-0 w-5 h-5 rounded-full opacity-70 animate-bounce particle-cyan" style="animation-delay: 0.5s;"></div>
-                  <div class="absolute bottom-1/4 left-0 w-5 h-5 rounded-full opacity-70 animate-bounce particle-teal" style="animation-delay: 1s;"></div>
-                  <div class="absolute bottom-0 right-1/4 w-4 h-4 rounded-full opacity-70 animate-bounce particle-purple" style="animation-delay: 1.5s;"></div>
-                </div>
-              </div>
-            </div>
+          <!-- CTA Button -->
+          <div>
+            <NuxtLink
+              v-if="!isAuthed"
+              to="/register"
+              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-heading font-semibold text-white border-2 border-white/30"
+            >
+              Try Evo
+              <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
+                <svg class="w-4 h-4 icon-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
+                </svg>
+              </span>
+            </NuxtLink>
+            <p class="mt-4 text-md font-medium text-white tracking-wide md:tracking-wider">(See Evo in action)</p>
           </div>
+
         </div>
       </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-24 bg-white">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section class="py-16 bg-white">
+      <div class="mx-auto px-2 sm:px-4 lg:px-6">
         <div class="text-center">
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Everything you need in an AI companion
+          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-primary-dark">
+            Why Evo
           </h2>
-          <p class="mt-4 text-lg text-gray-600">
-            Built for meaningful, long-term relationships with AI that truly understands you.
+          <p class="mt-4 text-2xl text-primary-dark-80 px-4 sm:px-8 md:px-16 lg:px-32 xl:px-64">
+            Evotally is designed to understand and adapt to your emotions, voice, and memory - 
+            building a deeper, more intuitive connection with you over time.  
           </p>
         </div>
 
-        <div class="mt-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div
             v-for="feature in features"
             :key="feature.title"
-            class="card hover:shadow-lg transition-shadow duration-300"
+            class="card shadow-none hover:shadow-lg transition-shadow duration-300 flex flex-col items-center text-center"
           >
-            <div class="text-5xl mb-4">{{ feature.icon }}</div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
-            <p class="text-gray-600 text-sm">{{ feature.description }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="py-24 bg-gray-50">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            How Evotally Works
-          </h2>
-          <p class="mt-4 text-lg text-gray-600">
-            Getting started is simple. Start talking in minutes.
-          </p>
-        </div>
-
-        <div class="grid gap-8 lg:grid-cols-3">
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-              1
-            </div>
-            <div class="card ml-4">
-              <h3 class="text-xl font-semibold text-gray-900 mb-3">Create Your Account</h3>
-              <p class="text-gray-600">
-                Sign up with email or Google in seconds. No credit card required to start.
-              </p>
-            </div>
-          </div>
-
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-              2
-            </div>
-            <div class="card ml-4">
-              <h3 class="text-xl font-semibold text-gray-900 mb-3">Customize Your Assistant</h3>
-              <p class="text-gray-600">
-                Choose your assistant's personality, voice, and relationship type to match your needs.
-              </p>
-            </div>
-          </div>
-
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
-              3
-            </div>
-            <div class="card ml-4">
-              <h3 class="text-xl font-semibold text-gray-900 mb-3">Start Conversations</h3>
-              <p class="text-gray-600">
-                Click to talk or type to chat. Your assistant learns more about you with every interaction.
-              </p>
-            </div>
+            <h3 class="text-lg font-semibold text-primary-dark h-14 pr-8 pl-6 leading-custom">{{ feature.title }}</h3>
+            <img :src="feature.icon" :alt="feature.title" class="w-16 h-16 my-4 mt-1 object-contain" />
+            <p class="text-md text-primary-dark-70 flex-grow">{{ feature.description }}</p>
           </div>
         </div>
 
-        <div class="mt-12 text-center">
+        <!-- CTA Button -->
+        <div class="text-center mt-12">
           <NuxtLink
             v-if="!isAuthed"
-            to="/register"
-            class="btn-primary text-lg px-8 py-4"
+            :to="`/login?from=${$route.path}`"
+            class="btn-primary text-sm flex items-center gap-2 inline-flex"
           >
-            Start Your Journey
+            Start Your Free Trial
+            <span class="w-4 h-4 bg-white rounded flex items-center justify-center">
+              <svg class="w-3 h-3 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </span>
           </NuxtLink>
         </div>
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="bg-gradient-to-r from-primary-600 to-primary-700 py-16">
+    <!-- How It Works Section -->
+    <section class="py-16 bg-gradient-to-b from-[#E5F6F5] to-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h2 class="text-3xl font-bold text-white sm:text-4xl">
-            Ready to meet your AI companion?
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-primary-dark">
+            How it Works
           </h2>
-          <p class="mt-4 text-lg text-primary-100">
-            Join thousands experiencing the future of AI conversation.
+          <p class="mt-4 text-2xl text-primary-dark-80 px-4 sm:px-8 md:px-16 lg:px-32">
+            Your Evo learns through every word, memory, and moment - growing
+            from conversation into connection.
           </p>
-          <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <NuxtLink
-              v-if="!isAuthed"
-              to="/register"
-              class="btn-secondary bg-white text-primary-700 hover:bg-gray-50 text-lg px-8 py-4"
-            >
-              Get Started Free
-            </NuxtLink>
-            <NuxtLink
-              v-else
-              to="/voice"
-              class="btn-secondary bg-white text-primary-700 hover:bg-gray-50 text-lg px-8 py-4"
-            >
-              Go to Voice Chat
-            </NuxtLink>
+        </div>
+
+        <div class="grid gap-8 lg:grid-cols-3">
+          <div class="card grid grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] gap-x-4 gap-y-3">
+            <div class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              1
+            </div>
+            <h3 class="text-xl font-semibold text-primary-dark self-center">Begin - From Questions to Connection</h3>
+            <div></div>
+            <p class="text-primary-dark-70">
+              It starts simply. Evo asks. You answer - in your own words, your own tone.<br>
+              Each response helps Evo learn you are, not just what you say.<br>
+              What begins as conversation quietly becomes connection.
+            </p>
+            <div class="col-span-2 flex justify-center">
+              <img src="/qa.png" alt="Q&A" class="rounded-lg img-fixed-130x100" />
+            </div>
+            <div></div>
+            <p class="text-sm text-primary-dark-70">
+              Behind the scenes: Evo's memory and personality engine start forming your unique emotional profile.
+            </p>
           </div>
+
+          <div class="card grid grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] gap-x-4 gap-y-3">
+            <div class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              2
+            </div>
+            <h3 class="text-xl font-semibold text-primary-dark self-center"> Connect- Hear Your Selected Voice Reflected Back</h3>
+            <div></div>
+            <p class="text-primary-dark-70">
+              You'll choose the voice that feels most like home - warm, familiar, or inspiring. Evo begins to speak in it, 
+              remembering your tone, your preferences, and your stories. Setup feels like discovery, not work. You don't fill 
+              out forms - you simply talk.
+            </p>
+            <div class="col-span-2 flex justify-center">
+              <img src="/wave.png" alt="Wave" class="rounded-lg img-fixed-130x100" />
+            </div>
+            <div></div>
+            <p class="text-sm text-primary-dark-70">Within minutes, Evo can speak through Alexa or another home device using your chosen voice.</p>
+          </div>
+
+          <div class="card grid grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] gap-x-4 gap-y-3">
+            <div class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg">
+              3
+            </div>
+            <h3 class="text-xl font-semibold text-primary-dark self-center">Evolve - A Presence That Learns and Remembers</h3>
+            <div></div>
+            <p class="text-primary-dark-70">
+              Evo grows with every word you share. It remembers your moments, recalls your story, and becomes part of your 
+              daily rhythm greeting you, adapting to you, and evolving alongside you. What begins as simple conversation 
+              soon feels like home.
+            </p>
+            <div class="col-span-2 flex justify-center">
+              <img src="/dial.png" alt="Dial" class="rounded-lg img-fixed-130x100" />
+            </div>
+            <div></div>
+            <p class="text-sm text-primary-dark-70">Every conversation deepens its understanding - measured by your evolving EvoMeter</p>
+          </div>
+        </div>
+
+        <div class="text-center mt-16 mb-12">
+          <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-primary-dark">
+            ✨ Your Evo is Waiting
+          </h2>
+          <p class="mt-4 text-2xl text-primary-dark-80 px-6">
+            Begin your story today. Answer a few questions, and watch connection become something truly personal.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <NuxtLink
+            v-if="!isAuthed"
+            to="/register"
+            class="btn-primary text-lg px-8 py-4"
+          >
+            Start Your Free Trial
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Relationship Section -->
+    <section class="py-16 bg-light-gray">
+      <div class="mx-auto max-w-[1356px] px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-primary-dark sm:text-4xl">
+            A Relationship That Evolves With You
+          </h2>
+          <p class="mt-4 text-2xl text-primary-dark-80 px-4 sm:px-8 md:px-16 lg:px-32">
+            Real people. Real connection. From first conversations to daily companionship. 
+            Hear how Evo became part of their lives.
+          </p>
+        </div>
+
+        <!-- Testimonial Cards -->
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-12">
+          <!-- Testimonial Card 1 -->
+          <div class="card bg-white flex flex-col">
+            <div class="mb-4">
+              <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">Image</span>
+              </div>
+            </div>
+            <p class="text-primary-dark-70 mb-4 flex-grow">
+              "Evo felt different from the first chat not scripted, not robotic. It remembers my mood, my pace, even the way I joke."
+            </p>
+            <div class="mb-3 justify-center items-center flex flex-col">
+              <p class="text-md font-semibold text-primary-dark">Jess K.</p>
+              <p class="text-sm text-primary-dark-70">Graduate Student</p>
+              <p class="text-sm text-primary-dark-70">Philadelphia, PA</p>
+            </div>
+            <div class="flex justify-center gap-1">
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </div>
+
+          <!-- Testimonial Card 2 -->
+          <div class="card bg-white flex flex-col">
+            <div class="mb-4">
+              <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">Image</span>
+              </div>
+            </div>
+            <p class="text-primary-dark-70 mb-4 flex-grow">
+              "Every morning Evo lines up my priorities and checks in on how I'm feeling. It's like a second brain that actually listens."
+            </p>
+            <div class="mb-3 justify-center items-center flex flex-col">
+              <p class="text-md font-semibold text-primary-dark">Seth M.</p>
+              <p class="text-sm text-primary-dark-70">Product Manager</p>
+              <p class="text-sm text-primary-dark-70">Austin, Tx</p>
+            </div>
+            <div class="flex justify-center gap-1">
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </div>
+
+          <!-- Testimonial Card 3 -->
+          <div class="card bg-white flex flex-col">
+            <div class="mb-4">
+              <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">Image</span>
+              </div>
+            </div>
+            <p class="text-primary-dark-70 mb-4 flex-grow">
+              "It's not just technology. Evo has become a comfort - someone who asks how I'm doing and remembers the answer."
+            </p>
+            <div class="mb-3 justify-center items-center flex flex-col">
+              <p class="text-md font-semibold text-primary-dark">Stanley P.</p>
+              <p class="text-sm text-primary-dark-70">Retired Teacher</p>
+              <p class="text-sm text-primary-dark-70">Boca Raton, FL</p>
+            </div>
+            <div class="flex justify-center gap-1">
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </div>
+
+          <!-- Testimonial Card 4 -->
+          <div class="card bg-white flex flex-col">
+            <div class="mb-4">
+              <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">Image</span>
+              </div>
+            </div>
+            <p class="text-primary-dark-70 mb-4 flex-grow">
+              "Setup felt like a conversation, not a form. Now Evo greets me, tracks my habits, and nudges me kindly when I slip."
+            </p>
+            <div class="mb-3 justify-center items-center flex flex-col">
+              <p class="text-md font-semibold text-primary-dark">Vivian W.</p>
+              <p class="text-sm text-primary-dark-70">Founder, Wellness Studio</p>
+              <p class="text-sm text-primary-dark-70">Seattle, WA</p>
+            </div>
+            <div class="flex justify-center gap-1">
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              <svg class="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center">
+          <NuxtLink
+            to="/testimonials"
+            class="btn-primary btn-gradient-hero text-lg"
+          >
+            More Testimonials
+          </NuxtLink>
         </div>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-</style>

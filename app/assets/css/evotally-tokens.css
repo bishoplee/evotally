@@ -310,3 +310,306 @@
     font-size: 13px;
   }
 }
+
+/* ========================================
+   TEXT COLOR UTILITIES
+   ======================================== */
+
+/* Primary text color for main content (excluding hero/footer) */
+.text-primary-dark {
+  color: #024A51;
+}
+
+.text-primary-dark-80 {
+  color: #024A51;
+  opacity: 0.8;
+}
+
+.text-primary-dark-70 {
+  color: #024A51;
+  opacity: 0.7;
+}
+
+/* Background color utility */
+.bg-light-gray {
+  background-color: #F5F7FA;
+}
+
+/* Gradient button - flipped hero gradient */
+.btn-gradient-hero {
+  background: linear-gradient(to right, #00CDD1, #006D77);
+  color: white;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.btn-gradient-hero:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Hero CTA button with gradient */
+.btn-hero-cta {
+  background: linear-gradient(135deg, #F24DB7 0%, #5F22A0 100%);
+}
+
+/* Fixed image dimensions */
+.img-fixed-130x100 {
+  width: 130px;
+  height: 100px;
+}
+
+/* SVG icon color coral */
+.icon-coral {
+  color: #F24DB7;
+}
+
+/* Custom line height */
+.leading-custom {
+  line-height: 1.35rem;
+}
+
+/* Testimonial card image */
+.testimonial-img {
+  width: 265px;
+  height: 225px;
+  object-fit: cover;
+}
+
+/* ========================================
+   BLOB ORB ANIMATIONS
+   ======================================== */
+
+/* Shared keyframe animations */
+@keyframes blob-anim-1 {
+  0% {
+    d: path("M 100 600 q 0 -500, 500 -500 t 500 500 t -500 500 T 100 600 z");
+  }
+  30% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  70% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+}
+
+@keyframes blob-anim-2 {
+  0% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  40% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  80% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+}
+
+@keyframes blob-anim-3 {
+  0% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  35% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  75% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+}
+
+@keyframes blob-anim-4 {
+  0% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  30% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  70% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hero Blob Orb Container */
+.hero-orb-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Color variables - vibrant gradient colors */
+  --blob-1: #FE8860;
+  --blob-2: #FEDE81;
+  --blob-3: #FD4C87;
+  --blob-4: #FD46CE;
+}
+
+.hero-orb-background {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FE8860 0%, #FD4C87 50%, #FD46CE 100%);
+  z-index: 1;
+  animation: float 3s ease-in-out infinite;
+  box-shadow: 
+    inset 0 4px 20px rgba(255, 255, 255, 0.3),
+    inset 0 -4px 20px rgba(0, 0, 0, 0.2),
+    0 12px 40px rgba(253, 76, 135, 0.4),
+    0 0 80px rgba(253, 70, 206, 0.2);
+}
+
+.hero-blobs {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.hero-blobs svg {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  z-index: 2;
+}
+
+.hero-blobs .blob {
+  animation: rotate 25s infinite alternate ease-in-out;
+  transform-origin: 50% 50%;
+  opacity: 0.8;
+}
+
+.hero-blobs .blob path {
+  animation: blob-anim-1 5s infinite alternate cubic-bezier(0.45, 0.2, 0.55, 0.8);
+  transform-origin: 50% 50%;
+  transform: scale(0.8);
+  transition: fill 800ms ease;
+}
+
+.hero-blobs .blob.alt {
+  animation-direction: alternate-reverse;
+  opacity: 0.4;
+}
+
+.hero-blobs .blob-1 path {
+  fill: var(--blob-1);
+  filter: blur(1.5rem);
+}
+
+.hero-blobs .blob-2 {
+  animation-duration: 18s;
+  animation-direction: alternate-reverse;
+}
+
+.hero-blobs .blob-2 path {
+  fill: var(--blob-2);
+  animation-name: blob-anim-2;
+  animation-duration: 7s;
+  filter: blur(1rem);
+  transform: scale(0.78);
+}
+
+.hero-blobs .blob-2.alt {
+  animation-direction: alternate;
+}
+
+.hero-blobs .blob-3 {
+  animation-duration: 23s;
+}
+
+.hero-blobs .blob-3 path {
+  fill: var(--blob-3);
+  animation-name: blob-anim-3;
+  animation-duration: 6s;
+  filter: blur(0.75rem);
+  transform: scale(0.76);
+}
+
+.hero-blobs .blob-4 {
+  animation-duration: 31s;
+  animation-direction: alternate-reverse;
+  opacity: 0.9;
+}
+
+.hero-blobs .blob-4 path {
+  fill: var(--blob-4);
+  animation-name: blob-anim-4;
+  animation-duration: 10s;
+  filter: blur(12rem);
+  transform: scale(0.5);
+}
+
+.hero-blobs .blob-4.alt {
+  animation-direction: alternate;
+  opacity: 0.8;
+}
+
+.hero-orb-icon {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Responsive Hero Orb */
+@media (max-width: 1023px) {
+  .hero-orb-container {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .hero-orb-background {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .hero-orb-icon svg {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-orb-container {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .hero-orb-background {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .hero-orb-icon svg {
+    width: 80px;
+    height: 80px;
+  }
+}

@@ -9,9 +9,39 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Enhanced Audio-Reactive Orb -->
-      <div class="orb-container" @click="toggle">
-        <canvas ref="orbCanvas" class="orb-canvas" width="200" height="200"></canvas>
+      <!-- SVG Blob Orb -->
+      <div class="orb-container" @click="toggle" :class="{ 'is-open': isOpen, 'is-speaking': vadState === 'speaking', 'is-listening': vadState === 'listening' }">
+        <!-- Circular background -->
+        <div class="orb-background"></div>
+        
+        <div class="blobs" :style="{ '--audio-level': level }">
+          <svg viewBox="0 0 1200 1200">
+            <g class="blob blob-1">
+              <path />
+            </g>
+            <g class="blob blob-2">
+              <path />
+            </g>
+            <g class="blob blob-3">
+              <path />
+            </g>
+            <g class="blob blob-4">
+              <path />
+            </g>
+            <g class="blob blob-1 alt">
+              <path />
+            </g>
+            <g class="blob blob-2 alt">
+              <path />
+            </g>
+            <g class="blob blob-3 alt">
+              <path />
+            </g>
+            <g class="blob blob-4 alt">
+              <path />
+            </g>
+          </svg>
+        </div>
 
         <!-- Center mic icon -->
         <div class="orb-center-content">
@@ -84,253 +114,7 @@ const vadState = ref<'idle' | 'listening' | 'speaking'>('idle')
 const companion = ref<'spouse_partner' | 'friend' | 'coach' | 'planner' | 'study_buddy'>('spouse_partner')
 const level = ref(0)
 
-// Canvas refs
-const orbCanvas = ref<HTMLCanvasElement | null>(null)
-let ctx: CanvasRenderingContext2D | null = null
-let animationFrameId: number | null = null
-
-// Orb animation state
-interface Particle {
-  angle: number
-  distance: number
-  size: number
-  speed: number
-  opacity: number
-  hue: number
-}
-
-const particles: Particle[] = []
-const numParticles = 20 // More particles for liveliness
-let orbRotation = 0
-let orbPulse = 0
-let breathePhase = 0
-
-// Initialize particles
-function initParticles() {
-  particles.length = 0
-  for (let i = 0; i < numParticles; i++) {
-    particles.push({
-      angle: (Math.PI * 2 * i) / numParticles,
-      distance: 30 + Math.random() * 15,
-      size: 2 + Math.random() * 3,
-      speed: 0.008 + Math.random() * 0.015,
-      opacity: 0.4 + Math.random() * 0.5,
-      hue: Math.random() * 360
-    })
-  }
-}
-
-// Draw the orb
-function drawOrb() {
-  if (!ctx || !orbCanvas.value) return
-
-  const canvas = orbCanvas.value
-  const centerX = canvas.width / 2
-  const centerY = canvas.height / 2
-  const baseRadius = 50
-
-  // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-  // Update animation state with more dynamic movement
-  const time = Date.now() * 0.001
-  orbRotation += 0.01
-  breathePhase += 0.02
-  orbPulse = Math.sin(breathePhase) * 0.12
-
-  // Calculate audio-reactive radius with breathing effect
-  const breathe = Math.sin(time * 1.2) * 0.05
-  const audioReactiveRadius = baseRadius * (1 + level.value * 0.4 + orbPulse + breathe)
-
-  // Determine colors based on state with smooth transitions
-  let primaryColor, secondaryColor, tertiaryColor, glowColor
-
-  if (vadState.value === 'speaking') {
-    // Warm, energetic colors (secondary palette - coral/orange)
-    primaryColor = '#fb8d68'
-    secondaryColor = '#ff845a'
-    tertiaryColor = '#e56a3d'
-    glowColor = 'rgba(251, 141, 104, 0.5)'
-  } else if (vadState.value === 'listening') {
-    // Cool, calm colors (primary palette - teal/cyan)
-    primaryColor = '#016d77'
-    secondaryColor = '#1b8790'
-    tertiaryColor = '#3aa1aa'
-    glowColor = 'rgba(1, 109, 119, 0.5)'
-  } else {
-    // Subtle breathing animation even when idle
-    const idlePulse = Math.sin(time * 0.5) * 0.5 + 0.5
-    primaryColor = `hsl(200, ${20 + idlePulse * 10}%, ${50 + idlePulse * 5}%)`
-    secondaryColor = `hsl(200, ${15 + idlePulse * 8}%, ${60 + idlePulse * 5}%)`
-    tertiaryColor = `hsl(200, ${10 + idlePulse * 5}%, ${70 + idlePulse * 5}%)`
-    glowColor = `rgba(107, 114, 128, ${0.2 + idlePulse * 0.1})`
-  }
-
-  // Draw multi-layer outer glow for depth
-  const glowRadius1 = audioReactiveRadius * (isOpen.value ? 1.8 : 1.3)
-  const glowRadius2 = audioReactiveRadius * (isOpen.value ? 1.4 : 1.1)
-
-  const glowGradient = ctx.createRadialGradient(centerX, centerY, audioReactiveRadius * 0.5, centerX, centerY, glowRadius1)
-  glowGradient.addColorStop(0, glowColor)
-  glowGradient.addColorStop(0.5, glowColor.replace(/[\d.]+\)/, '0.2)'))
-  glowGradient.addColorStop(1, 'rgba(0, 0, 0, 0)')
-  ctx.fillStyle = glowGradient
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-  // Draw main orb with enhanced gradient
-  const lightAngle = time * 0.3
-  const lightX = centerX + Math.cos(lightAngle) * audioReactiveRadius * 0.4
-  const lightY = centerY + Math.sin(lightAngle) * audioReactiveRadius * 0.4
-
-  const mainGradient = ctx.createRadialGradient(
-    lightX,
-    lightY,
-    0,
-    centerX,
-    centerY,
-    audioReactiveRadius
-  )
-  mainGradient.addColorStop(0, primaryColor)
-  mainGradient.addColorStop(0.5, secondaryColor)
-  mainGradient.addColorStop(1, tertiaryColor)
-
-  ctx.beginPath()
-  ctx.arc(centerX, centerY, audioReactiveRadius, 0, Math.PI * 2)
-  ctx.fillStyle = mainGradient
-  ctx.fill()
-
-  // Add subtle edge highlight
-  ctx.beginPath()
-  ctx.arc(centerX, centerY, audioReactiveRadius, 0, Math.PI * 2)
-  ctx.strokeStyle = `rgba(255, 255, 255, ${isOpen.value ? 0.3 : 0.15})`
-  ctx.lineWidth = isOpen.value ? 2 : 1
-  ctx.stroke()
-
-  // Draw floating particles - always visible for liveliness
-  particles.forEach((particle, i) => {
-    // Update particle with organic movement
-    particle.angle += particle.speed * (1 + level.value * 3)
-
-    // Audio-reactive distance with wave effect
-    const waveOffset = Math.sin(time * 2 + i * 0.5) * 5
-    const reactiveDistance = (particle.distance + waveOffset) * (1 + level.value * 0.8)
-
-    const x = centerX + Math.cos(particle.angle + orbRotation * 1.5) * reactiveDistance
-    const y = centerY + Math.sin(particle.angle + orbRotation * 1.5) * reactiveDistance
-
-    // Draw particle trail for movement
-    if (isOpen.value && level.value > 0.1) {
-      const trailLength = 3
-      for (let t = 0; t < trailLength; t++) {
-        const trailAngle = particle.angle + orbRotation * 1.5 - (t * 0.02)
-        const trailDist = reactiveDistance * (1 - t * 0.05)
-        const tx = centerX + Math.cos(trailAngle) * trailDist
-        const ty = centerY + Math.sin(trailAngle) * trailDist
-        const trailOpacity = particle.opacity * (1 - t / trailLength) * 0.3
-
-        ctx.beginPath()
-        ctx.arc(tx, ty, particle.size * (1 - t * 0.2), 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255, 255, 255, ${trailOpacity})`
-        ctx.fill()
-      }
-    }
-
-    // Draw main particle with enhanced visibility
-    const particleGlow = ctx.createRadialGradient(x, y, 0, x, y, particle.size * 2)
-    const baseOpacity = isOpen.value ? particle.opacity * (0.6 + level.value * 0.4) : particle.opacity * 0.3
-    particleGlow.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity})`)
-    particleGlow.addColorStop(1, `rgba(255, 255, 255, 0)`)
-
-    ctx.beginPath()
-    ctx.arc(x, y, particle.size * 2, 0, Math.PI * 2)
-    ctx.fillStyle = particleGlow
-    ctx.fill()
-  })
-
-  // Draw inner shimmer
-  if (isOpen.value && level.value > 0.1) {
-    const shimmerGradient = ctx.createRadialGradient(
-      centerX,
-      centerY,
-      0,
-      centerX,
-      centerY,
-      audioReactiveRadius * 0.6
-    )
-    shimmerGradient.addColorStop(0, `rgba(255, 255, 255, ${level.value * 0.4})`)
-    shimmerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
-
-    ctx.beginPath()
-    ctx.arc(centerX, centerY, audioReactiveRadius * 0.6, 0, Math.PI * 2)
-    ctx.fillStyle = shimmerGradient
-    ctx.fill()
-  }
-
-  // Draw animated energy rings when speaking
-  if (vadState.value === 'speaking') {
-    for (let i = 0; i < 4; i++) {
-      const offset = (time * 1.5 + i * 0.4) % 2
-      const ringRadius = audioReactiveRadius + offset * 25
-      const opacity = (1 - offset / 2) * 0.4 * (1 + level.value * 0.5)
-
-      // Draw pulsing ring
-      ctx.beginPath()
-      ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
-      ctx.lineWidth = 3
-      ctx.stroke()
-    }
-  }
-
-  // Draw orbiting energy dots when listening
-  if (vadState.value === 'listening' && isOpen.value) {
-    for (let i = 0; i < 3; i++) {
-      const dotAngle = time * 2 + (i * Math.PI * 2 / 3)
-      const dotDistance = audioReactiveRadius * 1.2
-      const dotX = centerX + Math.cos(dotAngle) * dotDistance
-      const dotY = centerY + Math.sin(dotAngle) * dotDistance
-
-      const dotGradient = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 4)
-      dotGradient.addColorStop(0, 'rgba(27, 135, 144, 0.8)')
-      dotGradient.addColorStop(1, 'rgba(27, 135, 144, 0)')
-
-      ctx.beginPath()
-      ctx.arc(dotX, dotY, 4, 0, Math.PI * 2)
-      ctx.fillStyle = dotGradient
-      ctx.fill()
-    }
-  }
-
-  // Continue animation
-  animationFrameId = requestAnimationFrame(drawOrb)
-}
-
-// Start orb animation
-function startOrbAnimation() {
-  if (!orbCanvas.value) return
-  ctx = orbCanvas.value.getContext('2d')
-  if (!ctx) return
-
-  initParticles()
-  drawOrb()
-}
-
-// Stop orb animation
-function stopOrbAnimation() {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
-    animationFrameId = null
-  }
-}
-
-// Watch for canvas mount
-onMounted(() => {
-  startOrbAnimation()
-})
-
-onBeforeUnmount(() => {
-  stopOrbAnimation()
-})
+// Blob orb is now purely CSS/SVG based, no canvas needed
 
 // Rest of your original code below...
 let mediaStream: MediaStream | null = null
@@ -679,15 +463,219 @@ onBeforeUnmount(closeSession)
   justify-content: center;
   cursor: pointer;
   user-select: none;
+  
+  /* Color variables - idle state */
+  --blob-1: #94a3b8;
+  --blob-2: #64748b;
+  --blob-3: #cbd5e1;
+  --blob-4: #f1f5f9;
 }
 
-.orb-canvas {
+.orb-background {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  z-index: 1;
+  transition: all 400ms ease;
+  box-shadow: 
+    inset 0 2px 8px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.orb-container.is-listening .orb-background {
+  background: linear-gradient(135deg, #016d77 0%, #1b8790 50%, #3aa1aa 100%);
+  box-shadow: 
+    inset 0 2px 12px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 12px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(1, 109, 119, 0.3);
+}
+
+.orb-container.is-speaking .orb-background {
+  background: linear-gradient(135deg, #fb8d68 0%, #ff845a 50%, #ffb088 100%);
+  box-shadow: 
+    inset 0 2px 12px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(251, 141, 104, 0.4);
+}
+
+/* Listening state - cool teal colors */
+.orb-container.is-listening {
+  --blob-1: #016d77;
+  --blob-2: #1b8790;
+  --blob-3: #3aa1aa;
+  --blob-4: #0a4a52;
+}
+
+/* Speaking state - warm coral/orange colors */
+.orb-container.is-speaking {
+  --blob-1: #fb8d68;
+  --blob-2: #ff845a;
+  --blob-3: #ffb088;
+  --blob-4: #e56a3d;
+}
+
+.blobs {
+  width: 200px;
+  height: 200px;
+  max-height: 100%;
+  max-width: 100%;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+}
+
+.blobs svg {
+  position: relative;
   height: 100%;
-  pointer-events: none;
+  z-index: 2;
+}
+
+.blobs .blob {
+  animation: rotate 25s infinite alternate ease-in-out;
+  transform-origin: 50% 50%;
+  opacity: 0.7;
+}
+
+.blobs .blob path {
+  animation: blob-anim-1 5s infinite alternate cubic-bezier(0.45, 0.2, 0.55, 0.8);
+  transform-origin: 50% 50%;
+  transform: scale(calc(0.8 + var(--audio-level, 0) * 0.2));
+  transition: fill 800ms ease, transform 100ms ease;
+}
+
+.blobs .blob.alt {
+  animation-direction: alternate-reverse;
+  opacity: 0.3;
+}
+
+.blobs .blob-1 path {
+  fill: var(--blob-1);
+  filter: blur(1rem);
+}
+
+.blobs .blob-2 {
+  animation-duration: 18s;
+  animation-direction: alternate-reverse;
+}
+
+.blobs .blob-2 path {
+  fill: var(--blob-2);
+  animation-name: blob-anim-2;
+  animation-duration: 7s;
+  filter: blur(0.75rem);
+  transform: scale(calc(0.78 + var(--audio-level, 0) * 0.2));
+}
+
+.blobs .blob-2.alt {
+  animation-direction: alternate;
+}
+
+.blobs .blob-3 {
+  animation-duration: 23s;
+}
+
+.blobs .blob-3 path {
+  fill: var(--blob-3);
+  animation-name: blob-anim-3;
+  animation-duration: 6s;
+  filter: blur(0.5rem);
+  transform: scale(calc(0.76 + var(--audio-level, 0) * 0.15));
+}
+
+.blobs .blob-4 {
+  animation-duration: 31s;
+  animation-direction: alternate-reverse;
+  opacity: 0.9;
+}
+
+.blobs .blob-4 path {
+  fill: var(--blob-4);
+  animation-name: blob-anim-4;
+  animation-duration: 10s;
+  filter: blur(10rem);
+  transform: scale(calc(0.5 + var(--audio-level, 0) * 0.3));
+}
+
+.blobs .blob-4.alt {
+  animation-direction: alternate;
+  opacity: 0.8;
+}
+
+/* Audio reactive intensity */
+.orb-container.is-open .blobs .blob {
+  opacity: calc(0.7 + var(--audio-level, 0) * 0.3);
+}
+
+@keyframes blob-anim-1 {
+  0% {
+    d: path("M 100 600 q 0 -500, 500 -500 t 500 500 t -500 500 T 100 600 z");
+  }
+  30% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  70% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+}
+
+@keyframes blob-anim-2 {
+  0% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  40% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  80% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+}
+
+@keyframes blob-anim-3 {
+  0% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  35% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  75% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+}
+
+@keyframes blob-anim-4 {
+  0% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+  30% {
+    d: path("M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z");
+  }
+  70% {
+    d: path("M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z");
+  }
+  100% {
+    d: path("M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z");
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .orb-center-content {
