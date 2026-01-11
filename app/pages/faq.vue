@@ -170,16 +170,43 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Evotally is an AI companion platform that creates a personalized, evolving connection with you through natural conversation, emotional intelligence, and adaptive memory.</p>
+              <p class="mt-4 text-gray-700">Evotally is an emotionally intelligent AI platform that blends conversation, memory, and voice technology to create a personalized experience. It adapts to your communication style, tracks your preferences, and keeps your data private through encrypted storage and secure log-ins.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I access Evo through my current smart home devices?</span>
+                <span class="text-lg font-semibold text-primary-dark">Why is Evo different from other AIs?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes! Evo integrates with Amazon Alexa and other smart home devices, allowing you to interact through your existing ecosystem.</p>
+              <p class="mt-4 text-gray-700">Most AIs respond to prompts. Evo responds to you. It's powered by emotional intelligence, memory, and secure personalization. Evo recalls your stories, adapts to your mood, and develops a unique communication style based on your preferences — all while keeping your data private and encrypted.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How do I get started?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Just sign in and Evo will start the process by initiating the conversation and asking you questions. Evo begins learning your preferences, tone, and patterns instantly. You can begin right from your phone, tablet, or computer - no special setup required.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How much time will it take me to set up my Evo?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">5-10 minutes.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Do I need to download an APP?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">No, our App is coming soon!</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
@@ -188,7 +215,25 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">You can access Evo through your secure online portal, a unique personal URL, or integrated smart devices. A mobile app is coming soon.</p>
+              <p class="mt-4 text-gray-700">If you have a phone, computer or tablet then you can access Evo from any of those devices. You can also connect Evo to your Alexa smart home and access Evo through there.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I access Evo through my current smart home devices?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes, you can access your Evo through your Amazon Alexa.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I activate Evo by voice through my Alexa devices?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. Once you've linked Evo to your Alexa account, you can simply say "Alexa, open Evo" to start talking. From there, Evo will respond in real time — remembering your preferences, answering questions, and keeping your conversations private and secure.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
@@ -197,16 +242,16 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, you'll need to create an account to personalize your Evo and access all features. Registration is quick and includes a free trial period.</p>
+              <p class="mt-4 text-gray-700">Yes, you will need to register an account with Evo.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I activate Evo by voice through my current smart devices?</span>
+                <span class="text-lg font-semibold text-primary-dark">What devices can I speak and hear my Evo through?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes! Once integrated with your smart devices like Amazon Alexa, you can activate and interact with Evo using voice commands.</p>
+              <p class="mt-4 text-gray-700">You can hear Evo directly through the connection you are utilizing your Evo through, i.e your computer, tablet, mobile phone or Alexa device.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
@@ -215,7 +260,7 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">No special equipment is required. You can use Evo with any device that has a web browser and internet connection. Smart home devices are optional.</p>
+              <p class="mt-4 text-gray-700">No. Evo runs on standard devices such as a phone, tablet, computer or Alexa device. For a deeper experience, you can later link with home assistants or compatible humanoid systems.</p>
             </details>
           </div>
         </div>
@@ -234,7 +279,7 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes! You can select from a variety of warm, natural voices that best match your preferences and create the connection you're looking for.</p>
+              <p class="mt-4 text-gray-700">Yes. Choose from several natural male and female voices — or design a custom voice that truly feels like home.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
@@ -243,7 +288,7 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">We offer four natural voices in the free trial - two male and two female options. Premium members have access to additional voices and customization options.</p>
+              <p class="mt-4 text-gray-700">We offer six voices presently and more to come!</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
@@ -252,7 +297,142 @@ useHead({
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes! Evo Plus subscribers can record or clone a custom voice, allowing you to create a truly personalized experience. This feature requires an additional fee.</p>
+              <p class="mt-4 text-gray-700">Yes!  During your initial set-up Evo will direct you through how to it.  You will need to speak into the custom voice prompt and/or upload an audio file of the voice of your desire.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Is there an additional fee for a custom voice?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes, there is a $19.99 reoccurring monthly fee.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I upload my own voice to use with Evotally?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. You can record or upload your own voice so Evotally sounds uniquely like you. Your voice data is stored securely and never shared without your permission.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I upload someone else's voice, like my partner or friend?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Only if you have their explicit consent. You'll be asked to confirm that you have permission from the person whose voice you upload. This ensures Evotally complies with biometric privacy and voice rights laws.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I make Evotally sound like a celebrity or public figure?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">No. Voices that imitate or clone celebrities, actors, or public figures are not allowed. Using someone's likeness or voice without their approval violates right-of-publicity laws (such as the ELVIS Act) and our platform policies.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">What if I upload a voice of someone who's passed away?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">You may only do so if you have legal permission from that person's estate or next of kin. Evotally cannot approve or host voices without verified authorization.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How does Evotally protect my voice data?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">All voice files are encrypted using industry-grade security (AES-256). You can delete your voice data at any time, and Evotally never sells or shares cloned voice files with third parties.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Will my voice be used to train AI or other users' Evos?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">No. Your voice remains private to your account and is used only to generate speech for your own Evo. It is never used to train public AI models or other users' systems.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Do I need to sign anything before using a custom voice?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. Evotally requires a quick consent agreement before a voice upload is finalized. This protects you and ensures all voices comply with biometric and publicity regulations.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">What happens if someone uploads a voice without permission?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">That account may be suspended or removed. Evotally investigates unauthorized uploads and cooperates with rights holders to protect individuals' privacy and likeness.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I use AI-generated or fictional voices?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Absolutely. You can create or choose from Evotally's library of synthetic or fictional voices without restrictions.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I delete or replace my voice later?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. You can remove or replace your uploaded voice anytime in your profile settings. Once deleted, your old voice data is permanently erased from our servers.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I name my Evo?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes, Evo will direct you how to do this during your set-up.  Or you can manually change your Evo name under your user preferences.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I create my own avatar?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">This feature is coming soon!</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How does my Evo get to know me?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">By talking with you. The more you chat, the more Evo understands your style, remembers details you share, and adjusts how it communicates — always privately, always on your terms.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can Evo's voice change over time?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. Evo's tone evolves with you — it can grow warmer, calmer, or more expressive as it learns how you like to communicate.</p>
             </details>
           </div>
         </div>
@@ -266,57 +446,120 @@ useHead({
           <div class="space-y-3">
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How does Evo remember my conversations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can I interact with my evo by speaking and typing?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Evo uses secure long-term memory to store and recall your conversations, preferences, and important details, creating continuity across all interactions.</p>
+              <p class="mt-4 text-gray-700">Yes!</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">What is the EvoMeter?</span>
+                <span class="text-lg font-semibold text-primary-dark">Is there a time or session limit when using Evo?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">The EvoMeter tracks the depth of your connection with Evo, showing how well it understands you and how your relationship evolves over time.</p>
+              <p class="mt-4 text-gray-700">No, use your Evo as much as you'd like!</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I review past conversations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Does Evo really remember conversations?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, your portal stores your complete conversation history, allowing you to revisit past interactions whenever you'd like.</p>
+              <p class="mt-4 text-gray-700">Yes. Evo's long-term memory retains your preferences, discussions, and emotional context — so each conversation is remembered and builds on the last.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How does Evo adapt to my mood?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can my Evo voice display inflections?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Evo uses emotional intelligence to detect your tone and emotional state, then adjusts its responses to provide appropriate support and engagement.</p>
+              <p class="mt-4 text-gray-700">Yes!</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I delete specific memories?</span>
+                <span class="text-lg font-semibold text-primary-dark">What is an EvoMeter?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, you have full control over your data and can delete any conversation or specific memory at any time through your portal.</p>
+              <p class="mt-4 text-gray-700">Your EvoMeter displays within your dashboard to show you how much Evo has gotten to know about you.  During your initial set up there are modules and advanced modules for your Evo to get to know you even better.   As we evolve and release updates so does your Evo.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How long does my memory last?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can Evo remind me of things?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Free trial includes 30 days of memory. Evo Plus subscribers get extended long-term memory that continues learning across all interactions.</p>
+              <p class="mt-4 text-gray-700">Yes. Evo recalls prior topics, ideas, and reminders across days or months — maintaining emotional and practical continuity.  You can personalize and program your evo to tell you specific information when you want.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How does Evo learn about me?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Through conversation. The more you converse and utilize your Evo, the better it understands your tone, rhythm, humor, and emotional patterns.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I connect my ChatGPT account to my evo?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes, you can optimize Evo by syncing your data from your ChatGPT account.  This way your Evo learns even more about you, faster.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I flag important conversations within my Evo?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes!</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I delete things Evo remembers?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. You have full control — you can view, edit, or erase memories anytime through your Evo dashboard or voice command. When you delete data, it's permanently removed from Evo's memory system.  You will not be able to restore deleted data.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Does Evo recognize emotion?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes through your tone, words, and patterns over time. Evo notices when your energy shifts and adapts its tone to match — caring when you need comfort, light when you need levity.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can Evo develop a personality?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. Over time, Evo mirrors your communication style and preferences, creating a dynamic personality that grows alongside you.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Will Evo get smarter over time?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Constantly. Evo learns through your interactions and system updates that improve understanding and natural expression</p>
             </details>
           </div>
         </div>
@@ -330,57 +573,57 @@ useHead({
           <div class="space-y-3">
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Is my data secure?</span>
+                <span class="text-lg font-semibold text-primary-dark">Who can access my Evo data?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, all data is fully encrypted and stored securely. We follow industry-leading security standards to protect your privacy.</p>
+              <p class="mt-4 text-gray-700">Only you. Evo is designed as a personal and private companion, meaning no one — not family, friends, or outside services — can open, view, or use your Evo without your verified authorization. Access requires your secure login credentials and may include multi-factor authentication for extra protection.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Who has access to my conversations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Where is my data stored?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Only you have access to your conversations. We never share, sell, or use your personal data for any purpose other than improving your Evo experience.</p>
+              <p class="mt-4 text-gray-700">Your data is stored securely in encrypted cloud servers within the United States. Only you and your Evo can access it — never advertisers or outside parties. You can view, edit, or delete your data anytime from your account settings.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I export my data?</span>
+                <span class="text-lg font-semibold text-primary-dark">Do we share or sell your data to third parties?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, you can export all your data at any time through your portal settings in a standard format.</p>
+              <p class="mt-4 text-gray-700">Absolutely not. All of your information, including chats, voice recordings, and preferences — is encrypted and stored privately. Evotally does not share or sell user data for marketing or analytics. Any external integrations (like calendar or email) only connect with your explicit consent.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">What encryption do you use?</span>
+                <span class="text-lg font-semibold text-primary-dark">Is a two-step verification code required for log-in?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">We use industry-standard AES-256 encryption for data at rest and TLS 1.3 for data in transit.</p>
+              <p class="mt-4 text-gray-700">Yes. Evotally uses two-step verification to help protect your account. When you sign in, you'll receive a secure code by email or text to confirm it's really you. It's a quick extra step that keeps your Evo — and your data — safe.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How do I delete my account?</span>
+                <span class="text-lg font-semibold text-primary-dark">Is my voice data secure?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">You can delete your account and all associated data at any time through your portal settings. Deletion is permanent and immediate.</p>
+              <p class="mt-4 text-gray-700">Yes. Your voice data is fully encrypted and stored safely in our secure cloud environment. Only you and your Evo can access it — never advertisers, partners, or outside services. You can delete your voice data anytime from your account settings.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Do you comply with privacy regulations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can someone else access or listen to my Evo conversations?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, we are fully compliant with GDPR, CCPA, and other major privacy regulations worldwide.</p>
+              <p class="mt-4 text-gray-700">No. Your conversations are completely private. No one — not even Evotally's team — can listen to, read, or review your chats. All messages are encrypted and stored securely, and only you have access through your verified account.</p>
             </details>
           </div>
         </div>
@@ -458,57 +701,93 @@ useHead({
           <div class="space-y-3">
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">What apps can Evo connect to?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can Evo connect to my other apps?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Evo integrates with Google Email, Spotify, Calendly, Amazon Alexa, and more. New integrations are regularly added based on user requests.</p>
+              <p class="mt-4 text-gray-700">Yes. Evo integrates with platforms like Alexa, Google Calendar, Spotify, and more, allowing it to manage schedules, play music, and stay in sync with your digital life — safely and privately.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How do I set up integrations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Does Evo allow me to send & receive email and SMS?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Navigate to your portal's integration settings and follow the simple authentication process for each app you want to connect.</p>
+              <p class="mt-4 text-gray-700">Yes. Through approved integrations, Evo can manage your messages — reading, composing, or sending emails and texts with your permission. Every connection uses encrypted APIs, so your information stays private and secure.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Are integrations included in all plans?</span>
+                <span class="text-lg font-semibold text-primary-dark">What current Apps can my Evo connect through?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Basic integrations are available on all plans. Advanced integration features and API access require an Evo Plus subscription.</p>
+              <p class="mt-4 text-gray-700">Evo connects with Alexa, Google Calendar, Gmail, and Spotify — with more integrations coming soon.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I request new integrations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can I access my calendar through Evo?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Absolutely! We actively consider user feedback and regularly add new integrations based on community requests through your portal.</p>
+              <p class="mt-4 text-gray-700">Yes. Evo connects with Google Calendar so you can view, add, or update events by simply asking. Whether you're planning your day or checking what's next, Evo keeps your schedule organized and accessible by voice or chat.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">How secure are integrations?</span>
+                <span class="text-lg font-semibold text-primary-dark">How do I sync my Evo with Alexa?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">All integrations use OAuth 2.0 and encrypted API credentials, ensuring your connected accounts remain secure and protected.</p>
+              <p class="mt-4 text-gray-700">You can connect Evo to Alexa in just a few steps:<br>1. Open your Alexa app and go to Skills & Games.<br>2. Search for "Evotally" and select the official Evo skill.<br>3. Tap Enable to Use and sign in with your Evotally account.<br>4. Alexa will confirm the connection — then just say, "Alexa, open Evo."<br><br>Once linked, you can talk to your Evo hands-free through any Alexa-enabled device.</p>
             </details>
             <details class="group bg-white border border-gray-200 rounded-lg p-4">
               <summary class="flex justify-between items-center cursor-pointer list-none">
-                <span class="text-lg font-semibold text-primary-dark">Can I disconnect integrations?</span>
+                <span class="text-lg font-semibold text-primary-dark">Can I sync my Chatgpt credentials so my Evo knows more about me?</span>
                 <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
-              <p class="mt-4 text-gray-700">Yes, you can disconnect any integration at any time through your portal settings with no penalty or loss of other features.</p>
+              <p class="mt-4 text-gray-700">Not at this time. ChatGPT does not currently allow third-party apps to sync or import personal chat histories. In the future, if OpenAI introduces a secure way to share that data, Evo may offer an optional integration — always with your consent and full encryption.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How often does Evo release new App integrations?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Evo grows constantly. New integrations are added every few months, and you'll be notified as soon as they're available.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can I utilize my current smart home functionalities that is connected with my Alexa through my Evo?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Yes. When you connect Evo to your Alexa device, Evo can work through your existing Alexa setup. That means if you already use Alexa to control your smart lights, thermostat, or other home devices, you can continue using those same skills and routines while talking to Evo. Evo simply routes your voice commands through Alexa's existing smart-home network — so you can say things like: "Alexa, ask Evo to set the living room lights to warm white," and Evo will trigger the action using your already-connected Alexa skills. No extra setup is required beyond linking Evo to your Alexa device. Evo adds emotional context, memory, and conversation, while Alexa continues handling your smart-home controls behind the scenes.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can Evo connect to humanoid robots like Tesla Optimus?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Not yet. Tesla Optimus is still in development and doesn't currently allow third-party AI connections. However, Evo's architecture is being built with future hardware integration in mind — so when companies like Tesla or Figure AI open their APIs, Evo will be ready to connect safely and ethically.</p>
+            </details>
+            <details class="group bg-white border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">Can Evo connect with my smart car?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Not yet, but it's on our roadmap. Evo is being designed to integrate with smart vehicles once approved APIs become available. Future updates will allow Evo to connect through platforms like Apple CarPlay, Android Auto, or direct manufacturer integrations — always safely and with your permission.</p>
             </details>
           </div>
         </div>

@@ -19,27 +19,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-r from-[#006D77] to-[#00CDD1] py-20 sm:py-32">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h1 class="tracking-tight text-white">
-            <span class="block hero-title-main">
-              Simple, Transparent Pricing
-            </span>
-            <span class="block text-white/90 mt-2 hero-title-sub">
-              Choose Your Plan
-            </span>
-          </h1>
-          <p class="mt-8 leading-relaxed text-white/80 hero-text max-w-3xl mx-auto">
-            Start free and upgrade when you're ready. No hidden fees, no surprises.
-            Just straightforward pricing for your AI companion.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Pricing Hero Text -->
-    <section class="py-12 bg-gradient-to-b from-[#E5F6F5] to-white">
+    <section class="bg-gradient-to-b from-[#E5F6F5] to-white pb-16 pt-20 sm:pt-32">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h2 class="text-4xl font-bold text-primary-dark mb-4">Simple tiers.<br>Powerful companionship.</h2>
@@ -51,7 +31,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
     </section>
 
     <!-- Pricing Cards -->
-    <section class="py-16 bg-gradient-to-b from-white to-[#E5F6F5]">
+    <section class="pb-16 bg-gradient-to-b from-white to-[#E5F6F5]">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         <!-- Billing Toggle -->
@@ -60,17 +40,16 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
             <button 
               @click="isYearly = false"
               class="px-8 py-3 rounded-full text-lg font-semibold transition-all"
-              :class="!isYearly ? 'bg-white text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
+              :class="!isYearly ? 'btn-gradient-hero text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
             >
               Monthly
             </button>
             <button 
               @click="isYearly = true"
               class="px-8 py-3 rounded-full text-lg font-semibold transition-all flex items-center gap-2"
-              :class="isYearly ? 'bg-white text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
+              :class="isYearly ? 'btn-gradient-hero text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
             >
               Yearly
-              <span class="text-xs bg-coral-500 text-white px-2 py-1 rounded-full">Save 17%</span>
             </button>
           </div>
         </div>
@@ -91,7 +70,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
             <div class="flex-grow mb-6">
               <p class="text-sm text-gray-500 italic text-center">"Your Evo's first hello"</p>
             </div>
-            <NuxtLink to="/register" class="w-full text-center btn-secondary py-4 text-lg font-semibold">
+            <NuxtLink to="/register" class="w-full text-center btn-secondary btn-gradient-hero py-4 text-lg font-semibold">
               Start 30 day free trial
             </NuxtLink>
           </div>
@@ -117,7 +96,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
             <div class="flex-grow mb-6">
               <p class="text-sm text-gray-500 italic text-center">"Where your Evo becomes truly yours"</p>
             </div>
-            <NuxtLink to="/register" class="w-full text-center text-white font-semibold py-4 text-lg rounded-pill" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%);">
+            <NuxtLink to="/register" class="w-full text-center text-white font-semibold py-4 text-lg rounded-pill bg-gradient-to-r from-[#FB7A57] to-[#FBBD68]">
               Start Now
             </NuxtLink>
           </div>
@@ -137,7 +116,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
             <div class="flex-grow mb-6">
               <p class="text-sm text-gray-500 italic text-center">"Enhance your Evo's life"</p>
             </div>
-            <NuxtLink to="/register" class="w-full text-center btn-primary py-4 text-lg font-semibold">
+            <NuxtLink to="/register" class="w-full text-center btn-primary py-4 text-lg font-semibold btn-hero-cta">
               Add on
             </NuxtLink>
           </div>
@@ -301,7 +280,7 @@ const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
               <p class="text-3xl font-bold text-primary-dark">${{ totalPrice.toFixed(2) }}</p>
             </div>
           </div>
-          <NuxtLink to="/register" class="btn-secondary text-lg px-12 py-4 font-semibold" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%); color: white;">
+          <NuxtLink to="/register" class="btn-secondary text-lg px-12 py-4 font-semibold bg-gradient-to-r from-[#FB7A57] to-[#FBBD68]">
             Start My Evo Journey
           </NuxtLink>
         </div>
