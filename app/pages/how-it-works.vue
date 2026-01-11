@@ -369,6 +369,48 @@ useHead({
             Once you create your Evo, you'll access it through your secure online portal - You'll also receive a floating URL that you can use from any device, anytime. Your Evo stays connected wherever life takes you. Mobile app coming soon.
           </p>
           
+          <!-- Three Cards -->
+          <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <!-- Card 1: Online Portal -->
+            <div class="bg-white rounded-2xl p-6 flex flex-col border-2 border-gray-300">
+              <h3 class="text-2xl font-bold text-primary-dark mb-4">
+                Online Portal
+              </h3>
+              <div class="w-full h-[190px] rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img src="/online_portal.png" alt="Online Portal" class="w-full h-full object-contain" />
+              </div>
+              <p class="text-base text-primary-dark text-lg">
+                Your personal dashboard that stores your memories and preferences.
+              </p>
+            </div>
+
+            <!-- Card 2: Unique URL Link -->
+            <div class="bg-white rounded-2xl p-6 flex flex-col border-2 border-gray-300">
+              <h3 class="text-2xl font-bold text-primary-dark mb-4">
+                Unique URL Link
+              </h3>
+              <div class="w-full h-[190px] rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img src="/url_link.png" alt="Unique URL Link" class="w-full h-full object-contain" />
+              </div>
+              <p class="text-base text-primary-dark text-lg">
+                A unique link tied to your username. Open it anywhere, anytime or pin it as a shortcut
+              </p>
+            </div>
+
+            <!-- Card 3: Mobile App -->
+            <div class="bg-white rounded-2xl p-6 flex flex-col border-2 border-gray-300">
+              <h3 class="text-2xl font-bold text-primary-dark mb-4">
+                Mobile App
+                <span class="text-lg block">(Coming Soon)</span>
+              </h3>
+              <div class="w-full h-[190px] rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                <img src="/mobile.png" alt="Mobile App" class="w-full h-full object-contain" />
+              </div>
+              <p class="text-base text-primary-dark text-lg">
+                Seamless on-the-go access that stays in sync with your portal and URL.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div class="flex flex-col items-center text-center gap-6">
