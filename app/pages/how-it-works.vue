@@ -253,5 +253,133 @@ useHead({
         </div>
       </div>
     </section>
+
+    <!-- Step 4 -->
+    <section class="py-16 bg-gradient-to-b from-[#026F78] to-[#BEFBFC]">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl mb-4">
+            Step 4: Let Evo Start Learning About You
+          </h2>
+          <p class="text-2xl text-white max-w-4xl mx-auto">
+            Evo adapts to you through conversation, your likes, dislikes, and preferences. Keep chatting and see Evo's understanding of you deepen and evolve.
+          </p>
+          
+        </div>
+
+        <div class="flex flex-col items-center text-center gap-6">
+          <!-- Hero Orb -->
+          <div class="relative">            
+            <div class="hero-orb-container">
+              <div class="hero-blobs">
+                <svg viewBox="0 0 1200 1200">
+                  <g class="blob blob-1">
+                    <path />
+                  </g>
+                  <g class="blob blob-2">
+                    <path />
+                  </g>
+                  <g class="blob blob-3">
+                    <path />
+                  </g>
+                  <g class="blob blob-4">
+                    <path />
+                  </g>
+                  <g class="blob blob-1 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-2 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-3 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-4 alt">
+                    <path />
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5 -->
+    <section class="py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
+            Step 5: Connect Your World (Optional)
+          </h2>
+          <p class="text-2xl text-primary-dark max-w-5xl mx-auto">
+            Connect Evo to your daily tools or voice assistants. Add API credentials, manage connections, and expand your Evo's abilities - all through your personal portal.
+          </p>
+          
+          <!-- Integration Images Grid -->
+          <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <!-- Google Email -->
+            <div class="flex flex-col items-center">
+              <div class="w-auto h-[110px] rounded-lg mb-3 overflow-hidden flex items-center justify-center bg-gray-50">
+                <img src="/google_email.png" alt="Google Email" class="w-full h-full object-contain" />
+              </div>
+              <h3 class="text-lg font-semibold text-primary-dark">Google Email</h3>
+            </div>
+            
+            <!-- Spotify -->
+            <div class="flex flex-col items-center">
+              <div class="w-auto h-[110px] rounded-lg mb-3 overflow-hidden flex items-center justify-center bg-gray-50">
+                <img src="/spotify.png" alt="Spotify" class="w-full h-full object-contain" />
+              </div>
+              <h3 class="text-lg font-semibold text-primary-dark">Spotify</h3>
+            </div>
+            
+            <!-- Calendly -->
+            <div class="flex flex-col items-center">
+              <div class="w-auto h-[110px] rounded-lg mb-3 overflow-hidden flex items-center justify-center bg-gray-50">
+                <img src="/calendly.png" alt="Calendly" class="w-full h-full object-contain" />
+              </div>
+              <h3 class="text-lg font-semibold text-primary-dark">Calendly</h3>
+            </div>
+            
+            <!-- Amazon Alexa -->
+            <div class="flex flex-col items-center">
+              <div class="w-auto h-[110px] rounded-lg mb-3 overflow-hidden flex items-center justify-center bg-gray-50">
+                <img src="/amazon_alexa.png" alt="Amazon Alexa" class="w-full h-full object-contain" />
+              </div>
+              <h3 class="text-lg font-semibold text-primary-dark">Amazon Alexa</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-center text-center">
+          <h3 class="text-2xl mt-8 text-primary-dark">New API's are always released!</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 6 -->
+    <section class="py-16 bg-gradient-to-b from-[#E5F6F5] to-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
+            Step 6: Access Your Evo Anywhere
+          </h2>
+          <p class="text-2xl text-primary-dark mx-auto">
+            Once you create your Evo, you'll access it through your secure online portal - You'll also receive a floating URL that you can use from any device, anytime. Your Evo stays connected wherever life takes you. Mobile app coming soon.
+          </p>
+          
+        </div>
+
+        <div class="flex flex-col items-center text-center gap-6">
+          <!-- CTA Section -->
+          <div class="mt-6">
+            <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-16 bg-gradient-to-b from-[#FB7A57] to-[#FBBD68]">
+              Start Your Free Trial
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
