@@ -12,26 +12,72 @@ useHead({
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-r from-[#006D77] to-[#00CDD1] py-20 sm:py-32">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section class="relative overflow-hidden bg-blend-overlay bg-gradient-to-r from-[#006D77] to-[#00CDD1] py-20 sm:py-32" style="background-image: url('/how-it-works-bg.png'); background-size: cover; background-position: center;;">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col gap-8">
         <div class="text-center">
-          <h1 class="tracking-tight text-white">
+          <h1 class="tracking-tight text-primary-dark">
             <span class="block hero-title-main">
-              How Evotally Works
+              What begins as conversation becomes connection.
             </span>
-            <span class="block text-white/90 mt-2 hero-title-sub">
-              Simple, Powerful, Personal
+            <span class="block text-primary-dark/90 my-6 hero-title-sub">
+              Evo learns your tone, your stories, and your rhythm - one day at a time.
             </span>
           </h1>
-          <p class="mt-8 leading-relaxed text-white/80 hero-text max-w-3xl mx-auto">
-            Getting started with your AI companion is easy. Learn how Evotally's 
-            memory and personality features create a truly personalized experience.
-          </p>
+        </div>
+        
+        <img src="/logo.png" alt="Evotally" class="h-32 w-auto my-8 mt-4" />
+
+        <!-- CTA Button -->
+        <div class="text-center">
+          <NuxtLink
+            to="/register"
+            class="btn-primary btn-gradient-hero text-lg"
+          >
+            Start Your Free Trial
+          </NuxtLink>
         </div>
       </div>
     </section>
 
-    <!-- Content Coming Soon -->
+    <!-- Step 1 -->
+    <section class="py-16 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
+            Step 1: Create Your Account
+          </h2>
+          <p class="text-2xl text-gray-600 max-w-2xl mx-auto">
+            Select from warn, natural voices - or clone a custom one with the paid plan. Your Evo's voice is how connection feels alive.
+          </p>
+          <div class="mt-10">
+            <NuxtLink to="/register" class="btn-primary text-lg px-24 py-4">
+              Start Now
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="py-24  bg-gradient-to-b from-[#E5F6F5] to-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
+            Step 2: Choose Your Voice
+          </h2>
+          <p class="text-2xl text-primary-dark max-w-2xl mx-auto">
+            Select between various male, female or customize your own.
+          </p>
+          <div class="mt-10">
+            <NuxtLink to="/" class="btn-primary text-lg px-8 py-4">
+              Return Home
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
     <section class="py-24 bg-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">

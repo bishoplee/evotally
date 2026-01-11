@@ -70,10 +70,10 @@ onUnmounted(() => {
               v-for="link in navLinks"
               :key="link.to"
               :to="link.to"
-              class="px-4 py-2 rounded-lg nav-link transition-colors duration-200"
+              class="px-4 py-2 rounded-lg nav-link transition-colors duration-200 text-lg"
               :class="route.path === link.to
-                ? 'bg-primary-50 text-primary-700'
-                : 'text-gray-600 text-lg hover:bg-gray-100 hover:text-gray-900'"
+                ? 'text-primary-700'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
             >
               {{ link.label }}
             </NuxtLink>
@@ -128,7 +128,7 @@ onUnmounted(() => {
               :to="link.to"
               class="px-4 py-2.5 rounded-lg nav-link transition-colors duration-200"
               :class="route.path === link.to
-                ? 'bg-primary-50 text-primary-700'
+                ? 'text-primary-700'
                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'"
               @click="closeMobileMenu"
             >
@@ -212,9 +212,11 @@ onUnmounted(() => {
             <ul class="space-y-2 text-teal-100">
               <li><NuxtLink to="/why-evo" class="hover:text-white transition">Why Evo</NuxtLink></li>
               <li><NuxtLink to="/how-it-works" class="hover:text-white transition">How it Works</NuxtLink></li>
-              <li><NuxtLink to="/faq" class="hover:text-white transition">FAQ</NuxtLink></li>
+              <li><NuxtLink to="/demo" class="hover:text-white transition">Demo</NuxtLink></li>
               <li><NuxtLink to="/pricing" class="hover:text-white transition">Pricing</NuxtLink></li>
               <li><NuxtLink to="/blog" class="hover:text-white transition">Blog</NuxtLink></li>
+              <li><NuxtLink to="/testimonials" class="hover:text-white transition">Testimonials</NuxtLink></li>
+              <li><NuxtLink to="/faq" class="hover:text-white transition">FAQ</NuxtLink></li>
             </ul>
           </div>
 

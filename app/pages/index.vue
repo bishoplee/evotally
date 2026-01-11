@@ -278,7 +278,7 @@ const stats = [
           <div class="card bg-white flex flex-col">
             <div class="mb-4">
               <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
-                <span class="text-gray-400">Image</span>
+                <img src="/jess_k.jpg" alt="Jess K.">
               </div>
             </div>
             <p class="text-primary-dark-70 mb-4 flex-grow">
@@ -302,7 +302,7 @@ const stats = [
           <div class="card bg-white flex flex-col">
             <div class="mb-4">
               <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
-                <span class="text-gray-400">Image</span>
+                <img src="/seth_m.jpg" alt="Seth M.">
               </div>
             </div>
             <p class="text-primary-dark-70 mb-4 flex-grow">
@@ -326,7 +326,7 @@ const stats = [
           <div class="card bg-white flex flex-col">
             <div class="mb-4">
               <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
-                <span class="text-gray-400">Image</span>
+                <img src="/stanley_p.jpg" alt="Stanley P.">
               </div>
             </div>
             <p class="text-primary-dark-70 mb-4 flex-grow">
@@ -350,7 +350,7 @@ const stats = [
           <div class="card bg-white flex flex-col">
             <div class="mb-4">
               <div class="testimonial-img bg-gray-200 rounded-lg flex items-center justify-center">
-                <span class="text-gray-400">Image</span>
+                <img src="/vivian_w.jpg" alt="Vivian W.">
               </div>
             </div>
             <p class="text-primary-dark-70 mb-4 flex-grow">

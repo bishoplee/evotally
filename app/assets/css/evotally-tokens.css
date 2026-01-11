@@ -183,6 +183,9 @@
   --ev-breakpoint-desktop: 1024px;
 }
 
+a {
+  outline: none;
+}
 /* ========================================
    EVOTALLY COMPONENT STYLES
    ======================================== */
@@ -190,16 +193,17 @@
 /* Hero Typography */
 .hero-title-main {
   font-family: var(--ev-font-heading);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 56px;
   line-height: 1.1;
 }
 
 .hero-title-sub {
   font-family: var(--ev-font-heading);
-  font-weight: 600;
-  font-size: 48px;
+  font-weight: 400;
+  font-size:28px;
   line-height: 1.2;
+  padding: 0 80px;
 }
 
 .hero-text {
@@ -374,7 +378,7 @@
 
 /* Testimonial card image */
 .testimonial-img {
-  width: 265px;
+  width: 260px;
   height: 225px;
   object-fit: cover;
 }

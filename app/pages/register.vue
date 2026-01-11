@@ -110,20 +110,23 @@ async function onSubmit() {
       <span class="text-sm font-medium">Back</span>
     </button>
 
-    <div class="max-w-md w-full">
+    <div class="max-w-lg w-full">
       <!-- Header -->
       <div class="text-center mb-8">
-        <div class="flex justify-center mb-4">
-          <img src="/logo.svg" alt="Evotally" class="h-16 w-auto" />
+        <div class="flex gap-4 items-center justify-center mb-4">
+          <img src="/logo.png" alt="Evotally" class="h-12 w-auto transition-transform group-hover:scale-105" />
+          <span class="text-3xl font-bold text-primary-900 hidden sm:inline">
+            EVOTALLY
+          </span>
         </div>
-        <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
-        <p class="mt-2 text-sm text-gray-600">
-          Register and set up your profile so the assistant can use your context.
-        </p>
       </div>
-
+      
       <!-- Register Card -->
       <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <h2 class="text-3xl font-bold text-primary-dark text-center">Join the Evotally Family</h2>
+        <p class="mt-2 text-lg text-gray-600 text-center mb-8">
+          Meet Evo - your personalized voice companion, assistant, plus memory that evolves with you.
+        </p>
         <form @submit.prevent="onSubmit" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>

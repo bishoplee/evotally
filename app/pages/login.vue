@@ -129,11 +129,14 @@ function loginWithGoogle() {
     <div class="max-w-md w-full">
       <!-- Header -->
       <div class="text-center mb-8">
-        <div class="flex justify-center mb-4">
-          <img src="/logo.svg" alt="Evotally" class="h-16 w-auto" />
+        <div class="flex gap-4 items-center justify-center mb-4">
+          <img src="/logo.png" alt="Evotally" class="h-12 w-auto transition-transform group-hover:scale-105" />
+          <span class="text-3xl font-bold text-primary-900 hidden sm:inline">
+            EVOTALLY
+          </span>
         </div>
-        <h2 class="text-3xl font-bold text-gray-900">Welcome back</h2>
-        <p class="mt-2 text-sm text-gray-600">
+        <h2 class="text-3xl font-bold text-primary-dark mt-6">Welcome back</h2>
+        <p class="mt-2 text-lg text-gray-600">
           Sign in to continue to Evotally
         </p>
       </div>
