@@ -7,6 +7,13 @@ useHead({
     { name: 'description', content: 'Choose the perfect plan for your AI companion experience with Evotally.' }
   ]
 })
+
+const isYearly = ref(false)
+
+const evoPlusPrice = computed(() => isYearly.value ? 299.99 : 29.99)
+const customVoicePrice = computed(() => isYearly.value ? 199.99 : 19.99)
+const totalPrice = computed(() => isYearly.value ? 499.98 : 49.98)
+const billingPeriod = computed(() => isYearly.value ? 'year' : 'month')
 </script>
 
 <template>
@@ -46,6 +53,27 @@ useHead({
     <!-- Pricing Cards -->
     <section class="py-16 bg-gradient-to-b from-white to-[#E5F6F5]">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        
+        <!-- Billing Toggle -->
+        <div class="flex justify-center items-center mb-12">
+          <div class="inline-flex bg-gray-200 rounded-full p-1">
+            <button 
+              @click="isYearly = false"
+              class="px-8 py-3 rounded-full text-lg font-semibold transition-all"
+              :class="!isYearly ? 'bg-white text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
+            >
+              Monthly
+            </button>
+            <button 
+              @click="isYearly = true"
+              class="px-8 py-3 rounded-full text-lg font-semibold transition-all flex items-center gap-2"
+              :class="isYearly ? 'bg-white text-primary-dark shadow-md' : 'text-gray-600 hover:text-primary-dark'"
+            >
+              Yearly
+              <span class="text-xs bg-coral-500 text-white px-2 py-1 rounded-full">Save 17%</span>
+            </button>
+          </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           
           <!-- Free Trial Card -->
@@ -79,8 +107,8 @@ useHead({
             <div class="text-center mb-6 mt-4">
               <h3 class="text-2xl font-bold text-primary-dark mb-2">Evo Plus</h3>
               <div class="mb-4">
-                <span class="text-5xl font-bold text-primary-dark">$29.99</span>
-                <span class="text-gray-600">/month</span>
+                <span class="text-5xl font-bold text-primary-dark">${{ evoPlusPrice.toFixed(2) }}</span>
+                <span class="text-gray-600">/{{ billingPeriod }}</span>
               </div>
             </div>
             <p class="text-center text-gray-700 mb-6">
@@ -99,8 +127,8 @@ useHead({
             <div class="text-center mb-6">
               <h3 class="text-2xl font-bold text-primary-dark mb-2">Custom Voice<br><span class="text-lg">(add on)</span></h3>
               <div class="mb-4">
-                <span class="text-5xl font-bold text-primary-dark">$19.99</span>
-                <span class="text-gray-600">/month</span>
+                <span class="text-5xl font-bold text-primary-dark">${{ customVoicePrice.toFixed(2) }}</span>
+                <span class="text-gray-600">/{{ billingPeriod }}</span>
               </div>
             </div>
             <p class="text-center text-gray-700 mb-6">
@@ -261,16 +289,16 @@ useHead({
         <div class="text-center">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div>
-              <h3 class="text-xl font-bold text-primary-dark mb-2">Evo Plus <span class="text-gray-600">(monthly)</span></h3>
-              <p class="text-3xl font-bold text-primary-dark">$29.99</p>
+              <h3 class="text-xl font-bold text-primary-dark mb-2">Evo Plus <span class="text-gray-600">({{ billingPeriod }}ly)</span></h3>
+              <p class="text-3xl font-bold text-primary-dark">${{ evoPlusPrice.toFixed(2) }}</p>
             </div>
             <div>
-              <h3 class="text-xl font-bold text-primary-dark mb-2">Custom voice <span class="text-gray-600">(monthly)</span></h3>
-              <p class="text-3xl font-bold text-primary-dark">$19.99</p>
+              <h3 class="text-xl font-bold text-primary-dark mb-2">Custom voice <span class="text-gray-600">({{ billingPeriod }}ly)</span></h3>
+              <p class="text-3xl font-bold text-primary-dark">${{ customVoicePrice.toFixed(2) }}</p>
             </div>
             <div>
-              <h3 class="text-xl font-bold text-primary-dark mb-2">Your Monthly Plan</h3>
-              <p class="text-3xl font-bold text-primary-dark">$49.98</p>
+              <h3 class="text-xl font-bold text-primary-dark mb-2">Your {{ isYearly ? 'Yearly' : 'Monthly' }} Plan</h3>
+              <p class="text-3xl font-bold text-primary-dark">${{ totalPrice.toFixed(2) }}</p>
             </div>
           </div>
           <NuxtLink to="/register" class="btn-secondary text-lg px-12 py-4 font-semibold" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%); color: white;">

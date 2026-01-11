@@ -99,9 +99,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
@@ -139,9 +137,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
@@ -179,9 +175,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
@@ -219,9 +213,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
@@ -259,9 +251,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
@@ -299,9 +289,7 @@ useHead({
               </p>
               <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center mr-3">
-                    <span class="text-white text-xs font-semibold">MZ</span>
-                  </div>
+                  <img src="/blog-assets/Blog--Author-.png" alt="Michael Zakaroff" class="w-8 h-8 rounded-full mr-3 object-cover" />
                   <div>
                     <p class="text-sm font-medium text-gray-900">Michael Zakaroff</p>
                   </div>
