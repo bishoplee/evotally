@@ -12,16 +12,16 @@ useHead({
 <template>
   <div>
     <!-- Blog Navigation -->
-    <section class="bg-white border-b border-gray-200">
+    <section class="bg-white border-b border-gray-200 mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-center justify-between py-3">
-          <div class="flex flex-wrap items-center gap-6">
-            <span class="text-primary-dark font-semibold">EvoBlog</span>
-            <a href="#new" class="text-sm text-gray-700 hover:text-primary-600 transition">New</a>
-            <a href="#ethics" class="text-sm text-gray-700 hover:text-primary-600 transition">Ethics</a>
-            <a href="#security" class="text-sm text-gray-700 hover:text-primary-600 transition">Security</a>
-            <a href="#emotional-intelligence" class="text-sm text-gray-700 hover:text-primary-600 transition">Emotional Intelligence</a>
-            <a href="#consignment-shops" class="text-sm text-gray-700 hover:text-primary-600 transition">Consignment Shops</a>
+          <div class="flex flex-wrap items-center gap-6 text-md">
+            <span class="nav-link text-lg text-primary-dark font-semibold">EvoBlog</span>
+            <a href="#new" class="nav-link text-lg text-gray-700 hover:text-primary-600 transition">New</a>
+            <a href="#ethics" class="nav-link text-lg text-gray-700 hover:text-primary-600 transition">Ethics</a>
+            <a href="#security" class="nav-link text-lg text-gray-700 hover:text-primary-600 transition">Security</a>
+            <a href="#emotional-intelligence" class="nav-link text-lg text-gray-700 hover:text-primary-600 transition">Emotional Intelligence</a>
+            <a href="#consignment-shops" class="nav-link text-lg text-gray-700 hover:text-primary-600 transition">Consignment Shops</a>
           </div>
           <div class="flex items-center">
             <button class="flex items-center text-sm text-gray-700 hover:text-primary-600 transition">

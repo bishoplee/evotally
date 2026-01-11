@@ -44,15 +44,15 @@ onUnmounted(() => {
   <div class="min-h-screen flex flex-col bg-gray-50">
     <!-- Header -->
     <header 
-      class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out py-4"
+      class="fixed top-0 left-0 right-0 z-50 border-b-2 border-solid border-gray-200 transition-all duration-300 ease-in-out py-4"
       style="position: fixed !important; top: 0 !important;"
       :class="[
         isScrolled 
           ? 'bg-white/70 backdrop-blur-lg border-b border-gray-200/50 shadow-sm' 
-          : 'bg-white/90 border-b border-transparent'
+          : 'bg-white/90 border-b'
       ]"
     >
-      <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <nav class="mx-auto max-w-7xl sm:px-6 lg:px-2">
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <NuxtLink to="/" class="flex items-center gap-3 group">
