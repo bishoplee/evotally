@@ -1,0 +1,45 @@
+<!-- FAQ Sections -->
+    <section class="py-16">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        
+        <!-- Getting Started -->
+        <div class="mb-16">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <h2 class="text-3xl font-bold text-primary-dark">Getting Started</h2>
+          </div>
+          <div class="space-y-3">
+            <details class="group bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">How do I create an account?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Click the "Sign Up" button and follow the prompts to create your personalized Evo account. You'll be guided through a simple setup process.</p>
+            </details>
+            <details class="group bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <summary class="flex justify-between items-center cursor-pointer list-none">
+                <span class="text-lg font-semibold text-primary-dark">What information do I need to provide?</span>
+                <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <p class="mt-4 text-gray-700">Basic contact information and preferences to help Evo understand and adapt to your needs from the very beginning.</p>
+            </details>
+            <!-- Add 5 more FAQ items similar to above -->
+          </div>
+        </div>
+
+        <!-- Repeat this structure for each category:
+        - Personalization & Voice
+        - Memory & Interaction
+        - Privacy & Security
+        - Pricing & Plans
+        - Integrations
+        - Emotional Connection
+        - Future Features
+        -->
+
+      </div>
+    </section>
