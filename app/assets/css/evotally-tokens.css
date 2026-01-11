@@ -280,6 +280,10 @@ a {
   animation: float 6s ease-in-out infinite;
 }
 
+.h-32 {
+  height: 32px
+}
+
 /* Particle Colors */
 .particle-pink {
   background: var(--ev-magenta-500);

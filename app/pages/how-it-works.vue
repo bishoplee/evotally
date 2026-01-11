@@ -47,12 +47,98 @@ useHead({
             Step 1: Create Your Account
           </h2>
           <p class="text-2xl text-gray-600 max-w-2xl mx-auto">
-            Select from warn, natural voices - or clone a custom one with the paid plan. Your Evo's voice is how connection feels alive.
+            Select from warm, natural voices - or clone a custom one with the paid plan. Your Evo's voice is how connection feels alive.
           </p>
-          <div class="mt-10">
-            <NuxtLink to="/register" class="btn-primary text-lg px-24 py-4">
-              Start Now
-            </NuxtLink>
+          
+          <!-- Two Cards -->
+          <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-3xl p-8 flex flex-col" style="border: 4px solid #006D77;">
+              <!-- Title Section -->
+              <div class="">
+                <h3 class="text-2xl font-bold text-primary-dark mb-3">
+                  Free Trial Version
+                </h3>
+                <p class="text-xl text-primary-dark font-bold">
+                  $0.00
+                </p>
+              </div>
+              
+              <!-- What's Included Section (flex-grow) -->
+              <div class="flex-grow text-left mt-4">
+                <h4 class="text-md font-semibold text-primary-dark mb-4">
+                  What's Included
+                </h4>
+                <ul class="space-y-3 text-left list-disc list-inside text-sm leading-tight">
+                  <li class="">
+                    Free 30 day secure memory saves your progress as Evo begins to know you
+                  </li>
+                  <li class="">
+                    No credit card required
+                  </li>
+                  <li class="">
+                    Four natural voices - Access to (two male, two female)
+                  </li>
+                  <li class="">
+                    Secure data- Fully encrypted
+                  </li>
+                  <li class="">
+                    Upgrade within 30 days to retain memory and progress
+                  </li>
+                </ul>
+              </div>
+              
+              <!-- CTA Section -->
+              <div class="mt-6">
+                <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-16">
+                  Start 30 day free trial
+                </NuxtLink>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-3xl p-8 flex flex-col" style="border: 4px solid #FF8D68;">
+              <!-- Title Section -->
+              <div class="">
+                <h3 class="text-2xl font-bold text-primary-dark mb-3">
+                  Evo Plus Version
+                </h3>
+                <p class="text-xl text-primary-dark font-bold">
+                  $29.99/month
+                </p>
+              </div>
+              
+              <!-- What's Included Section (flex-grow) -->
+              <div class="flex-grow text-left mt-4">
+                <h4 class="text-md font-semibold text-primary-dark mb-4">
+                  What's Included
+                </h4>
+                <ul class="space-y-3 text-left list-disc list-inside text-sm leading-tight">
+                  <li class="">
+                    Extended long-term memory that keeps learning across every interaction
+                  </li>
+                  <li class="">
+                    Expanded emotional intelligence - Evo adapts its tone to your moods and moments
+                  </li>
+                  <li class="">
+                    Voice personalization - record or clone a voice you love (additional fee)
+                  </li>
+                  <li class="">
+                    Secure data- Fully encrypted
+                  </li>
+                  <li class="">
+                    Smart connections - API access to sync your popular APPS.
+                  </li>
+                </ul>
+              </div>
+              
+              <!-- CTA Section -->
+              <div class="mt-6">
+                <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-32" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%);">
+                  Start Now
+                </NuxtLink>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -68,36 +154,98 @@ useHead({
           <p class="text-2xl text-primary-dark max-w-2xl mx-auto">
             Select between various male, female or customize your own.
           </p>
-          <div class="mt-10">
-            <NuxtLink to="/" class="btn-primary text-lg px-8 py-4">
-              Return Home
-            </NuxtLink>
-          </div>
+          
+          <!-- Voice Images Grid -->
+          <div class="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
+            <!-- Tom -->
+            <div class="flex flex-col items-center">
+              <img src="/tom.png" alt="Tom" class="w-full h-auto rounded-lg mb-3" />
+              <h3 class="text-lg font-semibold text-primary-dark">Tom</h3>
+            </div>
+            
+            <!-- Jake -->
+            <div class="flex flex-col items-center">
+              <img src="/jake.png" alt="Jake" class="w-full h-auto rounded-lg mb-3" />
+              <h3 class="text-lg font-semibold text-primary-dark">Jake</h3>
+            </div>
+            
+            <!-- Lisa -->
+            <div class="flex flex-col items-center">
+              <img src="/lisa.png" alt="Lisa" class="w-full h-auto rounded-lg mb-3" />
+              <h3 class="text-lg font-semibold text-primary-dark">Lisa</h3>
+            </div>
+            
+            <!-- Mel -->
+            <div class="flex flex-col items-center">
+              <img src="/mel.png" alt="Mel" class="w-full h-auto rounded-lg mb-3" />
+              <h3 class="text-lg font-semibold text-primary-dark">Mel</h3>
+            </div>
+            
+            <!-- Customize Pro -->
+            <div class="flex flex-col items-center">
+              <img src="/customize-pro.png" alt="Customize Pro" class="w-full h-auto rounded-lg mb-3" />
+              <h3 class="text-lg font-semibold text-primary-dark">Customize<br>(pro)</h3>
+            </div>
+          </div>          
         </div>
       </div>
     </section>
 
     <!-- Step 3 -->
-    <section class="py-24 bg-white">
+    <section class="py-24  bg-gradient-to-b from-[#E5F6F5] to-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-100 mb-6">
-            <svg class="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
-            Coming Soon
+          <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
+            Step 3: Name Your Evo
           </h2>
-          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-            We're creating detailed guides to help you understand and get the most out of Evotally. 
-            Stay tuned for step-by-step walkthroughs and tutorials.
+          <p class="text-2xl text-primary-dark max-w-2xl mx-auto">
+            Give your Evo a name - any name you want. Once you name it. Evo begins to learn your story, tone, and preferences.
           </p>
-          <div class="mt-10">
-            <NuxtLink to="/" class="btn-primary text-lg px-8 py-4">
-              Return Home
+          
+        </div>
+
+        <div class="flex flex-col items-center text-center gap-6">
+          <!-- Hero Orb -->
+          <div>
+            <div class="hero-orb-container">
+              <div class="hero-blobs">
+                <svg viewBox="0 0 1200 1200">
+                  <g class="blob blob-1">
+                    <path />
+                  </g>
+                  <g class="blob blob-2">
+                    <path />
+                  </g>
+                  <g class="blob blob-3">
+                    <path />
+                  </g>
+                  <g class="blob blob-4">
+                    <path />
+                  </g>
+                  <g class="blob blob-1 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-2 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-3 alt">
+                    <path />
+                  </g>
+                  <g class="blob blob-4 alt">
+                    <path />
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA Section -->
+          <div class="mt-6">
+            <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-16" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%);">
+              Start Your Free Trial
             </NuxtLink>
           </div>
+
         </div>
       </div>
     </section>
