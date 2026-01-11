@@ -100,49 +100,49 @@ useHead({
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <!-- Getting Started -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/get_started.svg" alt="Getting Started" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Getting Started</span>
               </button>
 
               <!-- Personalization & Voice -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/personalization_voice.svg" alt="Personalization & Voice" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Personalization & Voice</span>
               </button>
 
               <!-- Memory & Interaction -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/memory_interaction.svg" alt="Memory & Interaction" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Memory & Interaction</span>
               </button>
 
               <!-- Privacy & Security -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/privacy_security.svg" alt="Privacy & Security" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Privacy & Security</span>
               </button>
 
               <!-- Pricing & Plans -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/pricing_plans.svg" alt="Pricing & Plans" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Pricing & Plans</span>
               </button>
 
               <!-- Integrations -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/integrations.svg" alt="Integrations" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Integrations</span>
               </button>
 
               <!-- Emotional Connection -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/emotional_connections.svg" alt="Emotional Connection" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Emotional Connection</span>
               </button>
 
               <!-- Future Features -->
               <button class="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-300 rounded-pill hover:border-primary-600 hover:bg-primary-50 transition-all">
-                <div class="w-6 h-6 bg-gray-200 rounded-full flex-shrink-0"></div>
+                <img src="/faq-assets/future_features.svg" alt="Future Features" class="w-6 h-6 flex-shrink-0" />
                 <span class="text-sm font-semibold text-primary-dark">Future Features</span>
               </button>
             </div>
@@ -159,7 +159,7 @@ useHead({
         <!-- Getting Started -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/get_started.svg" alt="Getting Started" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Getting Started</h2>
           </div>
           <div class="space-y-3">
@@ -223,7 +223,7 @@ useHead({
         <!-- Personalization & Voice -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/personalization_voice.svg" alt="Personalization & Voice" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Personalization & Voice</h2>
           </div>
           <div class="space-y-3">
@@ -260,7 +260,7 @@ useHead({
         <!-- Memory & Interaction -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/memory_interaction.svg" alt="Memory & Interaction" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Memory & Interaction</h2>
           </div>
           <div class="space-y-3">
@@ -324,7 +324,7 @@ useHead({
         <!-- Privacy & Security -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/privacy_security.svg" alt="Privacy & Security" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Privacy & Security</h2>
           </div>
           <div class="space-y-3">
@@ -388,7 +388,7 @@ useHead({
         <!-- Pricing & Plans -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/pricing_plans.svg" alt="Pricing & Plans" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Pricing & Plans</h2>
           </div>
           <div class="space-y-3">
@@ -452,7 +452,7 @@ useHead({
         <!-- Integrations -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/integrations.svg" alt="Integrations" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Integrations</h2>
           </div>
           <div class="space-y-3">
@@ -516,7 +516,7 @@ useHead({
         <!-- Emotional Connection -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/emotional_connections.svg" alt="Emotional Connection" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Emotional Connection</h2>
           </div>
           <div class="space-y-3">
@@ -580,7 +580,7 @@ useHead({
         <!-- Future Features -->
         <div class="mb-16">
           <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+            <img src="/faq-assets/future_features.svg" alt="Future Features" class="w-8 h-8 flex-shrink-0" />
             <h2 class="text-3xl font-bold text-primary-dark">Future Features</h2>
           </div>
           <div class="space-y-3">
