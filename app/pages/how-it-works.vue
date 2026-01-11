@@ -134,7 +134,7 @@ useHead({
               
               <!-- CTA Section -->
               <div class="mt-6">
-                <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-32" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%);">
+                <NuxtLink to="/register" class="text-center btn-secondary bg-gradient-to-r from-[#FB7A57] to-[#FBBD68] text-base py-4 px-32">
                   Start Now
                 </NuxtLink>
               </div>
@@ -246,7 +246,7 @@ useHead({
 
           <!-- CTA Section -->
           <div class="mt-6">
-            <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-16" style="background: linear-gradient(135deg, #FB7A57 0%, #FF8D68 100%);">
+            <NuxtLink to="/register" class="text-center btn-secondary bg-gradient-to-r from-[#FB7A57] to-[#FBBD68] text-base py-4 px-16">
               Start Your Free Trial
             </NuxtLink>
           </div>
@@ -415,8 +415,8 @@ useHead({
 
         <div class="flex flex-col items-center text-center gap-6">
           <!-- CTA Section -->
-          <div class="mt-6">
-            <NuxtLink to="/register" class="text-center btn-secondary btn-gradient-hero text-base py-4 px-16 bg-gradient-to-b from-[#FB7A57] to-[#FBBD68]">
+          <div class="mt-16">
+            <NuxtLink to="/register" class="text-center text-white font-semibold text-base py-4 px-16 rounded-3xl bg-gradient-to-r from-[#FB7A57] to-[#FBBD68]">
               Start Your Free Trial
             </NuxtLink>
           </div>
