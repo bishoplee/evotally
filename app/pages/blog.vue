@@ -9,6 +9,15 @@ useHead({
 })
 </script>
 
+<style scoped>
+.hero-bg {
+  background-image: url('/blog-assets/Blog--Hero.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+</style>
+
 <template>
   <div>
     <!-- Blog Navigation -->
@@ -26,7 +35,7 @@ useHead({
           <div class="flex items-center">
             <button class="flex items-center text-sm text-gray-700 hover:text-primary-600 transition">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" :stroke-width="2" />
               </svg>
               Search
             </button>
@@ -36,16 +45,16 @@ useHead({
     </section>
 
     <!-- Hero Section -->
-    <section class="relative bg-gradient-to-r from-[#1a4d5e] via-[#2d5f72] to-[#3d7086] py-16 md:py-20 overflow-hidden">
+    <section class="relative bg-gradient-to-r from-[#1a4d5e] via-[#2d5f72] to-[#3d7086] py-16 md:py-20 overflow-hidden" style="background-image: url('/blog-assets/Blog--Hero.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-2 gap-12 items-center">
           <!-- Left Content -->
           <div class="text-white">
-            <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+            <h1 class="text-4xl md:text-5xl font-medium leading-tight mb-6">
               Exploring the Future of Human-AI Connection
             </h1>
 
-            <p class="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
+            <p class="text-lg md:text-2xl mb-8 text-white/90 leading-relaxed">
               Insights, research, and reflections all about AI and the creators of Evotally — where technology learns empathy, memory, and emotional intelligence.
             </p>
 
@@ -56,19 +65,9 @@ useHead({
             </div>
           </div>
 
-          <!-- Right Content - AI Head Image -->
+          <!-- Right Content - Spacer for background image -->
           <div class="relative">
-            <div class="w-full h-auto">
-              <!-- Placeholder for AI head image -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-purple-600/10"></div>
-                <svg class="w-48 h-48 text-white/20 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <div class="absolute top-1/4 right-1/4 w-32 h-32 bg-blue-400/20 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-1/4 left-1/4 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl"></div>
-              </div>
-            </div>
+            <!-- Background image displays here via CSS -->
           </div>
         </div>
       </div>
@@ -81,10 +80,12 @@ useHead({
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Article Card 1 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-orange-300 via-amber-200 to-orange-400 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0 opacity-50">
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--The-Future-of-Connection-Understanding-Emotional-Intelligence-in-AI.jpg" 
+                alt="Emotional Intelligence in AI" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -107,7 +108,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
@@ -119,11 +120,12 @@ useHead({
 
           <!-- Article Card 2 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-slate-700 via-blue-900 to-slate-800 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0">
-                <div class="absolute top-1/3 left-1/4 w-24 h-24 bg-blue-400/20 rounded-full blur-2xl"></div>
-                <div class="absolute bottom-1/3 right-1/4 w-32 h-32 bg-cyan-400/20 rounded-full blur-3xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--Behind-the-Voice-The-Science-and-Ethics-of-AI-Voice-Cloning.jpg" 
+                alt="AI Voice Cloning" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -146,7 +148,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
@@ -158,10 +160,12 @@ useHead({
 
           <!-- Article Card 3 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-slate-800 via-gray-700 to-slate-900 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0">
-                <div class="absolute top-0 right-0 w-40 h-40 bg-gray-400/10 rounded-full blur-3xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--From-Data-to-Devotion-How-AI-Learns-and-Remembers.jpg" 
+                alt="AI Learning and Memory" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -184,7 +188,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
@@ -196,10 +200,12 @@ useHead({
 
           <!-- Article Card 4 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-gray-600 via-slate-500 to-gray-700 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0">
-                <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--Emotional-Intelligence-vs.-Functional-AI-Whats-the-Difference.jpg" 
+                alt="Emotional vs Functional AI" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -222,7 +228,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
@@ -234,11 +240,12 @@ useHead({
 
           <!-- Article Card 5 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-blue-800 via-indigo-900 to-blue-950 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0">
-                <div class="absolute top-1/4 right-1/3 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl"></div>
-                <div class="absolute bottom-1/4 left-1/3 w-40 h-40 bg-indigo-400/20 rounded-full blur-3xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--Beyond-Screens-How-Emotional-AI-Is-Entering-Robots-and-Cars.jpg" 
+                alt="Emotional AI in Robots and Cars" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -261,7 +268,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
@@ -273,10 +280,12 @@ useHead({
 
           <!-- Article Card 6 -->
           <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            <div class="aspect-video bg-gradient-to-br from-slate-900 via-gray-800 to-slate-950 flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0">
-                <div class="absolute top-1/3 left-1/2 w-36 h-36 bg-gray-500/10 rounded-full blur-3xl"></div>
-              </div>
+            <div class="aspect-video bg-white flex items-center justify-center relative overflow-hidden">
+              <img 
+                src="/blog-assets/Blog--What-Code-Really-Represents-Why-Software-Is-More-Than-Lines-on-a-Screen.jpg" 
+                alt="What Code Represents" 
+                class="w-full h-full object-cover"
+              >
             </div>
             <div class="p-6">
               <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -299,7 +308,7 @@ useHead({
                 </div>
                 <button class="text-primary-600 hover:text-primary-700 transition">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
               </div>
