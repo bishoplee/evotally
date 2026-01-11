@@ -145,7 +145,7 @@ useHead({
     </section>
 
     <!-- Step 2 -->
-    <section class="py-24  bg-gradient-to-b from-[#E5F6F5] to-white">
+    <section class="py-16 bg-gradient-to-b from-[#E5F6F5] to-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
@@ -192,7 +192,7 @@ useHead({
     </section>
 
     <!-- Step 3 -->
-    <section class="py-24  bg-gradient-to-b from-[#E5F6F5] to-white">
+    <section class="py-16 bg-gradient-to-b from-[#E5F6F5] to-white">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h2 class="text-3xl font-bold tracking-tight text-primary-dark sm:text-4xl mb-4">
@@ -206,7 +206,12 @@ useHead({
 
         <div class="flex flex-col items-center text-center gap-6">
           <!-- Hero Orb -->
-          <div>
+          <div class="relative">
+            <!-- Floating Greeting -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 bg-white py-4 px-16 rounded-lg shadow-lg text-2xl font-semibold text-primary-dark z-10 whitespace-nowrap border-2 border-gray-300" style="transform: translate(-50%, calc(-50% + 16px));">
+              Hello, I'm Mike
+            </div>
+            
             <div class="hero-orb-container">
               <div class="hero-blobs">
                 <svg viewBox="0 0 1200 1200">
@@ -245,7 +250,6 @@ useHead({
               Start Your Free Trial
             </NuxtLink>
           </div>
-
         </div>
       </div>
     </section>
