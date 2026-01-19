@@ -208,11 +208,11 @@ useHead({
           <!-- Hero Orb -->
           <div class="relative">
             <!-- Floating Greeting -->
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 bg-white py-4 px-16 rounded-lg shadow-lg text-2xl font-semibold text-primary-dark z-10 whitespace-nowrap border-2 border-gray-300" style="transform: translate(-50%, calc(-50% + 16px));">
+            <div class="absolute top-1/2 left-1/2 bg-white py-4 px-16 rounded-lg shadow-lg text-2xl font-semibold text-primary-dark z-10 whitespace-nowrap border-2 border-gray-300" style="transform: translate(-50%, calc(-50% + 40px));">
               Hello, I'm Mike
             </div>
             
-            <div class="hero-orb-container">
+            <div class="hero-orb-container mt-16">
               <div class="hero-blobs">
                 <svg viewBox="0 0 1200 1200">
                   <g class="blob blob-1">
@@ -269,7 +269,7 @@ useHead({
 
         <div class="flex flex-col items-center text-center gap-6">
           <!-- Hero Orb -->
-          <div class="relative">            
+          <div class="relative mt-16">            
             <div class="hero-orb-container">
               <div class="hero-blobs">
                 <svg viewBox="0 0 1200 1200">

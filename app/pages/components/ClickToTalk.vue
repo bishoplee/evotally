@@ -463,6 +463,7 @@ onBeforeUnmount(closeSession)
   justify-content: center;
   cursor: pointer;
   user-select: none;
+  border-radius: 50%;
   
   /* Color variables - idle state */
   --blob-1: #94a3b8;

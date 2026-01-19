@@ -2,12 +2,16 @@
   "name": "nuxt-app",
   "type": "module",
   "private": true,
+  "author": "Oladipo Olaleye <raph.davids@gmail.com>",
+  "contributors": ["Olaleye Oladipo"],
+  "copyright": "© 2026 Olaleye Oladipo - EvoTally Platform",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "prisma generate && nuxt prepare"
+    "postinstall": "prisma generate && nuxt prepare",
+    "reinstall": "rimraf node_modules && pnpm install"
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
@@ -18,10 +22,10 @@
     "csv-parse": "^6.1.0",
     "jose": "^6.1.0",
     "nuxt": "^4.1.2",
-    "pinia": "^3.0.3",
-    "vue": "^3.5.22",
-    "vue-router": "^4.5.1",
-    "zod": "^4.1.12"
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",

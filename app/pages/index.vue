@@ -70,7 +70,7 @@ const stats = [
           </div>
 
           <!-- Hero Orb -->
-          <div>
+          <div class="my-6">
             <div class="hero-orb-container">
               <div class="hero-blobs">
                 <svg viewBox="0 0 1200 1200">

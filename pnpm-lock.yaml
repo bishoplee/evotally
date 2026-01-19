@@ -13,7 +13,7 @@ importers:
         version: 6.14.0(magicast@0.5.1)(yaml@2.8.2)
       '@pinia/nuxt':
         specifier: ^0.11.2
-        version: 0.11.3(magicast@0.5.1)(pinia@3.0.4(vue@3.5.26))
+        version: 0.11.3(magicast@0.5.1)(pinia@2.3.1(vue@3.5.26))
       '@prisma/client':
         specifier: ^6.16.3
         version: 6.19.1(prisma@6.19.1(magicast@0.5.1))
@@ -33,17 +33,17 @@ importers:
         specifier: ^4.1.2
         version: 4.2.2(@parcel/watcher@2.5.1)(@vue/compiler-sfc@3.5.26)(cac@6.7.14)(db0@0.3.4)(ioredis@5.8.2)(magicast@0.5.1)(rollup@4.54.0)(terser@5.44.1)(vite@7.3.0(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))(yaml@2.8.2)
       pinia:
-        specifier: ^3.0.3
-        version: 3.0.4(vue@3.5.26)
+        specifier: ^2.3.1
+        version: 2.3.1(vue@3.5.26)
       vue:
-        specifier: ^3.5.22
+        specifier: ^3.5.13
         version: 3.5.26
       vue-router:
-        specifier: ^4.5.1
+        specifier: ^4.5.0
         version: 4.6.4(vue@3.5.26)
       zod:
-        specifier: ^4.1.12
-        version: 4.2.1
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       autoprefixer:
         specifier: ^10.4.21
@@ -1371,22 +1371,13 @@ packages:
   '@vue/devtools-api@6.6.4':
     resolution: {integrity: sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==}
 
-  '@vue/devtools-api@7.7.9':
-    resolution: {integrity: sha512-kIE8wvwlcZ6TJTbNeU2HQNtaxLx3a84aotTITUuL/4bzfPxzajGBOoqjMhwZJ8L9qFYDU/lAYMEEm11dnZOD6g==}
-
   '@vue/devtools-core@8.0.5':
     resolution: {integrity: sha512-dpCw8nl0GDBuiL9SaY0mtDxoGIEmU38w+TQiYEPOLhW03VDC0lfNMYXS/qhl4I0YlysGp04NLY4UNn6xgD0VIQ==}
     peerDependencies:
       vue: ^3.0.0
 
-  '@vue/devtools-kit@7.7.9':
-    resolution: {integrity: sha512-PyQ6odHSgiDVd4hnTP+aDk2X4gl2HmLDfiyEnn3/oV+ckFDuswRs4IbBT7vacMuGdwY/XemxBoh302ctbsptuA==}
-
   '@vue/devtools-kit@8.0.5':
     resolution: {integrity: sha512-q2VV6x1U3KJMTQPUlRMyWEKVbcHuxhqJdSr6Jtjz5uAThAIrfJ6WVZdGZm5cuO63ZnSUz0RCsVwiUUb0mDV0Yg==}
-
-  '@vue/devtools-shared@7.7.9':
-    resolution: {integrity: sha512-iWAb0v2WYf0QWmxCGy0seZNDPdO3Sp5+u78ORnyeonS6MT4PC7VPrryX2BpMJrwlDeaZ6BD4vP4XKjK0SZqaeA==}
 
   '@vue/devtools-shared@8.0.5':
     resolution: {integrity: sha512-bRLn6/spxpmgLk+iwOrR29KrYnJjG9DGpHGkDFG82UM21ZpJ39ztUT9OXX3g+usW7/b2z+h46I9ZiYyB07XMXg==}
@@ -2863,11 +2854,11 @@ packages:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
     engines: {node: '>=0.10.0'}
 
-  pinia@3.0.4:
-    resolution: {integrity: sha512-l7pqLUFTI/+ESXn6k3nu30ZIzW5E2WZF/LaHJEpoq6ElcLD+wduZoB2kBN19du6K/4FDpPMazY2wJr+IndBtQw==}
+  pinia@2.3.1:
+    resolution: {integrity: sha512-khUlZSwt9xXCaTbbxFYBKDc/bWAGWJjOgvxETwkTN7KRm66EeT1ZdZj6i2ceh9sP2Pzqsbc704r2yngBrxBVug==}
     peerDependencies:
-      typescript: '>=4.5.0'
-      vue: ^3.5.11
+      typescript: '>=4.4.4'
+      vue: ^2.7.0 || ^3.5.11
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -3462,6 +3453,7 @@ packages:
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   terser@5.44.1:
     resolution: {integrity: sha512-t/R3R/n0MSwnnazuPpPNVO60LX0SKL45pyl9YlvxIdkH0Of7D5qM2EVe+yASRIlY5pZ73nclYJfNANGWPwFDZw==}
@@ -3779,6 +3771,17 @@ packages:
   vue-bundle-renderer@2.2.0:
     resolution: {integrity: sha512-sz/0WEdYH1KfaOm0XaBmRZOWgYTEvUDt6yPYaUzl4E52qzgWLlknaPPTTZmp6benaPTlQAI/hN1x3tAzZygycg==}
 
+  vue-demi@0.14.10:
+    resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
+    engines: {node: '>=12'}
+    hasBin: true
+    peerDependencies:
+      '@vue/composition-api': ^1.0.0-rc.1
+      vue: ^3.0.0-0 || ^2.6.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
   vue-devtools-stub@0.1.0:
     resolution: {integrity: sha512-RutnB7X8c5hjq39NceArgXg28WZtZpGc3+J16ljMiYnFhKvd8hITxSWQSQ5bvldxMDU6gG5mkxl1MTQLXckVSQ==}
 
@@ -3879,8 +3882,8 @@ packages:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
     engines: {node: '>= 14'}
 
-  zod@4.2.1:
-    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -4886,10 +4889,10 @@ snapshots:
 
   '@phc/format@1.0.0': {}
 
-  '@pinia/nuxt@0.11.3(magicast@0.5.1)(pinia@3.0.4(vue@3.5.26))':
+  '@pinia/nuxt@0.11.3(magicast@0.5.1)(pinia@2.3.1(vue@3.5.26))':
     dependencies:
       '@nuxt/kit': 4.2.2(magicast@0.5.1)
-      pinia: 3.0.4(vue@3.5.26)
+      pinia: 2.3.1(vue@3.5.26)
     transitivePeerDependencies:
       - magicast
 
@@ -5218,10 +5221,6 @@ snapshots:
 
   '@vue/devtools-api@6.6.4': {}
 
-  '@vue/devtools-api@7.7.9':
-    dependencies:
-      '@vue/devtools-kit': 7.7.9
-
   '@vue/devtools-core@8.0.5(vite@7.3.0(jiti@2.6.1)(terser@5.44.1)(yaml@2.8.2))(vue@3.5.26)':
     dependencies:
       '@vue/devtools-kit': 8.0.5
@@ -5234,16 +5233,6 @@ snapshots:
     transitivePeerDependencies:
       - vite
 
-  '@vue/devtools-kit@7.7.9':
-    dependencies:
-      '@vue/devtools-shared': 7.7.9
-      birpc: 2.9.0
-      hookable: 5.5.3
-      mitt: 3.0.1
-      perfect-debounce: 1.0.0
-      speakingurl: 14.0.1
-      superjson: 2.2.6
-
   '@vue/devtools-kit@8.0.5':
     dependencies:
       '@vue/devtools-shared': 8.0.5
@@ -5253,10 +5242,6 @@ snapshots:
       perfect-debounce: 2.0.0
       speakingurl: 14.0.1
       superjson: 2.2.6
-
-  '@vue/devtools-shared@7.7.9':
-    dependencies:
-      rfdc: 1.4.1
 
   '@vue/devtools-shared@8.0.5':
     dependencies:
@@ -6971,10 +6956,13 @@ snapshots:
 
   pify@2.3.0: {}
 
-  pinia@3.0.4(vue@3.5.26):
+  pinia@2.3.1(vue@3.5.26):
     dependencies:
-      '@vue/devtools-api': 7.7.9
+      '@vue/devtools-api': 6.6.4
       vue: 3.5.26
+      vue-demi: 0.14.10(vue@3.5.26)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
 
   pirates@4.0.7: {}
 
@@ -7883,6 +7871,10 @@ snapshots:
     dependencies:
       ufo: 1.6.1
 
+  vue-demi@0.14.10(vue@3.5.26):
+    dependencies:
+      vue: 3.5.26
+
   vue-devtools-stub@0.1.0: {}
 
   vue-router@4.6.4(vue@3.5.26):
@@ -7976,4 +7968,4 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.7.0
 
-  zod@4.2.1: {}
+  zod@3.25.76: {}
