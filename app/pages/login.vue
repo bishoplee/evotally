@@ -131,7 +131,7 @@ function loginWithGoogle() {
       <div class="text-center mb-8">
         <div class="flex gap-4 items-center justify-center mb-4">
           <img src="/logo.png" alt="Evotally" class="h-12 w-auto transition-transform group-hover:scale-105" />
-          <span class="text-3xl font-bold text-primary-900 hidden sm:inline">
+          <span class="text-3xl font-bold font-primary text-primary-900 hidden sm:inline">
             EVOTALLY
           </span>
         </div>

@@ -13,7 +13,7 @@
   
   /* Coral CTAs */
   --ev-coral-500: #FF8D68;
-  --ev-coral-400: #FB7A57;
+  --ev-coral-400: #FB8D68;
   
   /* Gradient Colors (Evo Orb) */
   --ev-magenta-500: #FF3CAC;
@@ -186,6 +186,23 @@
 a {
   outline: none;
 }
+
+.font-primary {
+  font-family: var(--ev-font-heading);
+  font-weight: 400;
+  font-size: 48px;
+  line-height: 1.1;
+}
+
+#hero-section {
+  height: 510px;
+  margin-top: 5rem;
+}
+
+#blog-hero-section {
+  height: 456px;
+}
+
 /* ========================================
    EVOTALLY COMPONENT STYLES
    ======================================== */
@@ -203,7 +220,7 @@ a {
   font-weight: 400;
   font-size:28px;
   line-height: 1.2;
-  padding: 0 80px;
+  /* padding: 0 80px; */
 }
 
 .hero-text {

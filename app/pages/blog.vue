@@ -45,7 +45,7 @@ useHead({
     </section>
 
     <!-- Hero Section -->
-    <section class="relative bg-gradient-to-r from-[#1a4d5e] via-[#2d5f72] to-[#3d7086] py-16 md:py-20 overflow-hidden" style="background-image: url('/blog-assets/Blog--Hero.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    <section id="blog-hero-section" class="relative bg-gradient-to-r from-[#1a4d5e] via-[#2d5f72] to-[#3d7086] py-16 md:py-20 overflow-hidden" style="background-image: url('/blog-assets/Blog--Hero.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-2 gap-12 items-center">
           <!-- Left Content -->

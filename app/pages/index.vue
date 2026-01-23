@@ -52,7 +52,7 @@ const stats = [
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-gradient-to-r from-[#006D77] to-[#00CDD1] pt-32 pb-12 sm:pb-16">
+    <section class="relative h-[100vh] bg-gradient-to-r from-[#006D77] to-[#00CDD1] pt-32 pb-12 sm:pb-16">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Vertical Row Layout: Text (top) → Orb (middle) → CTA (bottom) -->
         <div class="flex flex-col items-center text-center gap-6">
@@ -108,18 +108,12 @@ const stats = [
             <NuxtLink
               v-if="!isAuthed"
               to="/register"
-              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-heading font-semibold text-white border-2 border-white/30"
+              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-semibold text-white border-2 border-white/60"
             >
               Try Evo
-              <span class="w-5 h-5 bg-white rounded flex items-center justify-center">
-                <svg class="w-4 h-4 icon-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
-                </svg>
-              </span>
             </NuxtLink>
-            <p class="mt-4 text-md font-medium text-white tracking-wide md:tracking-wider">(See Evo in action)</p>
+            <p class="mt-4 text-lg font-bold font-primary text-white tracking-wide md:tracking-wider">(See Evo in action)</p>
           </div>
-
         </div>
       </div>
     </section>

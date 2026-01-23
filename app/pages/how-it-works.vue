@@ -12,20 +12,20 @@ useHead({
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-blend-overlay bg-gradient-to-r from-[#006D77] to-[#00CDD1] py-20 sm:py-32" style="background-image: url('/how-it-works-bg.png'); background-size: cover; background-position: center;;">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-center items-center flex-col gap-8">
+    <section id="hero-section" class="relative overflow-hidden bg-blend-overlay bg-gradient-to-r from-[#006D77] to-[#00CDD1]" style="background-image: url('/how-it-works-bg.png'); background-size: cover; background-position: center;;">
+      <div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8 flex justify-center items-center flex-col gap-8">
         <div class="text-center">
           <h1 class="tracking-tight text-primary-dark">
             <span class="block hero-title-main">
               What begins as conversation becomes connection.
             </span>
-            <span class="block text-primary-dark/90 my-6 hero-title-sub">
+            <span class="block text-primary-dark/90 mt-6 hero-title-sub">
               Evo learns your tone, your stories, and your rhythm - one day at a time.
             </span>
           </h1>
         </div>
         
-        <img src="/logo.png" alt="Evotally" class="h-32 w-auto my-8 mt-4" />
+        <img src="/logo.png" alt="Evotally" class="h-32 w-auto my-4 mt-4" />
 
         <!-- CTA Button -->
         <div class="text-center">
