@@ -481,8 +481,8 @@ a {
 /* Hero Blob Orb Container */
 .hero-orb-container {
   position: relative;
-  width: 250px;
-  height: 250px;
+  width: 215px;
+  height: 215px;
   display: flex;
   align-items: center;
   justify-content: center;

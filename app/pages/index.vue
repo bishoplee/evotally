@@ -52,14 +52,14 @@ const stats = [
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative h-[100vh] bg-gradient-to-r from-[#006D77] to-[#00CDD1] pt-32 pb-12 sm:pb-16">
+    <section id="hero-section" class="relative bg-gradient-to-r from-[#006D77] to-[#00CDD1] pb-5">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Vertical Row Layout: Text (top) → Orb (middle) → CTA (bottom) -->
         <div class="flex flex-col items-center text-center gap-6">
           
           <!-- Hero Text -->
           <div class="w-full">
-            <h1 class="tracking-tight text-white">
+            <h1 class="tracking-tight text-white pt-4">
               <span class="block hero-title-main">
                 Your AI that grows with you!
               </span>
@@ -70,7 +70,7 @@ const stats = [
           </div>
 
           <!-- Hero Orb -->
-          <div class="my-6">
+          <div class="">
             <div class="hero-orb-container">
               <div class="hero-blobs">
                 <svg viewBox="0 0 1200 1200">
@@ -108,7 +108,7 @@ const stats = [
             <NuxtLink
               v-if="!isAuthed"
               to="/register"
-              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-semibold text-white border-2 border-white/60"
+              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-semibold text-white border-2 border-white/80"
             >
               Try Evo
             </NuxtLink>
@@ -119,7 +119,7 @@ const stats = [
     </section>
 
     <!-- Features Section -->
-    <section class="py-16 bg-white">
+    <section class="py-8 bg-white">
       <div class="mx-auto px-2 sm:px-4 lg:px-6">
         <div class="text-center">
           <h2 class="text-3xl font-bold tracking-tight sm:text-4xl text-primary-dark">
