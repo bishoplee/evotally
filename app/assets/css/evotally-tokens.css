@@ -194,13 +194,16 @@ a {
   line-height: 1.1;
 }
 
-#hero-section {
+#hero-section, #pt-hero-section {
   height: 510px;
   margin-top: 5rem;
 }
 
 #blog-hero-section {
   height: 456px;
+}
+#pt-hero-section {
+  height: 240px;
 }
 
 /* ========================================
@@ -379,6 +382,11 @@ a {
 /* Hero CTA button with gradient */
 .btn-hero-cta {
   background: linear-gradient(135deg, #F24DB7 0%, #5F22A0 100%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-hero-cta:hover {
+  /* background: linear-gradient(135deg, #5F22A0 0%, #F24DB7 100%); */
+  opacity: 0.9;
 }
 
 /* Fixed image dimensions */

@@ -14,6 +14,7 @@ const navLinks = [
   { to: '/faq', label: 'FAQ' },
   { to: '/pricing', label: 'Pricing' },
   { to: '/blog', label: 'Blog' },
+  { to: '/login', label: 'Login' },
 ]
 
 async function onLogout() {
@@ -26,7 +27,7 @@ function closeMobileMenu() {
 }
 
 function handleScroll() {
-  isScrolled.value = window.scrollY > 50
+  isScrolled.value = window.scrollY > 5
 }
 
 onMounted(() => {
@@ -44,27 +45,26 @@ onUnmounted(() => {
     <!-- Header -->
     <header 
       class="fixed top-0 left-0 right-0 z-50 border-b-2 border-solid border-gray-200 transition-all duration-300 ease-in-out py-4"
-      style="position: fixed !important; top: 0 !important;"
       :class="[
         isScrolled 
           ? 'bg-white/70 backdrop-blur-lg border-b border-gray-200/50 shadow-sm' 
           : 'bg-white/90 border-b'
       ]"
     >
-      <nav class="mx-auto max-w-7xl sm:px-6 lg:px-2">
+      <nav class="w-full px-4 lg:px-8">
         <div class="flex items-center justify-between">
           <!-- Logo -->
           <NuxtLink to="/" class="flex items-center gap-3 group">
             <img src="/logo.png" alt="Evotally" class="h-12 w-auto transition-transform group-hover:scale-105" />
-            <span class="text-3xl font-bold font-primary text-primary-900 hidden sm:inline">
+            <span class="text-3xl font-bold font-primary text-primary-900 sm:inline">
               EVOTALLY
             </span>
           </NuxtLink>
 
           <!-- Desktop Navigation & Auth Actions -->
-          <div class="hidden md:flex items-center gap-16">
+          <div class="hidden md:flex items-center gap-16 flex-1">
             <!-- Nav Links -->
-            <div class="flex items-center gap-1">
+            <div class="flex flex-1 items-center justify-center gap-8">
               <NuxtLink
                 v-for="link in navLinks"
                 :key="link.to"
@@ -230,10 +230,10 @@ onUnmounted(() => {
 
         <!-- Copyright -->
         <div class="border-t border-teal-700 pt-4 flex flex-col md:flex-row justify-between items-center text-teal-100 text-sm">
-          <p class="mb-2 md:mb-0 gap-8 flex font-primary text-lg">
+          <p class="mb-2 md:mb-0 gap-8 flex font-primary text-sm">
             © {{ new Date().getFullYear() }} Evotally. All rights reserved
-            <a href="#" class="hover:text-white transition">Privacy</a>
-            <a href="#" class="hover:text-white transition">Terms</a>
+            <NuxtLink to="/privacy" class="hover:text-white transition">Privacy</NuxtLink>
+            <NuxtLink to="/terms" class="hover:text-white transition">Terms</NuxtLink>
           </p>
         </div>
       </div>

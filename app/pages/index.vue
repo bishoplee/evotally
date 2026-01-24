@@ -108,7 +108,7 @@ const stats = [
             <NuxtLink
               v-if="!isAuthed"
               to="/register"
-              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-semibold text-white border-2 border-white/80"
+              class="btn-hero-cta text-lg px-16 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all inline-flex items-center gap-3 rounded-pill font-semibold text-white border-2 border-white/90"
             >
               Try Evo
             </NuxtLink>
