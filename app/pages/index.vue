@@ -59,13 +59,11 @@ const stats = [
           
           <!-- Hero Text -->
           <div class="w-full">
-            <h1 class="tracking-tight text-white pt-4">
-              <span class="block hero-title-main">
-                Your AI that grows with you!
-              </span>
-              <p class="block text-white/90 mt-4 text-xl sm:text-2xl font-normal leading-relaxed">
+            <h1 class="text-white pt-4 hero-title-main">
+              Your AI that grows with you!
+              <span class="hero-title-sub text-white/90 mt-2 text-xl sm:text-2xl">
                 Meet Evo - your personalized voice companion, assistant, plus memory that evolves with you
-              </p>
+              </span>
             </h1>
           </div>
 
@@ -148,14 +146,9 @@ const stats = [
           <NuxtLink
             v-if="!isAuthed"
             :to="`/login?from=${$route.path}`"
-            class="btn-primary text-sm flex items-center gap-2 inline-flex"
+            class="btn-primary text-lg px-8 py-4"
           >
             Start Your Free Trial
-            <span class="w-4 h-4 bg-white rounded flex items-center justify-center">
-              <svg class="w-3 h-3 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </span>
           </NuxtLink>
         </div>
       </div>

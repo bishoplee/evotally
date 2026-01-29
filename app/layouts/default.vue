@@ -11,9 +11,9 @@ const isScrolled = ref(false)
 
 const navLinks = [
   { to: '/how-it-works', label: 'How it works' },
-  { to: '/faq', label: 'FAQ' },
   { to: '/pricing', label: 'Pricing' },
   { to: '/blog', label: 'Blog' },
+  { to: '/faq', label: 'FAQ' },
   { to: '/login', label: 'Login' },
 ]
 
@@ -92,13 +92,8 @@ onUnmounted(() => {
                   </button>
                 </template>
                 <template v-else>
-                  <NuxtLink :to="`/login?from=${route.path}`" class="btn-primary text-md flex items-center gap-2">
+                  <NuxtLink :to="`/login?from=${route.path}`" class="btn-primary text-lg px-8 py-2">
                     Start Free Trial
-                    <span class="w-4 h-4 bg-white rounded flex items-center justify-center">
-                      <svg class="w-3 h-3 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
-                      </svg>
-                    </span>
                   </NuxtLink>
                 </template>
               </template>
